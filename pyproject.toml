@@ -43,7 +43,9 @@ path = "src/lasagna/__about__.py"
 
 [tool.hatch.envs.types]
 extra-dependencies = [
-  "mypy>=1.0.0",
+  "mypy>=1.10.0",
+  "pytest>=8.1.1",
+  "pytest-asyncio>=0.23.6",
 ]
 
 [tool.hatch.envs.types.scripts]
