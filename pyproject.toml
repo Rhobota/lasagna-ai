@@ -25,6 +25,14 @@ classifiers = [
 ]
 dependencies = []
 
+[project.optional-dependencies]
+openai = [
+  "openai>=1.23.2",
+]
+anthropic = [
+  "anthropic>=0.26.1",
+]
+
 [project.urls]
 Documentation = "https://github.com/Rhobota/lasagna-ai#readme"
 Issues = "https://github.com/Rhobota/lasagna-ai/issues"

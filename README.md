@@ -15,7 +15,7 @@
 ## Installation
 
 ```console
-pip install lasagna-ai
+pip install lasagna-ai[openai, anthropic]
 ```
 
 ## License
