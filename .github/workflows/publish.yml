@@ -26,4 +26,7 @@ jobs:
       run: hatch build
 
     - name: Publish
+      env:
+        HATCH_INDEX_USER: ${{ secrets.HATCH_INDEX_USER }}
+        HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH }}
       run: hatch publish
