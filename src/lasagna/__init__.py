@@ -1,5 +1,7 @@
 from .types import (
-    ChatParams,
+    AgentSpec,
+    AgentCallable,
+    ProviderFactory,
     ChatMessage,
     EventCallback,
     AgentRecord,
@@ -15,23 +17,29 @@ MODEL_PROVIDERS: Dict[str, ModelProviderRecord] = {}
 
 
 async def run(
-    chat_params: ChatParams,
+    agent_spec: AgentSpec,
     event_callback: EventCallback,
     messages: List[ChatMessage],
 ) -> List[ChatMessage]:
-    agent = AGENTS[chat_params['agent_name']]
+    agent: AgentCallable
+    if isinstance(agent_spec['agent'], str):
+        agent = AGENTS[agent_spec['agent']]['runner']
+    else:
+        agent = agent_spec['agent']
 
-    provider = MODEL_PROVIDERS[chat_params['provider']]
-    factory = provider['factory']
-    model_names = [m['formal_name'] for m in provider['models']]
-    if chat_params['model_name'] not in model_names:
-        raise RuntimeError(f"unknown model name: {chat_params['model_name']}")
-    kwargs = chat_params.get('model_kwargs', None)
+    provider: ProviderFactory
+    if isinstance(agent_spec['provider'], str):
+        provider = MODEL_PROVIDERS[agent_spec['provider']]['factory']
+    else:
+        provider = agent_spec['provider']
+
+    kwargs = agent_spec.get('model_kwargs', None)
     if kwargs is None:
         kwargs = {}
-    llm = factory(model=chat_params['model_name'], **kwargs)
 
-    return await agent['factory'](
+    llm = provider(model=agent_spec['model'], **kwargs)
+
+    return await agent(
         llm,
         event_callback,
         messages,
