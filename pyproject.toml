@@ -14,7 +14,6 @@ authors = [
   { name = "Ryan Henning", email = "ryan@rhobota.com" },
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
@@ -45,6 +44,9 @@ check = "mypy --install-types --non-interactive {args:src/lasagna tests}"
 [tool.hatch.build.targets.wheel]
 packages = ["src/lasagna"]
 
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
 [tool.coverage.run]
 source_pkgs = ["lasagna", "tests"]
 branch = true
@@ -52,9 +54,6 @@ parallel = true
 omit = [
   "src/lasagna/__about__.py",
 ]
-
-[tool.pytest.ini_options]
-pythonpath = ["src"]
 
 [tool.coverage.paths]
 lasagna = ["src/lasagna", "*/lasagna-ai/src/lasagna"]
