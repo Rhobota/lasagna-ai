@@ -1,15 +1,11 @@
 import re
 
-from typing import Tuple, List, TypedDict
+from typing import Tuple, List
+
+from .types import ToolParam
 
 
-class DocParam(TypedDict):
-    name: str
-    type: str
-    description: str
-
-
-def parse_docstring(docstring: str) -> Tuple[str, List[DocParam]]:
+def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
     lines = docstring.splitlines()
     indent_amounts = [(len(line) - len(line.lstrip())) for line in lines]
     first_indent = max(ia for ia in indent_amounts[:2])
@@ -25,7 +21,7 @@ def parse_docstring(docstring: str) -> Tuple[str, List[DocParam]]:
     if not description:
         raise ValueError("no description found")
     params = re.findall(r":param:\s+(\w+):\s+([\w ]+):\s+(.+)", dedented_docs)
-    params: List[DocParam] = [
+    params: List[ToolParam] = [
         {
             'name': p[0].strip(),
             'type': p[1].strip(),
