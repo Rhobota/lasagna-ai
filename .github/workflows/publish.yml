@@ -1,0 +1,29 @@
+name: Publish to PyPI
+
+on:
+  push:
+    branches: [main]
+
+env:
+  PYTHONUNBUFFERED: "1"
+  FORCE_COLOR: "1"
+
+jobs:
+  publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Hatch
+      run: pip install --upgrade hatch
+
+    - name: Final Test
+      run: hatch test --python 3.8
+
+    - name: Build
+      run: hatch build
+
+    - name: Publish
+      run: hatch publish
