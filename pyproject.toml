@@ -1,0 +1,65 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lasagna-ai"
+dynamic = ["version"]
+description = 'Agents for your agents!'
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Ryan Henning", email = "ryan@rhobota.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = []
+
+[project.urls]
+Documentation = "https://github.com/Rhobota/lasagna-ai#readme"
+Issues = "https://github.com/Rhobota/lasagna-ai/issues"
+Source = "https://github.com/Rhobota/lasagna-ai"
+
+[tool.hatch.version]
+path = "src/lasagna/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/lasagna tests}"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lasagna"]
+
+[tool.coverage.run]
+source_pkgs = ["lasagna", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/lasagna/__about__.py",
+]
+
+[tool.coverage.paths]
+lasagna = ["src/lasagna", "*/lasagna-ai/src/lasagna"]
+tests = ["tests", "*/lasagna-ai/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
