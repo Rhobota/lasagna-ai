@@ -26,10 +26,13 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install Hatch
-      run: pip install --upgrade hatch
+      run: |
+        pip install --upgrade hatch
 
     - name: Run static analysis
-      run: hatch fmt --check
+      run: |
+        hatch run types:check
 
     - name: Run tests
-      run: hatch test --python ${{ matrix.python-version }} --cover --randomize
+      run: |
+        hatch test --python ${{ matrix.python-version }} --cover --randomize
