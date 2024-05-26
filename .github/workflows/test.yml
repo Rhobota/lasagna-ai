@@ -29,7 +29,7 @@ jobs:
       run: |
         pip install --upgrade hatch
 
-    - name: Run static analysis
+    - name: Check type correctness
       run: |
         hatch run types:check
 

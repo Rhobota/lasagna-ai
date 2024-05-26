@@ -17,10 +17,16 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install Hatch
-      run: pip install --upgrade hatch
+      run: |
+        pip install --upgrade hatch
 
-    - name: Final Test
-      run: hatch test --python 3.8
+    - name: Check type correctness
+      run: |
+        hatch run types:check
+
+    - name: Run tests
+      run: |
+        hatch test --cover --randomize
 
     - name: Build
       run: hatch build
