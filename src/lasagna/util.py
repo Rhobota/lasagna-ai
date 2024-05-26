@@ -79,8 +79,8 @@ def convert_to_image_url_sync(image_filepath_or_url: str) -> str:
         # The string is already a remote URL, so just return it.
         return image_filepath_or_url
 
-    if parsed_url.scheme == 'file':
-        local_path = os.path.normpath(parsed_url.path)
+    if image_filepath_or_url.startswith('file://'):
+        local_path = image_filepath_or_url[7:]
     else:
         local_path = image_filepath_or_url
 
