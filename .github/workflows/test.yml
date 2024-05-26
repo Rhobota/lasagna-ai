@@ -34,4 +34,4 @@ jobs:
 
     - name: Run tests
       run: |
-        hatch test --cover --randomize
+        hatch test --all --cover --randomize
