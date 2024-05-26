@@ -3,9 +3,13 @@ import pytest
 from lasagna.util import (
     parse_docstring,
     combine_pairs,
+    convert_to_image_url,
 )
 
 from typing import List
+
+import tempfile
+import os
 
 
 def test_parse_docstring():
@@ -264,3 +268,42 @@ def test_combine_pairs():
     assert combine_pairs([4, 4, 4, 9], combine_rule_3) == [4, 4, 9]
     assert combine_pairs([1, 7, 7, 7], combine_rule_3) == [1, 7, 7]
     assert combine_pairs([7, 7, 7, 7], combine_rule_3) == [7, 7, 7]
+
+
+@pytest.mark.asyncio
+async def test_convert_to_image_url():
+    url = 'https://example.com/img.png'
+    s = await convert_to_image_url(url)
+    assert s == url
+
+    url = 'http://example.com/img.png'
+    s = await convert_to_image_url(url)
+    assert s == url
+
+    with tempfile.TemporaryDirectory() as tmp:
+        fn = os.path.join(tmp, 'a.jpeg')
+        with open(fn, 'wb') as f:
+            f.write(b'1234')
+        s = await convert_to_image_url(fn)
+        assert s == 'data:image/jpeg;base64,MTIzNA=='
+
+        fn = os.path.join(tmp, 'a.png')
+        with open(fn, 'wb') as f:
+            f.write(b'1235')
+        s = await convert_to_image_url(fn)
+        assert s == 'data:image/png;base64,MTIzNQ=='
+
+        fn = os.path.abspath(fn)
+        with open(fn, 'wb') as f:
+            f.write(b'1235')
+        s = await convert_to_image_url(fn)
+        assert s == 'data:image/png;base64,MTIzNQ=='
+
+        fn_with_schema = f"file://{fn}"
+        with open(fn, 'wb') as f:
+            f.write(b'1235')
+        s = await convert_to_image_url(fn_with_schema)
+        assert s == 'data:image/png;base64,MTIzNQ=='
+
+    with pytest.raises(ValueError):
+        await convert_to_image_url(os.path.join('does', 'not', 'exist.png'))
