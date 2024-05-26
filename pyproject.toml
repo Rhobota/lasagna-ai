@@ -37,6 +37,11 @@ openai = [
 anthropic = [
   "anthropic>=0.26.1",
 ]
+dev = [
+  "mypy>=1.10.0",
+  "pytest>=8.1.1",
+  "pytest-asyncio>=0.23.6",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/lasagna"]
@@ -45,12 +50,7 @@ packages = ["src/lasagna"]
 path = "src/lasagna/__init__.py"
 
 [tool.hatch.envs.types]
-extra-dependencies = [
-  "mypy>=1.10.0",
-  "pytest>=8.1.1",
-  "pytest-asyncio>=0.23.6",
-]
-features = ["openai", "anthropic"]
+features = ["dev", "openai", "anthropic"]
 
 [[tool.hatch.envs.types.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
@@ -59,7 +59,7 @@ python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 check = "mypy --install-types --non-interactive {args:src/lasagna tests}"
 
 [tool.hatch.envs.hatch-test]
-features = ["openai", "anthropic"]
+features = ["dev", "openai", "anthropic"]
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
