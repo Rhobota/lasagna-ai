@@ -37,7 +37,7 @@ from openai.types.chat import (
 from openai.types.chat.chat_completion_chunk import ChoiceDelta
 
 from typing import (
-    List, Callable, AsyncIterator, Any,
+    List, Callable, AsyncIterator, Any, cast,
     Tuple, Dict, Optional, Union, Literal,
 )
 
@@ -408,15 +408,30 @@ class LasagnaOpenAI(LLM):
 
         tools_spec = _convert_to_openai_tools(tools)
 
+        frequency_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['frequency_penalty']) if 'frequency_penalty' in self.model_kwargs else NOT_GIVEN
+        presence_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['presence_penalty']) if 'presence_penalty' in self.model_kwargs else NOT_GIVEN
+        max_tokens: Union[int, NotGiven] = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else NOT_GIVEN
+        stop: Union[List[str], NotGiven] = cast(List[str], self.model_kwargs['stop']) if 'stop' in self.model_kwargs else NOT_GIVEN
+        temperature: Union[float, NotGiven] = cast(float, self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
+        top_p: Union[float, NotGiven] = cast(float, self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
+        user: Union[str, NotGiven] = cast(str, self.model_kwargs['user']) if 'user' in self.model_kwargs else NOT_GIVEN
+
         completion: AsyncIterator[ChatCompletionChunk] = await self.client.chat.completions.create(
             model        = self.model,
             messages     = (await _convert_to_openai_messages(messages)),
             tools        = tools_spec,
             tool_choice  = tool_choice,
             stream       = True,
+            stream_options = {'include_usage': True},
             logprobs     = True,
             top_logprobs = 20,
-            #**self.model_kwargs,    # TODO
+            frequency_penalty = frequency_penalty,
+            presence_penalty = presence_penalty,
+            max_tokens = max_tokens,
+            stop = stop,
+            temperature = temperature,
+            top_p = top_p,
+            user = user,
         )
 
         raw_stream, rt_stream = adup(completion)
