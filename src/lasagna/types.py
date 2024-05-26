@@ -55,7 +55,7 @@ class ChatMessageBase(TypedDict):
 class ChatMessageContent(ChatMessageBase):
     role: Literal[ChatMessageRole.SYSTEM, ChatMessageRole.HUMAN, ChatMessageRole.AI]
     text: Optional[str]
-    media: Optional[Media]
+    media: Optional[List[Media]]
 
 
 class ChatMessageToolCall(ChatMessageBase):

@@ -799,12 +799,20 @@ async def test_convert_to_openai_messages():
         {'role': ChatMessageRole.SYSTEM, 'text': 'be nice', 'media': None, 'cost': None, 'raw': None},
         {'role': ChatMessageRole.HUMAN, 'text': 'hi', 'media': None, 'cost': None, 'raw': None},
         {'role': ChatMessageRole.AI, 'text': 'oh hi', 'media': None, 'cost': None, 'raw': None},
+        {'role': ChatMessageRole.HUMAN, 'text': 'here is a picture', 'media': [{'media_type': 'image', 'image': 'http://example.com/img.png'}], 'cost': None, 'raw': None},
+        {'role': ChatMessageRole.AI, 'text': 'thanks!', 'media': None, 'cost': None, 'raw': None},
+        {'role': ChatMessageRole.HUMAN, 'text': 'here are two', 'media': [{'media_type': 'image', 'image': 'http://example.com/img.png'}, {'media_type': 'image', 'image': 'http://example.com/img2.png'}], 'cost': None, 'raw': None},
+        {'role': ChatMessageRole.AI, 'text': 'double thanks!', 'media': None, 'cost': None, 'raw': None},
     ]
     ms = await _convert_to_openai_messages(messages)
     assert ms == [
         {'role': 'system', 'content': 'be nice'},
         {'role': 'user', 'content': [{'type': 'text', 'text': 'hi'}]},
         {'role': 'assistant', 'content': 'oh hi'},
+        {'role': 'user', 'content': [{'type': 'text', 'text': 'here is a picture'}, {'type': 'image_url', 'image_url': {'url': 'http://example.com/img.png'}}]},
+        {'role': 'assistant', 'content': 'thanks!'},
+        {'role': 'user', 'content': [{'type': 'text', 'text': 'here are two'}, {'type': 'image_url', 'image_url': {'url': 'http://example.com/img.png'}}, {'type': 'image_url', 'image_url': {'url': 'http://example.com/img2.png'}}]},
+        {'role': 'assistant', 'content': 'double thanks!'},
     ]
 
     messages: List[ChatMessage] = [{

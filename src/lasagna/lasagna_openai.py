@@ -215,16 +215,18 @@ async def _make_openai_content(
             'text': message['text'],
         })
     if message['media']:
-        m = message['media']
-        if m['media_type'] == 'image':
-            ret.append({
-                'type': 'image_url',
-                'image_url': {
-                    'url': (await convert_to_image_url(m['image'])),
-                },
-            })
-        else:
-            raise ValueError(f"unknown media type: {m['media_type']}")
+        for m in message['media']:
+            if m['media_type'] == 'image':
+                ret.append({
+                    'type': 'image_url',
+                    'image_url': {
+                        'url': (await convert_to_image_url(m['image'])),
+                    },
+                })
+            else:
+                raise ValueError(f"unknown media type: {m['media_type']}")
+    if len(ret) == 0:
+        raise ValueError('no content in this message!')
     return ret
 
 
@@ -261,7 +263,7 @@ async def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatC
                 raise ValueError('This model does not support media in the system prompt.')
             ms.append({
                 'role': 'system',
-                'content': m['text'],
+                'content': m['text'] or '',
             })
         elif m['role'] == ChatMessageRole.HUMAN:
             ms.append({
