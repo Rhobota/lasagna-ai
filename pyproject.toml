@@ -9,7 +9,7 @@ description = 'Agents for your agents!'
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
-keywords = []
+keywords = ["ai", "agents", "llm", "hierarchical"]
 authors = [
   { name = "Ryan Henning", email = "ryan@rhobota.com" },
 ]
@@ -38,6 +38,9 @@ Documentation = "https://github.com/Rhobota/lasagna-ai#readme"
 Issues = "https://github.com/Rhobota/lasagna-ai/issues"
 Source = "https://github.com/Rhobota/lasagna-ai"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/lasagna"]
+
 [tool.hatch.version]
 path = "src/lasagna/__about__.py"
 
@@ -47,12 +50,13 @@ extra-dependencies = [
   "pytest>=8.1.1",
   "pytest-asyncio>=0.23.6",
 ]
+features = ["openai", "anthropic"]
 
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/lasagna tests}"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/lasagna"]
+[tool.hatch.envs.hatch-test]
+features = ["openai", "anthropic"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
