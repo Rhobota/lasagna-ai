@@ -11,6 +11,9 @@ from .types import (
 from typing import List
 
 
+__version__ = "0.1.0"
+
+
 async def run(
     agent_spec: AgentSpec,
     event_callback: EventCallback,

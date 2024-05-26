@@ -42,7 +42,7 @@ Source = "https://github.com/Rhobota/lasagna-ai"
 packages = ["src/lasagna"]
 
 [tool.hatch.version]
-path = "src/lasagna/__about__.py"
+path = "src/lasagna/__init__.py"
 
 [tool.hatch.envs.types]
 extra-dependencies = [
@@ -65,9 +65,7 @@ pythonpath = ["src"]
 source_pkgs = ["lasagna", "tests"]
 branch = true
 parallel = true
-omit = [
-  "src/lasagna/__about__.py",
-]
+omit = []
 
 [tool.coverage.paths]
 lasagna = ["src/lasagna", "*/lasagna-ai/src/lasagna"]
