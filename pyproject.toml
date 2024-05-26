@@ -25,6 +25,11 @@ classifiers = [
 ]
 dependencies = []
 
+[project.urls]
+Documentation = "https://github.com/Rhobota/lasagna-ai#readme"
+Issues = "https://github.com/Rhobota/lasagna-ai/issues"
+Source = "https://github.com/Rhobota/lasagna-ai"
+
 [project.optional-dependencies]
 openai = [
   "openai>=1.23.2",
@@ -32,11 +37,6 @@ openai = [
 anthropic = [
   "anthropic>=0.26.1",
 ]
-
-[project.urls]
-Documentation = "https://github.com/Rhobota/lasagna-ai#readme"
-Issues = "https://github.com/Rhobota/lasagna-ai/issues"
-Source = "https://github.com/Rhobota/lasagna-ai"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/lasagna"]
@@ -52,11 +52,17 @@ extra-dependencies = [
 ]
 features = ["openai", "anthropic"]
 
+[[tool.hatch.envs.types.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/lasagna tests}"
 
 [tool.hatch.envs.hatch-test]
 features = ["openai", "anthropic"]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
