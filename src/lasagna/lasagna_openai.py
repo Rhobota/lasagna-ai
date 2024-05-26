@@ -288,6 +288,7 @@ def _build_messages_from_openai_payload(
     ai_message: Optional[ChatMessage] = {
         'role': ChatMessageRole.AI,
         'text': ''.join([e[2] for e in ai_events if e[1] == 'text']),
+        'media': None,
         'cost': None,  # TODO: OpenAI's API doesn't return this info in streaming mode! Hopefully they will in the future.
         'raw': raw,
     } if len(ai_events) > 0 else None

@@ -795,9 +795,9 @@ def test_convert_to_openai_messages():
         _convert_to_openai_messages(messages)
 
     messages: List[ChatMessage] = [
-        {'role': ChatMessageRole.SYSTEM, 'text': 'be nice', 'cost': None, 'raw': None},
-        {'role': ChatMessageRole.HUMAN, 'text': 'hi', 'cost': None, 'raw': None},
-        {'role': ChatMessageRole.AI, 'text': 'oh hi', 'cost': None, 'raw': None},
+        {'role': ChatMessageRole.SYSTEM, 'text': 'be nice', 'media': None, 'cost': None, 'raw': None},
+        {'role': ChatMessageRole.HUMAN, 'text': 'hi', 'media': None, 'cost': None, 'raw': None},
+        {'role': ChatMessageRole.AI, 'text': 'oh hi', 'media': None, 'cost': None, 'raw': None},
     ]
     ms = _convert_to_openai_messages(messages)
     assert ms == [
@@ -852,6 +852,7 @@ def test_convert_to_openai_messages():
         {
             'role': ChatMessageRole.AI,
             'text': "I'll use my tools!",
+            'media': None,
             'cost': None,
             'raw': None,
         },
