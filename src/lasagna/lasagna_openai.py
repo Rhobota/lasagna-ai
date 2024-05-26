@@ -1,5 +1,6 @@
 from .types import (
     ChatMessage,
+    ChatMessageContent,
     ChatMessageToolCall,
     ChatMessageRole,
     EventCallback,
@@ -17,7 +18,11 @@ from .stream import (
     prefix_stream,
 )
 
-from .util import parse_docstring, combine_pairs
+from .util import (
+    parse_docstring,
+    combine_pairs,
+    convert_to_image_url,
+)
 
 from .registrar import register_model_provider
 
@@ -27,6 +32,7 @@ from openai.types.chat import (
     ChatCompletionToolParam,
     ChatCompletionToolChoiceOptionParam,
     ChatCompletionMessageParam,
+    ChatCompletionContentPartParam,
 )
 from openai.types.chat.chat_completion_chunk import ChoiceDelta
 
@@ -199,7 +205,30 @@ def _convert_to_openai_tools(tools: List[Callable]) -> Union[NotGiven, List[Chat
     return specs
 
 
-def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatCompletionMessageParam]:
+async def _make_openai_content(
+    message: ChatMessageContent,
+) -> List[ChatCompletionContentPartParam]:
+    ret: List[ChatCompletionContentPartParam] = []
+    if message['text']:
+        ret.append({
+            'type': 'text',
+            'text': message['text'],
+        })
+    if message['media']:
+        m = message['media']
+        if m['media_type'] == 'image':
+            ret.append({
+                'type': 'image_url',
+                'image_url': {
+                    'url': (await convert_to_image_url(m['image'])),
+                },
+            })
+        else:
+            raise ValueError(f"unknown media type: {m['media_type']}")
+    return ret
+
+
+async def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatCompletionMessageParam]:
     ms: List[ChatCompletionMessageParam] = []
     for m in messages:
         if m['role'] == ChatMessageRole.TOOL_CALL:
@@ -228,6 +257,8 @@ def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatComplet
                     'tool_call_id': t['call_id'],
                 })
         elif m['role'] == ChatMessageRole.SYSTEM:
+            if m['media']:
+                raise ValueError('This model does not support media in the system prompt.')
             ms.append({
                 'role': 'system',
                 'content': m['text'],
@@ -235,9 +266,11 @@ def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatComplet
         elif m['role'] == ChatMessageRole.HUMAN:
             ms.append({
                 'role': 'user',
-                'content': m['text'],
+                'content': (await _make_openai_content(m)),
             })
         elif m['role'] == ChatMessageRole.AI:
+            if m['media']:
+                raise ValueError('This model does not support media in AI messages.')
             ms.append({
                 'role': 'assistant',
                 'content': m['text'],
@@ -288,7 +321,7 @@ def _build_messages_from_openai_payload(
     ai_message: Optional[ChatMessage] = {
         'role': ChatMessageRole.AI,
         'text': ''.join([e[2] for e in ai_events if e[1] == 'text']),
-        'media': None,
+        'media': None, # <-- the chat API doesn't know how to generate images (it only _reads_ images)
         'cost': None,  # TODO: OpenAI's API doesn't return this info in streaming mode! Hopefully they will in the future.
         'raw': raw,
     } if len(ai_events) > 0 else None
@@ -375,7 +408,7 @@ class LasagnaOpenAI(LLM):
 
         completion: AsyncIterator[ChatCompletionChunk] = await self.client.chat.completions.create(
             model        = self.model,
-            messages     = _convert_to_openai_messages(messages),
+            messages     = (await _convert_to_openai_messages(messages)),
             tools        = tools_spec,
             tool_choice  = tool_choice,
             stream       = True,

@@ -782,7 +782,8 @@ def test_convert_to_openai_tools():
     }
 
 
-def test_convert_to_openai_messages():
+@pytest.mark.asyncio
+async def test_convert_to_openai_messages():
     messages: List[ChatMessage] = [
         {
             'role': 'INVALID', # type: ignore
@@ -792,17 +793,17 @@ def test_convert_to_openai_messages():
         },
     ]
     with pytest.raises(ValueError):
-        _convert_to_openai_messages(messages)
+        await _convert_to_openai_messages(messages)
 
     messages: List[ChatMessage] = [
         {'role': ChatMessageRole.SYSTEM, 'text': 'be nice', 'media': None, 'cost': None, 'raw': None},
         {'role': ChatMessageRole.HUMAN, 'text': 'hi', 'media': None, 'cost': None, 'raw': None},
         {'role': ChatMessageRole.AI, 'text': 'oh hi', 'media': None, 'cost': None, 'raw': None},
     ]
-    ms = _convert_to_openai_messages(messages)
+    ms = await _convert_to_openai_messages(messages)
     assert ms == [
         {'role': 'system', 'content': 'be nice'},
-        {'role': 'user', 'content': 'hi'},
+        {'role': 'user', 'content': [{'type': 'text', 'text': 'hi'}]},
         {'role': 'assistant', 'content': 'oh hi'},
     ]
 
@@ -815,7 +816,7 @@ def test_convert_to_openai_messages():
         'cost': None,
         'raw': None,
     }]
-    ms = _convert_to_openai_messages(messages)
+    ms = await _convert_to_openai_messages(messages)
     assert ms == [{
         'role': 'assistant',
         'content': None,
@@ -834,7 +835,7 @@ def test_convert_to_openai_messages():
         'cost': None,
         'raw': None,
     }]
-    ms = _convert_to_openai_messages(messages)
+    ms = await _convert_to_openai_messages(messages)
     assert ms == [
         {
             'role': 'tool',
@@ -866,7 +867,7 @@ def test_convert_to_openai_messages():
             'raw': None,
         },
     ]
-    ms = _convert_to_openai_messages(messages)
+    ms = await _convert_to_openai_messages(messages)
     assert ms == [{
         'role': 'assistant',
         'content': "I'll use my tools!",
@@ -886,6 +887,7 @@ def test_build_messages_from_openai_payload():
     assert messages == [{
         'role': ChatMessageRole.AI,
         'text': 'Hello Ryan',
+        'media': None,
         'cost': None,
         'raw': [],
     }]
@@ -948,6 +950,7 @@ def test_build_messages_from_openai_payload():
         {
             'role': ChatMessageRole.AI,
             'text': 'Hello Ryan',
+            'media': None,
             'cost': None,
             'raw': None,
         },

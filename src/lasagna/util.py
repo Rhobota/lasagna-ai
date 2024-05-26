@@ -1,3 +1,8 @@
+from urllib.parse import urlparse
+import mimetypes
+import asyncio
+import base64
+import os
 import re
 
 from typing import Tuple, List, Literal, Union, TypeVar, Callable
@@ -66,3 +71,30 @@ def combine_pairs(
         # If the last pair was *not* combined, then we need to add the last element.
         res.append(lst[i])
     return res
+
+
+def convert_to_image_url_sync(image_filepath_or_url: str) -> str:
+    parsed_url = urlparse(image_filepath_or_url)
+    if parsed_url.scheme in ('http', 'https'):
+        # The string is already a remote URL, so just return it.
+        return image_filepath_or_url
+
+    if parsed_url.scheme == 'file':
+        local_path = os.path.normpath(parsed_url.path)
+    else:
+        local_path = image_filepath_or_url
+
+    if not os.path.isfile(local_path):
+        raise ValueError(f'cannot find file: {image_filepath_or_url}')
+
+    mimetype = mimetypes.guess_type(local_path)[0]
+
+    with open(local_path, "rb") as f:
+        img_encoded = base64.b64encode(f.read()).decode('utf-8')
+
+    return f"data:{mimetype};base64,{img_encoded}"
+
+
+async def convert_to_image_url(image_filepath_or_url: str) -> str:
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, convert_to_image_url_sync, image_filepath_or_url)
