@@ -17,7 +17,7 @@ from .stream import (
     prefix_stream,
 )
 
-from .util import parse_docstring
+from .util import parse_docstring, combine_pairs
 
 from .registrar import register_model_provider
 
@@ -32,7 +32,7 @@ from openai.types.chat.chat_completion_chunk import ChoiceDelta
 
 from typing import (
     List, Callable, AsyncIterator, Any,
-    Tuple, Dict, Optional, Union,
+    Tuple, Dict, Optional, Union, Literal,
 )
 
 import copy
@@ -244,8 +244,24 @@ def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatComplet
             })
         else:
             raise ValueError(f"unknown message role: {m['role']}")
-    # TODO: collapse subsequent messages that are both 'assistant'
-    return ms
+    def should_combine(
+        m1: ChatCompletionMessageParam,
+        m2: ChatCompletionMessageParam,
+    ) -> Union[Literal[False], Tuple[Literal[True], ChatCompletionMessageParam]]:
+        if m1['role'] == 'assistant' and m2 is not None and m2['role'] == 'assistant':
+            # This is the case where the model started with text and switched
+            # to tool-calling part-way-through. We need to combine these
+            # messages.
+            assert m1.get('content') and not m1.get('tool_calls')
+            assert not m2.get('content') and m2.get('tool_calls')
+            m_combined: ChatCompletionMessageParam = {
+                'role': 'assistant',
+                'content': m1['content'],
+                'tool_calls': m2['tool_calls'],
+            }
+            return True, m_combined
+        return False
+    return combine_pairs(ms, should_combine)
 
 
 def _build_messages_from_openai_payload(

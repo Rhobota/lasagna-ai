@@ -1,8 +1,11 @@
 import re
 
-from typing import Tuple, List
+from typing import Tuple, List, Literal, Union, TypeVar, Callable
 
 from .types import ToolParam
+
+
+T = TypeVar('T')
 
 
 def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
@@ -37,3 +40,26 @@ def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
         if not p['description']:
             raise ValueError("no parameter name found")
     return description, params
+
+
+def combine_pairs(
+    lst: List[T],
+    decision_func: Callable[[T, T], Union[Literal[False], Tuple[Literal[True], T]]],
+) -> List[T]:
+    # This implementation is ugly but I can't find a nice way to do it.
+    res: List[T] = []
+    i: int = 0
+    while i < len(lst) - 1:
+        j = i + 1
+        flag = decision_func(lst[i], lst[j])
+        if flag is False:
+            res.append(lst[i])
+        else:
+            new_val = flag[1]
+            res.append(new_val)
+            i += 1  # <-- This is where the ugliness comes from! We need to skip the next iteration
+        i += 1
+    if i < len(lst):
+        # If the last pair was *not* combined, then we need to add the last element.
+        res.append(lst[i])
+    return res

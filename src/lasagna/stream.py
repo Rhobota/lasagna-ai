@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 
-from typing import AsyncIterator, Iterable, TypeVar, Tuple, List, Union, Literal, cast
+from typing import AsyncIterator, Iterable, TypeVar, Tuple, List, Union, Literal
 
 
 T = TypeVar('T')  # <-- for generic programming
@@ -61,15 +61,13 @@ def adup(source: AsyncIterator[T]) -> Tuple[AsyncIterator[T], AsyncIterator[T]]:
     _ = asyncio.create_task(pull())
     async def gen(q: asyncio.Queue[Union[Tuple[Literal[True], T], Tuple[Literal[False], Union[None, Exception]]]]) -> AsyncIterator[T]:
         while True:
-            success, v = await q.get()
-            if success:
-                v = cast(T, v)   # <-- mypy should *know* this, but it doesn't for some reason
-                yield v
+            thing = await q.get()
+            if thing[0]:
+                yield thing[1]
             else:
-                v = cast(Union[None, Exception], v)   # <-- mypy should *know* this, but it doesn't for some reason
-                await q.put((False, v))  # <-- put it back so that we find it again if we try to re-itereate
-                if v is not None:
-                    raise v
+                await q.put((False, thing[1]))  # <-- put it back so that we find it again if we try to re-itereate
+                if thing[1] is not None:
+                    raise thing[1]
                 else:
                     break
     return gen(q1), gen(q2)
