@@ -1,12 +1,12 @@
 import asyncio
 
-from typing import AsyncIterator, Iterator, TypeVar, Tuple, List, Union, Literal, cast
+from typing import AsyncIterator, Iterable, TypeVar, Tuple, List, Union, Literal, cast
 
 
 T = TypeVar('T')  # <-- for generic programming
 
 
-async def fake_async(source: Iterator[T]) -> AsyncIterator[T]:
+async def fake_async(source: Iterable[T]) -> AsyncIterator[T]:
     for v in source:
         yield v
 
