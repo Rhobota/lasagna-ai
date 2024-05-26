@@ -20,14 +20,14 @@ def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
     description = ' '.join(description_match[1].strip().splitlines())
     if not description:
         raise ValueError("no description found")
-    params = re.findall(r":param:\s+(\w+):\s+([\w ]+):\s+(.+)", dedented_docs)
+    params_found = re.findall(r":param:\s+(\w+):\s+([\w ]+):\s+(.+)", dedented_docs)
     params: List[ToolParam] = [
         {
             'name': p[0].strip(),
             'type': p[1].strip(),
             'description': p[2].strip(),
         }
-        for p in params
+        for p in params_found
     ]
     for p in params:
         if not p['name']:
