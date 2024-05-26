@@ -14,13 +14,12 @@ env:
 
 jobs:
   test:
-    name: Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
+    name: Testing on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
 
     steps:
     - uses: actions/checkout@v4
@@ -31,8 +30,8 @@ jobs:
 
     - name: Check type correctness
       run: |
-        hatch run types:check --python ${{ matrix.python-version }}
+        hatch run types:check
 
     - name: Run tests
       run: |
-        hatch test --python ${{ matrix.python-version }} --cover --randomize
+        hatch test --cover --randomize
