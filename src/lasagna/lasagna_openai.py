@@ -343,7 +343,7 @@ class LasagnaOpenAI(LLM):
         tools: List[Callable],
         force_tool: bool = False,
     ) -> List[ChatMessage]:
-        tool_choice: ChatCompletionToolChoiceOptionParam | NotGiven
+        tool_choice: Union[ChatCompletionToolChoiceOptionParam, NotGiven]
         if force_tool:
             if len(tools) != 1:
                 raise ValueError(f"When `force_tool` is set, you must pass exactly one tool, not {len(tools)}.")
