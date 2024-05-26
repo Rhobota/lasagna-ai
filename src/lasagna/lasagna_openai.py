@@ -10,6 +10,7 @@ from .types import (
     ToolParam,
     ToolResult,
     ModelRecord,
+    Cost,
 )
 
 from .stream import (
@@ -299,6 +300,21 @@ async def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatC
     return combine_pairs(ms, should_combine)
 
 
+def _get_cost(
+    payload: List[ChatCompletionChunk],
+) -> Optional[Cost]:
+    usages = [p.usage for p in payload if p.usage]
+    if not usages:
+        return None
+    usage = usages[-1]
+    return {
+        'input_tokens': usage.prompt_tokens,
+        'output_tokens': usage.completion_tokens,
+        'total_tokens': usage.total_tokens,
+        'cost_usd_cents': None,   # API doesn't give this, unfortunately
+    }
+
+
 def _build_messages_from_openai_payload(
     payload: List[ChatCompletionChunk],
     events: List[EventPayload],
@@ -309,6 +325,7 @@ def _build_messages_from_openai_payload(
      - all TOOL_CALL events
      - some AI events then it switches to TOOL_CALL events
     """
+    cost = _get_cost(payload)
     raw = [p.to_dict() for p in payload]
     ai_events = [
         event
@@ -324,13 +341,13 @@ def _build_messages_from_openai_payload(
         'role': ChatMessageRole.AI,
         'text': ''.join([e[2] for e in ai_events if e[1] == 'text']),
         'media': None, # <-- the chat API doesn't know how to generate images (it only _reads_ images)
-        'cost': None,  # TODO: OpenAI's API doesn't return this info in streaming mode! Hopefully they will in the future.
+        'cost': cost,
         'raw': raw,
     } if len(ai_events) > 0 else None
     tool_message: Optional[ChatMessageToolCall] = {
         'role': ChatMessageRole.TOOL_CALL,
         'tools': [e[2] for e in tool_events if e[1] == 'tool_call'],
-        'cost': None,  # TODO: OpenAI's API doesn't return this info in streaming mode! Hopefully they will in the future.
+        'cost': cost,
         'raw': raw,
     } if len(tool_events) > 0 else None
     if ai_message and tool_message:
