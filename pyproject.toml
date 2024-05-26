@@ -81,6 +81,7 @@ exclude_lines = [
 ]
 
 [tool.mypy]
+mypy_path = ["src"]
 implicit_reexport = false
 allow_redefinition = true
 strict_equality = true
@@ -89,3 +90,7 @@ warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unreachable = true
 disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
