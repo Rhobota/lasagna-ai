@@ -49,17 +49,20 @@ def combine_pairs(
     # This implementation is ugly but I can't find a nice way to do it.
     res: List[T] = []
     i: int = 0
+    did_just_combine: bool = False
     while i < len(lst) - 1:
         j = i + 1
         flag = decision_func(lst[i], lst[j])
         if flag is False:
-            res.append(lst[i])
+            if not did_just_combine:
+                res.append(lst[i])
+            did_just_combine = False
         else:
             new_val = flag[1]
             res.append(new_val)
-            i += 1  # <-- This is where the ugliness comes from! We need to skip the next iteration
+            did_just_combine = True
         i += 1
-    if i < len(lst):
+    if not did_just_combine and i < len(lst):
         # If the last pair was *not* combined, then we need to add the last element.
         res.append(lst[i])
     return res

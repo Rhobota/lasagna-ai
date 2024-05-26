@@ -1,6 +1,11 @@
 import pytest
 
-from lasagna.util import parse_docstring
+from lasagna.util import (
+    parse_docstring,
+    combine_pairs,
+)
+
+from typing import List
 
 
 def test_parse_docstring():
@@ -212,4 +217,50 @@ def test_parse_docstring():
         print(params)
 
 
-# TODO: test combine_pairs
+def test_combine_pairs():
+    def combine_rule_1(a, b):
+        return False
+    def combine_rule_2(a, b):
+        return True, 99
+    def combine_rule_3(a, b):
+        if a == b:
+            return True, a
+        return False
+
+    empty: List[int] = []
+    oneval: List[int] = [7]
+    twovals: List[int] = [7, 12]
+    threevals: List[int] = [7, 12, 4]
+
+    assert combine_pairs(empty, combine_rule_1) == []
+    assert combine_pairs(empty, combine_rule_2) == []
+    assert combine_pairs(empty, combine_rule_3) == []
+
+    assert combine_pairs(oneval, combine_rule_1) == [7]
+    assert combine_pairs(oneval, combine_rule_2) == [7]
+    assert combine_pairs(oneval, combine_rule_3) == [7]
+
+    assert combine_pairs(twovals, combine_rule_1) == [7, 12]
+    assert combine_pairs(twovals, combine_rule_2) == [99]
+    assert combine_pairs(twovals, combine_rule_3) == [7, 12]
+
+    assert combine_pairs(threevals, combine_rule_1) == [7, 12, 4]
+    assert combine_pairs(threevals, combine_rule_2) == [99, 99]
+    assert combine_pairs(threevals, combine_rule_3) == [7, 12, 4]
+
+    assert combine_pairs([1, 4], combine_rule_3) == [1, 4]
+    assert combine_pairs([4, 4], combine_rule_3) == [4]
+
+    assert combine_pairs([1, 4, 7], combine_rule_3) == [1, 4, 7]
+    assert combine_pairs([4, 4, 7], combine_rule_3) == [4, 7]
+    assert combine_pairs([1, 4, 4], combine_rule_3) == [1, 4]
+    assert combine_pairs([4, 4, 4], combine_rule_3) == [4, 4]
+
+    assert combine_pairs([1, 4, 7, 9], combine_rule_3) == [1, 4, 7, 9]
+    assert combine_pairs([4, 4, 7, 9], combine_rule_3) == [4, 7, 9]
+    assert combine_pairs([1, 4, 4, 9], combine_rule_3) == [1, 4, 9]
+    assert combine_pairs([1, 4, 7, 7], combine_rule_3) == [1, 4, 7]
+    assert combine_pairs([4, 4, 7, 7], combine_rule_3) == [4, 7]
+    assert combine_pairs([4, 4, 4, 9], combine_rule_3) == [4, 4, 9]
+    assert combine_pairs([1, 7, 7, 7], combine_rule_3) == [1, 7, 7]
+    assert combine_pairs([7, 7, 7, 7], combine_rule_3) == [7, 7, 7]

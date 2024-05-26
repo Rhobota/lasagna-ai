@@ -248,7 +248,7 @@ def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatComplet
         m1: ChatCompletionMessageParam,
         m2: ChatCompletionMessageParam,
     ) -> Union[Literal[False], Tuple[Literal[True], ChatCompletionMessageParam]]:
-        if m1['role'] == 'assistant' and m2 is not None and m2['role'] == 'assistant':
+        if m1['role'] == 'assistant' and m2['role'] == 'assistant':
             # This is the case where the model started with text and switched
             # to tool-calling part-way-through. We need to combine these
             # messages.
