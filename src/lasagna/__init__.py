@@ -1,19 +1,14 @@
+from .registrar import AGENTS, MODEL_PROVIDERS
+
 from .types import (
     AgentSpec,
     AgentCallable,
     ProviderFactory,
     ChatMessage,
     EventCallback,
-    AgentRecord,
-    ModelProviderRecord,
 )
 
-from typing import List, Dict
-
-
-AGENTS: Dict[str, AgentRecord] = {}
-
-MODEL_PROVIDERS: Dict[str, ModelProviderRecord] = {}
+from typing import List
 
 
 async def run(

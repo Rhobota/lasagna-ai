@@ -62,7 +62,15 @@ class ChatMessageToolResult(ChatMessageBase):
 ChatMessage = Union[ChatMessageText, ChatMessageToolCall, ChatMessageToolResult]
 
 
-EventCallback = Callable[[Tuple[ChatMessageRole, str, Union[str, ToolCall, ToolResult]]], Awaitable[None]]
+EventPayload = Union[
+    Tuple[Literal[ChatMessageRole.AI], Literal['text'], str],
+    Tuple[Literal[ChatMessageRole.TOOL_CALL], Literal['text'], str],
+    Tuple[Literal[ChatMessageRole.TOOL_CALL], Literal['tool_call'], ToolCall],
+    Tuple[Literal[ChatMessageRole.TOOL_RES], Literal['tool_res'], ToolResult],
+]
+
+
+EventCallback = Callable[[EventPayload], Awaitable[None]]
 
 
 class LLM(abc.ABC):
