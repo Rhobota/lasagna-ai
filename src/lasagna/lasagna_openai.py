@@ -151,6 +151,10 @@ async def _extract_deltas(
     stream: AsyncIterator[ChatCompletionChunk],
 ) -> AsyncIterator[Tuple[ChoiceDelta, Union[str, None]]]:
     async for v in stream:
+        if len(v.choices) == 0:
+            # The final message that has the `usage` has zero choices.
+            # So just skip it here!
+            continue
         assert len(v.choices) == 1, f"Why do we have {len(v.choices)} choices?"
         single_choice = v.choices[0]
         yield single_choice.delta, single_choice.finish_reason
