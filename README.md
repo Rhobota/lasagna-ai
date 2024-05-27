@@ -36,7 +36,7 @@ TODO: More badges:
 ## Installation
 
 ```console
-pip install lasagna-ai[openai,anthropic]
+pip install -U lasagna-ai[openai,anthropic]
 ```
 
 ## License

@@ -113,3 +113,49 @@ async def test_run_with_registered_names():
     assert events == [
         (ChatMessageRole.AI, 'text', 'Hi!'),
     ]
+
+
+@pytest.mark.asyncio
+async def test_run_direct():
+    AGENTS.clear()
+    MODEL_PROVIDERS.clear()
+    spec: AgentSpec = {
+        'agent': agent_1,
+        'provider': MockProvider,
+        'model': 'some_model',
+        'model_kwargs': {
+            'b': 6,
+            'a': 'yes',
+        },
+    }
+    events: List[EventPayload] = []
+    async def event_callback(event: EventPayload) -> None:
+        events.append(event)
+    messages: List[ChatMessage] = []
+    new_messages = await run(spec, event_callback, messages)
+    assert new_messages == [
+        {
+            'role': ChatMessageRole.AI,
+            'text': f"model: some_model",
+            'media': None,
+            'cost': None,
+            'raw': None,
+        },
+        {
+            'role': ChatMessageRole.HUMAN,
+            'text': f"model_kwarg: a = yes",
+            'media': None,
+            'cost': None,
+            'raw': None,
+        },
+        {
+            'role': ChatMessageRole.HUMAN,
+            'text': f"model_kwarg: b = 6",
+            'media': None,
+            'cost': None,
+            'raw': None,
+        },
+    ]
+    assert events == [
+        (ChatMessageRole.AI, 'text', 'Hi!'),
+    ]
