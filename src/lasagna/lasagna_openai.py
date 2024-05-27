@@ -42,8 +42,10 @@ from typing import (
     Tuple, Dict, Optional, Union, Literal,
 )
 
+import asyncio
 import copy
 import json
+import inspect
 
 
 _KNOWN_MODELS: List[ModelRecord] = [
@@ -362,29 +364,36 @@ def _build_messages_from_openai_payload(
         raise ValueError('no events')
 
 
-def _handle_tools(
+async def _handle_tools(
     messages: List[ChatMessage],
     tools_map: Dict[str, Callable],
 ) -> Union[List[ToolResult], None]:
-    # TODO: this needs to be async and delegate to a threadpool behind the scenes
     assert len(messages) > 0
     message = messages[-1]   # <-- the tool message will be last, if at all
     if message['role'] != ChatMessageRole.TOOL_CALL:
         return None
-    results: List[ToolResult] = []
+    to_gather: List[asyncio.Task[ToolResult]] = []
     for t in message['tools']:
         assert t['call_type'] == 'function'
-        call_id = 'unknown'
-        try:
-            call_id = t['call_id']
-            func = tools_map[t['function']['name']]
-            args = t['function']['arguments']
-            res = func(**json.loads(args))
-            results.append({'call_id': call_id, 'result': res})
-        except Exception as e:
-            error = f"{type(e).__name__}: {e}"
-            results.append({'call_id': call_id, 'result': error})
-    return results
+        async def _go(t: ToolCall) -> ToolResult:
+            call_id = 'unknown'
+            try:
+                call_id = t['call_id']
+                func = tools_map[t['function']['name']]
+                args = t['function']['arguments']
+                if inspect.iscoroutinefunction(func):
+                    res = await func(**json.loads(args))
+                else:
+                    def _wrapped_sync() -> Any:
+                        return func(**json.loads(args))
+                    loop = asyncio.get_running_loop()
+                    res = await loop.run_in_executor(None, _wrapped_sync)
+                return {'call_id': call_id, 'result': res}
+            except Exception as e:
+                error = f"{type(e).__name__}: {e}"
+                return {'call_id': call_id, 'result': error}
+        to_gather.append(asyncio.create_task(_go(t)))
+    return await asyncio.gather(*to_gather)
 
 
 def _build_tool_response_message(tool_results: List[ToolResult]) -> ChatMessage:
@@ -485,7 +494,7 @@ class LasagnaOpenAI(LLM):
             tools_map = {tool.__name__: tool for tool in tools}
             new_messages.extend(new_messages_here)
             messages.extend(new_messages_here)
-            tools_results = _handle_tools(new_messages_here, tools_map)
+            tools_results = await _handle_tools(new_messages_here, tools_map)
             if tools_results is None:
                 break
             for tool_result in tools_results:

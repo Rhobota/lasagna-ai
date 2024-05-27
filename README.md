@@ -22,7 +22,8 @@ TODO: More badges:
 - Also easy to integrate with a database.
 - Lasagna has layers. Now your agents can too!
    - Build hierarchical (or even recursive) agents! Lasagna has layers!
-- Parallel tool calling
+- Fully asyncio (with threadpools where appropriate)
+   - Parallel tool calling (your tools can by either sync or async, no prob!)
 - Supports _vision_!
 - Strongly typed
 - 90% test coverage

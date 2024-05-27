@@ -980,15 +980,24 @@ def tool_a(first, second, third=5):
 def tool_b(x):
     return x * 2
 
-def test_handle_tools():
+async def tool_async_a(x):
+    return x * 3
+
+@pytest.mark.asyncio
+async def test_handle_tools():
     x = 4
     def tool_c():
-        return x * 2
+        return x * 4
+
+    async def tool_async_b():
+        return x * 5
 
     tool_map: Dict[str, Callable] = {
         'tool_a': tool_a,
         'tool_b': tool_b,
         'tool_c': tool_c,
+        'tool_async_a': tool_async_a,
+        'tool_async_b': tool_async_b,
     }
     message: ChatMessage = {
         'role': ChatMessageRole.TOOL_CALL,
@@ -1006,11 +1015,14 @@ def test_handle_tools():
             {'call_id': '1011', 'function': {'arguments': '{"first": 5}', 'name': 'tool_a'}, 'call_type': 'function'},
             {'call_id': '1012', 'function': {'arguments': '{}', 'name': 'tool_c'}, 'call_type': 'function'},
             {'call_id': '1013', 'function': {'arguments': '{}', 'name': 'tool_d'}, 'call_type': 'function'},
+            {'call_id': '1014', 'function': {'arguments': '{"x": -3}', 'name': 'tool_async_a'}, 'call_type': 'function'},
+            {'call_id': '1015', 'function': {'arguments': '{}', 'name': 'tool_async_b'}, 'call_type': 'function'},
+            {'call_id': '1016', 'function': {'arguments': '{}', 'name': 'tool_async_a'}, 'call_type': 'function'},
         ],
         'cost': None,
         'raw': None,
     }
-    tool_results = _handle_tools([message], tool_map)
+    tool_results = await _handle_tools([message], tool_map)
     assert tool_results is not None
     assert tool_results == [
         {'call_id': '1001', 'result': 16 },
@@ -1024,8 +1036,11 @@ def test_handle_tools():
         {'call_id': '1009', 'result': 111.5 },
         {'call_id': '1010', 'result': "TypeError: tool_a() missing 2 required positional arguments: 'first' and 'second'" },
         {'call_id': '1011', 'result': "TypeError: tool_a() missing 1 required positional argument: 'second'" },
-        {'call_id': '1012', 'result': 8 },
+        {'call_id': '1012', 'result': 16 },
         {'call_id': '1013', 'result': "KeyError: 'tool_d'" },
+        {'call_id': '1014', 'result': -9 },
+        {'call_id': '1015', 'result': 20 },
+        {'call_id': '1016', 'result': "TypeError: tool_async_a() missing 1 required positional argument: 'x'" },
     ]
 
 
