@@ -17,16 +17,15 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install Hatch
-      run: |
-        pip install --upgrade hatch
+      uses: pypa/hatch@install
 
     - name: Check type correctness
       run: |
-        hatch run types:check
+        make checkall
 
     - name: Run tests
       run: |
-        hatch test --all --cover --randomize
+        make testall
 
     - name: Build
       run: hatch build
