@@ -25,8 +25,6 @@ from .util import (
     convert_to_image_url,
 )
 
-from .registrar import register_model_provider
-
 from openai import AsyncOpenAI, NOT_GIVEN, NotGiven
 from openai.types.chat import (
     ChatCompletionChunk,
@@ -48,7 +46,7 @@ import json
 import inspect
 
 
-_KNOWN_MODELS: List[ModelRecord] = [
+OPENAI_KNOWN_MODELS: List[ModelRecord] = [
     {
         'formal_name': 'gpt-4o-2024-05-13',
         'display_name': 'GPT-4o',
@@ -411,7 +409,7 @@ def _build_tool_response_message(tool_results: List[ToolResult]) -> ChatMessage:
 
 class LasagnaOpenAI(LLM):
     def __init__(self, model: str, **model_kwargs: Dict[str, Any]):
-        known_model_names = [m['formal_name'] for m in _KNOWN_MODELS]
+        known_model_names = [m['formal_name'] for m in OPENAI_KNOWN_MODELS]
         if model not in known_model_names:
             raise ValueError(f'unknown model: {model}')
         self.model = model
@@ -507,11 +505,3 @@ class LasagnaOpenAI(LLM):
             new_messages.append(tool_response_message)
             messages.append(tool_response_message)
         return new_messages
-
-
-register_model_provider(
-    key  = 'openai',
-    name = 'OpenAI',
-    factory = LasagnaOpenAI,
-    models = _KNOWN_MODELS,
-)

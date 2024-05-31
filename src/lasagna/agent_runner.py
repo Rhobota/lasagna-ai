@@ -8,6 +8,8 @@ from .types import (
     EventCallback,
 )
 
+from .known_providers import attempt_load_known_providers
+
 from typing import List
 
 
@@ -24,7 +26,10 @@ async def run(
 
     provider: ProviderFactory
     if isinstance(agent_spec['provider'], str):
-        provider = MODEL_PROVIDERS[agent_spec['provider']]['factory']
+        provider_str = agent_spec['provider']
+        if provider_str not in MODEL_PROVIDERS:
+            attempt_load_known_providers(provider_str)
+        provider = MODEL_PROVIDERS[provider_str]['factory']
     else:
         provider = agent_spec['provider']
 
