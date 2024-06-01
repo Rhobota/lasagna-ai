@@ -1,8 +1,8 @@
 from .types import (
     AgentRecord,
     AgentCallable,
-    ModelProviderRecord,
-    ProviderFactory,
+    ProviderRecord,
+    ModelFactory,
     ModelRecord,
 )
 
@@ -11,7 +11,7 @@ from typing import Dict, List
 
 AGENTS: Dict[str, AgentRecord] = {}
 
-MODEL_PROVIDERS: Dict[str, ModelProviderRecord] = {}
+PROVIDERS: Dict[str, ProviderRecord] = {}
 
 
 def register_agent(
@@ -27,15 +27,15 @@ def register_agent(
     }
 
 
-def register_model_provider(
+def register_provider(
     key: str,
     name: str,
-    factory: ProviderFactory,
+    factory: ModelFactory,
     models: List[ModelRecord],
 ) -> None:
-    if key in MODEL_PROVIDERS:
+    if key in PROVIDERS:
         raise RuntimeError(f"A model provider with this key is already registered: {key}")
-    MODEL_PROVIDERS[key] = {
+    PROVIDERS[key] = {
         'name': name,
         'factory': factory,
         'models': models,

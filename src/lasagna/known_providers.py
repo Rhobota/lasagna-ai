@@ -1,4 +1,4 @@
-from .registrar import register_model_provider
+from .registrar import register_provider
 
 
 def attempt_load_known_providers(provider: str) -> None:
@@ -26,7 +26,7 @@ def attempt_load_known_providers(provider: str) -> None:
             OPENAI_KNOWN_MODELS,
             LasagnaOpenAI,
         )
-        register_model_provider(
+        register_provider(
             key  = 'openai',
             name = 'OpenAI',
             factory = LasagnaOpenAI,

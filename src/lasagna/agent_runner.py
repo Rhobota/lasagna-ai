@@ -1,9 +1,9 @@
-from .registrar import AGENTS, MODEL_PROVIDERS
+from .registrar import AGENTS, PROVIDERS
 
 from .types import (
     AgentSpec,
     AgentCallable,
-    ProviderFactory,
+    ModelFactory,
     ChatMessage,
     EventCallback,
 )
@@ -24,20 +24,20 @@ async def run(
     else:
         agent = agent_spec['agent']
 
-    provider: ProviderFactory
+    model_factory: ModelFactory
     if isinstance(agent_spec['provider'], str):
         provider_str = agent_spec['provider']
-        if provider_str not in MODEL_PROVIDERS:
+        if provider_str not in PROVIDERS:
             attempt_load_known_providers(provider_str)
-        provider = MODEL_PROVIDERS[provider_str]['factory']
+        model_factory = PROVIDERS[provider_str]['factory']
     else:
-        provider = agent_spec['provider']
+        model_factory = agent_spec['provider']
 
     kwargs = agent_spec.get('model_kwargs', None)
     if kwargs is None:
         kwargs = {}
 
-    llm = provider(model=agent_spec['model'], **kwargs)
+    llm = model_factory(model=agent_spec['model'], **kwargs)
 
     return await agent(
         llm,

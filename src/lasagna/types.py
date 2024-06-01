@@ -109,19 +109,19 @@ class ModelRecord(TypedDict):
     display_name: str
 
 
-class ProviderFactory(Protocol):
+class ModelFactory(Protocol):
     def __call__(self, model: str, **model_kwargs: Dict[str, Any]) -> LLM: ...
 
 
-class ModelProviderRecord(TypedDict):
+class ProviderRecord(TypedDict):
     name: str
-    factory: ProviderFactory
+    factory: ModelFactory
     models: List[ModelRecord]
 
 
 class AgentSpec(TypedDict):
     agent: Union[str, AgentCallable]
-    provider: Union[str, ProviderFactory]
+    provider: Union[str, ModelFactory]
     model: str
     model_kwargs: Optional[Dict[str, Any]]
     # TODO: make it hierarchical!

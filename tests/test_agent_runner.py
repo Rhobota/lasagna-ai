@@ -12,9 +12,9 @@ from lasagna.types import (
 
 from lasagna.registrar import (
     register_agent,
-    register_model_provider,
+    register_provider,
     AGENTS,
-    MODEL_PROVIDERS,
+    PROVIDERS,
 )
 
 from typing import List, Dict, Any, Callable
@@ -67,9 +67,9 @@ async def agent_1(
 @pytest.mark.asyncio
 async def test_run_with_registered_names():
     AGENTS.clear()
-    MODEL_PROVIDERS.clear()
+    PROVIDERS.clear()
     register_agent('agent_1', 'Agent 1', agent_1)
-    register_model_provider('mock_provider', 'Mock Provider', MockProvider, [])
+    register_provider('mock_provider', 'Mock Provider', MockProvider, [])
     spec: AgentSpec = {
         'agent': 'agent_1',
         'provider': 'mock_provider',
@@ -112,7 +112,7 @@ async def test_run_with_registered_names():
 @pytest.mark.asyncio
 async def test_run_direct():
     AGENTS.clear()
-    MODEL_PROVIDERS.clear()
+    PROVIDERS.clear()
     spec: AgentSpec = {
         'agent': agent_1,
         'provider': MockProvider,
