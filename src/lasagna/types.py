@@ -5,6 +5,8 @@ from typing import (
     Callable, Tuple, Awaitable, Union, Protocol,
 )
 
+from typing_extensions import NotRequired
+
 
 class ToolCallFunction(TypedDict):
     name: str
@@ -45,7 +47,7 @@ class ChatMessageBase(TypedDict):
 class ChatMessageContent(ChatMessageBase):
     role: Literal['system', 'human', 'ai']
     text: Optional[str]
-    media: Optional[List[Media]]
+    media: NotRequired[List[Media]]
 
 
 class ChatMessageToolCall(ChatMessageBase):

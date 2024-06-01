@@ -218,7 +218,7 @@ async def _make_openai_content(
             'type': 'text',
             'text': message['text'],
         })
-    if message['media']:
+    if 'media' in message:
         for m in message['media']:
             if m['media_type'] == 'image':
                 ret.append({
@@ -263,7 +263,7 @@ async def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatC
                     'tool_call_id': t['call_id'],
                 })
         elif m['role'] == 'system':
-            if m['media']:
+            if 'media' in m and len(m['media']) > 0:
                 raise ValueError('This model does not support media in the system prompt.')
             ms.append({
                 'role': 'system',
@@ -275,7 +275,7 @@ async def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatC
                 'content': (await _make_openai_content(m)),
             })
         elif m['role'] == 'ai':
-            if m['media']:
+            if 'media' in m and len(m['media']) > 0:
                 raise ValueError('This model does not support media in AI messages.')
             ms.append({
                 'role': 'assistant',
@@ -291,8 +291,8 @@ async def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatC
             # This is the case where the model started with text and switched
             # to tool-calling part-way-through. We need to combine these
             # messages.
-            assert m1.get('content') and not m1.get('tool_calls')
-            assert not m2.get('content') and m2.get('tool_calls')
+            assert ('content' in m1 and m1['content']) and ('tool_calls' not in m1 or not m1['tool_calls'])
+            assert ('content' not in m2 or not m2['content']) and ('tool_calls' in m2 and m2['tool_calls'])
             m_combined: ChatCompletionMessageParam = {
                 'role': 'assistant',
                 'content': m1['content'],
@@ -343,7 +343,6 @@ def _build_messages_from_openai_payload(
     ai_message: Optional[ChatMessage] = {
         'role': 'ai',
         'text': ''.join([e[2] for e in ai_events if e[1] == 'text_event']),
-        'media': None, # <-- the chat API doesn't know how to generate images (it only _reads_ images)
         'cost': cost,
         'raw': raw,
     } if len(ai_events) > 0 else None

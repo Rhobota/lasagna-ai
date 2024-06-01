@@ -39,7 +39,6 @@ class MockProvider(LLM):
             {
                 'role': 'ai',
                 'text': f"model: {self.model}",
-                'media': None,
                 'cost': None,
                 'raw': None,
             },
@@ -49,7 +48,6 @@ class MockProvider(LLM):
             m: ChatMessage = {
                 'role': 'human',
                 'text': f"model_kwarg: {key} = {val}",
-                'media': None,
                 'cost': None,
                 'raw': None,
             }
@@ -90,21 +88,18 @@ async def test_run_with_registered_names():
         {
             'role': 'ai',
             'text': f"model: some_model",
-            'media': None,
             'cost': None,
             'raw': None,
         },
         {
             'role': 'human',
             'text': f"model_kwarg: a = yes",
-            'media': None,
             'cost': None,
             'raw': None,
         },
         {
             'role': 'human',
             'text': f"model_kwarg: b = 6",
-            'media': None,
             'cost': None,
             'raw': None,
         },
@@ -136,21 +131,18 @@ async def test_run_direct():
         {
             'role': 'ai',
             'text': f"model: some_model",
-            'media': None,
             'cost': None,
             'raw': None,
         },
         {
             'role': 'human',
             'text': f"model_kwarg: a = yes",
-            'media': None,
             'cost': None,
             'raw': None,
         },
         {
             'role': 'human',
             'text': f"model_kwarg: b = 6",
-            'media': None,
             'cost': None,
             'raw': None,
         },
