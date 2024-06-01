@@ -2,7 +2,6 @@ import pytest
 
 from lasagna.types import (
     ChatMessage,
-    ChatMessageRole,
     ToolCall,
     ToolResult,
     EventPayload,
@@ -623,7 +622,7 @@ async def test_process_output_stream__text():
     stream = _process_output_stream(_extract_deltas(fake_async(SAMPLE_TEXT_STREAM)))
     texts: List[str] = []
     async for role, type_, text in stream:
-        assert role == ChatMessageRole.AI
+        assert role == 'ai'
         assert type_ == 'text_event'
         assert isinstance(text, str)
         texts.append(text)
@@ -637,7 +636,7 @@ async def test_process_output_stream__tool():
     texts: List[str] = []
     tool_calls: List[ToolCall] = []
     async for event in stream:
-        assert event[0] == ChatMessageRole.TOOL_CALL
+        assert event[0] == 'tool_call'
         if event[1] == 'text_event':
             texts.append(event[2])
         elif event[1] == 'tool_call_event':
@@ -652,7 +651,7 @@ async def test_process_output_stream__tool():
     texts: List[str] = []
     tool_calls: List[ToolCall] = []
     async for event in stream:
-        assert event[0] == ChatMessageRole.TOOL_CALL
+        assert event[0] == 'tool_call'
         if event[1] == 'text_event':
             texts.append(event[2])
         elif event[1] == 'tool_call_event':
@@ -673,10 +672,10 @@ async def test_process_output_stream__text_and_tool():
     texts: List[str] = []
     tool_calls: List[ToolCall] = []
     async for event in stream:
-        if event[0] == ChatMessageRole.AI:
+        if event[0] == 'ai':
             assert event[1] == 'text_event'
             texts.append(event[2])
-        elif event[0] == ChatMessageRole.TOOL_CALL:
+        elif event[0] == 'tool_call':
             if event[1] == 'text_event':
                 texts.append(event[2])
             elif event[1] == 'tool_call_event':
@@ -796,13 +795,13 @@ async def test_convert_to_openai_messages():
         await _convert_to_openai_messages(messages)
 
     messages: List[ChatMessage] = [
-        {'role': ChatMessageRole.SYSTEM, 'text': 'be nice', 'media': None, 'cost': None, 'raw': None},
-        {'role': ChatMessageRole.HUMAN, 'text': 'hi', 'media': None, 'cost': None, 'raw': None},
-        {'role': ChatMessageRole.AI, 'text': 'oh hi', 'media': None, 'cost': None, 'raw': None},
-        {'role': ChatMessageRole.HUMAN, 'text': 'here is a picture', 'media': [{'media_type': 'image', 'image': 'http://example.com/img.png'}], 'cost': None, 'raw': None},
-        {'role': ChatMessageRole.AI, 'text': 'thanks!', 'media': None, 'cost': None, 'raw': None},
-        {'role': ChatMessageRole.HUMAN, 'text': 'here are two', 'media': [{'media_type': 'image', 'image': 'http://example.com/img.png'}, {'media_type': 'image', 'image': 'http://example.com/img2.png'}], 'cost': None, 'raw': None},
-        {'role': ChatMessageRole.AI, 'text': 'double thanks!', 'media': None, 'cost': None, 'raw': None},
+        {'role': 'system', 'text': 'be nice', 'media': None, 'cost': None, 'raw': None},
+        {'role': 'human', 'text': 'hi', 'media': None, 'cost': None, 'raw': None},
+        {'role': 'ai', 'text': 'oh hi', 'media': None, 'cost': None, 'raw': None},
+        {'role': 'human', 'text': 'here is a picture', 'media': [{'media_type': 'image', 'image': 'http://example.com/img.png'}], 'cost': None, 'raw': None},
+        {'role': 'ai', 'text': 'thanks!', 'media': None, 'cost': None, 'raw': None},
+        {'role': 'human', 'text': 'here are two', 'media': [{'media_type': 'image', 'image': 'http://example.com/img.png'}, {'media_type': 'image', 'image': 'http://example.com/img2.png'}], 'cost': None, 'raw': None},
+        {'role': 'ai', 'text': 'double thanks!', 'media': None, 'cost': None, 'raw': None},
     ]
     ms = await _convert_to_openai_messages(messages)
     assert ms == [
@@ -816,7 +815,7 @@ async def test_convert_to_openai_messages():
     ]
 
     messages: List[ChatMessage] = [{
-        'role': ChatMessageRole.TOOL_CALL,
+        'role': 'tool_call',
         'tools': [
             {'call_id': 'call_x7zmzwKI0LrwDF2xVMcfzXzN', 'function': {'arguments': '{"a": 5, "b": 7}', 'name': 'multiply'}, 'call_type': 'function'},
             {'call_id': 'call_33vMBGeVd96A9BhW6H3r8jHb', 'function': {'arguments': '{"a": 8, "b": 101}', 'name': 'multiply'}, 'call_type': 'function'},
@@ -835,7 +834,7 @@ async def test_convert_to_openai_messages():
     }]
 
     messages: List[ChatMessage] = [{
-        'role': ChatMessageRole.TOOL_RES,
+        'role': 'tool_res',
         'tools': [
             {'call_id': '1002', 'result': 10.8 },
             {'call_id': '1003', 'result': "hihi" },
@@ -859,14 +858,14 @@ async def test_convert_to_openai_messages():
 
     messages: List[ChatMessage] = [
         {
-            'role': ChatMessageRole.AI,
+            'role': 'ai',
             'text': "I'll use my tools!",
             'media': None,
             'cost': None,
             'raw': None,
         },
         {
-            'role': ChatMessageRole.TOOL_CALL,
+            'role': 'tool_call',
             'tools': [
                 {'call_id': 'call_x7zmzwKI0LrwDF2xVMcfzXzN', 'function': {'arguments': '{"a": 5, "b": 7}', 'name': 'multiply'}, 'call_type': 'function'},
                 {'call_id': 'call_33vMBGeVd96A9BhW6H3r8jHb', 'function': {'arguments': '{"a": 8, "b": 101}', 'name': 'multiply'}, 'call_type': 'function'},
@@ -888,12 +887,12 @@ async def test_convert_to_openai_messages():
 
 def test_build_messages_from_openai_payload():
     events: List[EventPayload] = [
-        (ChatMessageRole.AI, 'text_event', 'Hello'),
-        (ChatMessageRole.AI, 'text_event', ' Ryan'),
+        ('ai', 'text_event', 'Hello'),
+        ('ai', 'text_event', ' Ryan'),
     ]
     messages = _build_messages_from_openai_payload([], events)
     assert messages == [{
-        'role': ChatMessageRole.AI,
+        'role': 'ai',
         'text': 'Hello Ryan',
         'media': None,
         'cost': None,
@@ -905,24 +904,24 @@ def test_build_messages_from_openai_payload():
         {'call_id': 'call_33vMBGeVd96A9BhW6H3r8jHb', 'function': {'arguments': '{"a": 8, "b": 101}', 'name': 'multiply'}, 'call_type': 'function'},
     ]
     events: List[EventPayload] = [
-        (ChatMessageRole.TOOL_CALL, 'text_event', 'multiply('),
-        (ChatMessageRole.TOOL_CALL, 'text_event', '{"a"'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', ': 5, '),
-        (ChatMessageRole.TOOL_CALL, 'text_event', '"b": 7'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', '}'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', ')\n'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', 'multiply('),
-        (ChatMessageRole.TOOL_CALL, 'text_event', '{"a"'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', ': 8, '),
-        (ChatMessageRole.TOOL_CALL, 'text_event', '"b": 1'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', '01}'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', ')'),
-        (ChatMessageRole.TOOL_CALL, 'tool_call_event', tool_calls[0]),
-        (ChatMessageRole.TOOL_CALL, 'tool_call_event', tool_calls[1]),
+        ('tool_call', 'text_event', 'multiply('),
+        ('tool_call', 'text_event', '{"a"'),
+        ('tool_call', 'text_event', ': 5, '),
+        ('tool_call', 'text_event', '"b": 7'),
+        ('tool_call', 'text_event', '}'),
+        ('tool_call', 'text_event', ')\n'),
+        ('tool_call', 'text_event', 'multiply('),
+        ('tool_call', 'text_event', '{"a"'),
+        ('tool_call', 'text_event', ': 8, '),
+        ('tool_call', 'text_event', '"b": 1'),
+        ('tool_call', 'text_event', '01}'),
+        ('tool_call', 'text_event', ')'),
+        ('tool_call', 'tool_call_event', tool_calls[0]),
+        ('tool_call', 'tool_call_event', tool_calls[1]),
     ]
     messages = _build_messages_from_openai_payload([], events)
     assert messages == [{
-        'role': ChatMessageRole.TOOL_CALL,
+        'role': 'tool_call',
         'tools': [
             {'call_id': 'call_x7zmzwKI0LrwDF2xVMcfzXzN', 'function': {'arguments': '{"a": 5, "b": 7}', 'name': 'multiply'}, 'call_type': 'function'},
             {'call_id': 'call_33vMBGeVd96A9BhW6H3r8jHb', 'function': {'arguments': '{"a": 8, "b": 101}', 'name': 'multiply'}, 'call_type': 'function'},
@@ -936,34 +935,34 @@ def test_build_messages_from_openai_payload():
         {'call_id': 'call_33vMBGeVd96A9BhW6H3r8jHb', 'function': {'arguments': '{"a": 8, "b": 101}', 'name': 'multiply'}, 'call_type': 'function'},
     ]
     events: List[EventPayload] = [
-        (ChatMessageRole.AI, 'text_event', 'Hello'),
-        (ChatMessageRole.AI, 'text_event', ' Ryan'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', 'multiply('),
-        (ChatMessageRole.TOOL_CALL, 'text_event', '{"a"'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', ': 5, '),
-        (ChatMessageRole.TOOL_CALL, 'text_event', '"b": 7'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', '}'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', ')\n'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', 'multiply('),
-        (ChatMessageRole.TOOL_CALL, 'text_event', '{"a"'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', ': 8, '),
-        (ChatMessageRole.TOOL_CALL, 'text_event', '"b": 1'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', '01}'),
-        (ChatMessageRole.TOOL_CALL, 'text_event', ')'),
-        (ChatMessageRole.TOOL_CALL, 'tool_call_event', tool_calls[0]),
-        (ChatMessageRole.TOOL_CALL, 'tool_call_event', tool_calls[1]),
+        ('ai', 'text_event', 'Hello'),
+        ('ai', 'text_event', ' Ryan'),
+        ('tool_call', 'text_event', 'multiply('),
+        ('tool_call', 'text_event', '{"a"'),
+        ('tool_call', 'text_event', ': 5, '),
+        ('tool_call', 'text_event', '"b": 7'),
+        ('tool_call', 'text_event', '}'),
+        ('tool_call', 'text_event', ')\n'),
+        ('tool_call', 'text_event', 'multiply('),
+        ('tool_call', 'text_event', '{"a"'),
+        ('tool_call', 'text_event', ': 8, '),
+        ('tool_call', 'text_event', '"b": 1'),
+        ('tool_call', 'text_event', '01}'),
+        ('tool_call', 'text_event', ')'),
+        ('tool_call', 'tool_call_event', tool_calls[0]),
+        ('tool_call', 'tool_call_event', tool_calls[1]),
     ]
     messages = _build_messages_from_openai_payload([], events)
     assert messages == [
         {
-            'role': ChatMessageRole.AI,
+            'role': 'ai',
             'text': 'Hello Ryan',
             'media': None,
             'cost': None,
             'raw': None,
         },
         {
-            'role': ChatMessageRole.TOOL_CALL,
+            'role': 'tool_call',
             'tools': [
                 {'call_id': 'call_x7zmzwKI0LrwDF2xVMcfzXzN', 'function': {'arguments': '{"a": 5, "b": 7}', 'name': 'multiply'}, 'call_type': 'function'},
                 {'call_id': 'call_33vMBGeVd96A9BhW6H3r8jHb', 'function': {'arguments': '{"a": 8, "b": 101}', 'name': 'multiply'}, 'call_type': 'function'},
@@ -1000,7 +999,7 @@ async def test_handle_tools():
         'tool_async_b': tool_async_b,
     }
     message: ChatMessage = {
-        'role': ChatMessageRole.TOOL_CALL,
+        'role': 'tool_call',
         'tools': [
             {'call_id': '1001', 'function': {'arguments': '{"x": 8}', 'name': 'tool_b'}, 'call_type': 'function'},
             {'call_id': '1002', 'function': {'arguments': '{"x": 5.4}', 'name': 'tool_b'}, 'call_type': 'function'},
@@ -1051,7 +1050,7 @@ def test_build_tool_response_message():
     ]
     message = _build_tool_response_message(res)
     assert message == {
-        'role': ChatMessageRole.TOOL_RES,
+        'role': 'tool_res',
         'tools': res,
         'cost': None,
         'raw': None,

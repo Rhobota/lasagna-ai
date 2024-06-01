@@ -1,19 +1,9 @@
 import abc
 
-from enum import Enum
-
 from typing import (
     TypedDict, Dict, List, Any, Optional, Literal,
     Callable, Tuple, Awaitable, Union, Protocol,
 )
-
-
-class ChatMessageRole(Enum):
-    SYSTEM    = "system"
-    HUMAN     = "human"
-    AI        = "ai"
-    TOOL_CALL = "tool_call"
-    TOOL_RES  = "tool_res"
 
 
 class ToolCallFunction(TypedDict):
@@ -53,18 +43,18 @@ class ChatMessageBase(TypedDict):
 
 
 class ChatMessageContent(ChatMessageBase):
-    role: Literal[ChatMessageRole.SYSTEM, ChatMessageRole.HUMAN, ChatMessageRole.AI]
+    role: Literal['system', 'human', 'ai']
     text: Optional[str]
     media: Optional[List[Media]]
 
 
 class ChatMessageToolCall(ChatMessageBase):
-    role: Literal[ChatMessageRole.TOOL_CALL]
+    role: Literal['tool_call']
     tools: List[ToolCall]
 
 
 class ChatMessageToolResult(ChatMessageBase):
-    role: Literal[ChatMessageRole.TOOL_RES]
+    role: Literal['tool_res']
     tools: List[ToolResult]
 
 
@@ -72,10 +62,10 @@ ChatMessage = Union[ChatMessageContent, ChatMessageToolCall, ChatMessageToolResu
 
 
 EventPayload = Union[
-    Tuple[Literal[ChatMessageRole.AI], Literal['text_event'], str],
-    Tuple[Literal[ChatMessageRole.TOOL_CALL], Literal['text_event'], str],
-    Tuple[Literal[ChatMessageRole.TOOL_CALL], Literal['tool_call_event'], ToolCall],
-    Tuple[Literal[ChatMessageRole.TOOL_RES], Literal['tool_res_event'], ToolResult],
+    Tuple[Literal['ai'],        Literal['text_event'],      str],
+    Tuple[Literal['tool_call'], Literal['text_event'],      str],
+    Tuple[Literal['tool_call'], Literal['tool_call_event'], ToolCall],
+    Tuple[Literal['tool_res'],  Literal['tool_res_event'],  ToolResult],
 ]
 
 

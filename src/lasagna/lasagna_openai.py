@@ -2,7 +2,6 @@ from .types import (
     ChatMessage,
     ChatMessageContent,
     ChatMessageToolCall,
-    ChatMessageRole,
     EventCallback,
     EventPayload,
     LLM,
@@ -69,18 +68,18 @@ async def _process_text_stream(
         text = delta.content
         if finish_reason is not None:
             if text is not None:
-                yield ChatMessageRole.AI, 'text_event', str(text)
+                yield 'ai', 'text_event', str(text)
             return
         if text is None:
             # The model is switching from text to tools!
-            yield ChatMessageRole.AI, 'text_event', "\n\n"
+            yield 'ai', 'text_event', "\n\n"
             put_back_val: Tuple[ChoiceDelta, Union[str, None]] = (delta, finish_reason)
             fixed_stream = prefix_stream([put_back_val], stream)
             substream = _process_tool_call_stream(fixed_stream)
             async for subval in substream:
                 yield subval
             return
-        yield ChatMessageRole.AI, 'text_event', str(text)
+        yield 'ai', 'text_event', str(text)
 
 
 async def _process_tool_call_stream(
@@ -95,7 +94,7 @@ async def _process_tool_call_stream(
         for tc in delta.tool_calls:
             index = tc.index
             if index != last_index and last_index is not None:
-                yield ChatMessageRole.TOOL_CALL, 'text_event', ")\n"   # <-- again, assumes no index-interleave
+                yield 'tool_call', 'text_event', ")\n"   # <-- again, assumes no index-interleave
             last_index = index
             if index not in recs_by_index:
                 assert tc.type == 'function', f"The only tool type we can do is a function! But got: {tc.type}"
@@ -113,7 +112,7 @@ async def _process_tool_call_stream(
                     },
                 }
                 args_by_index[index] = [a]
-                yield ChatMessageRole.TOOL_CALL, 'text_event', f"{n}("   # <-- assumes no index-interleave
+                yield 'tool_call', 'text_event', f"{n}("   # <-- assumes no index-interleave
             else:
                 # assumes nothing but the argument is in the delta message...
                 args = args_by_index[index]
@@ -122,13 +121,13 @@ async def _process_tool_call_stream(
                 assert not tc.function.name
                 a_delta: str = tc.function.arguments
                 args.append(a_delta)
-                yield ChatMessageRole.TOOL_CALL, 'text_event', a_delta
+                yield 'tool_call', 'text_event', a_delta
     if last_index is not None:
-        yield ChatMessageRole.TOOL_CALL, 'text_event', ")"   # <-- again, assumes no index-interleave
+        yield 'tool_call', 'text_event', ")"   # <-- again, assumes no index-interleave
     for index in sorted(recs_by_index.keys()):
         rec = recs_by_index[index]
         rec['function']['arguments'] = ''.join(args_by_index[index])
-        yield ChatMessageRole.TOOL_CALL, 'tool_call_event', rec
+        yield 'tool_call', 'tool_call_event', rec
 
 
 async def _process_output_stream(
@@ -238,7 +237,7 @@ async def _make_openai_content(
 async def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatCompletionMessageParam]:
     ms: List[ChatCompletionMessageParam] = []
     for m in messages:
-        if m['role'] == ChatMessageRole.TOOL_CALL:
+        if m['role'] == 'tool_call':
             tool_calls = m['tools']
             ms.append({
                 'role': 'assistant',
@@ -255,7 +254,7 @@ async def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatC
                     for t in tool_calls
                 ],
             })
-        elif m['role'] == ChatMessageRole.TOOL_RES:
+        elif m['role'] == 'tool_res':
             tool_results = m['tools']
             for t in tool_results:
                 ms.append({
@@ -263,19 +262,19 @@ async def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatC
                     'content': str(t['result']),
                     'tool_call_id': t['call_id'],
                 })
-        elif m['role'] == ChatMessageRole.SYSTEM:
+        elif m['role'] == 'system':
             if m['media']:
                 raise ValueError('This model does not support media in the system prompt.')
             ms.append({
                 'role': 'system',
                 'content': m['text'] or '',
             })
-        elif m['role'] == ChatMessageRole.HUMAN:
+        elif m['role'] == 'human':
             ms.append({
                 'role': 'user',
                 'content': (await _make_openai_content(m)),
             })
-        elif m['role'] == ChatMessageRole.AI:
+        elif m['role'] == 'ai':
             if m['media']:
                 raise ValueError('This model does not support media in AI messages.')
             ms.append({
@@ -334,22 +333,22 @@ def _build_messages_from_openai_payload(
     ai_events = [
         event
         for event in events
-        if event[0] == ChatMessageRole.AI
+        if event[0] == 'ai'
     ]
     tool_events = [
         event
         for event in events
-        if event[0] == ChatMessageRole.TOOL_CALL
+        if event[0] == 'tool_call'
     ]
     ai_message: Optional[ChatMessage] = {
-        'role': ChatMessageRole.AI,
+        'role': 'ai',
         'text': ''.join([e[2] for e in ai_events if e[1] == 'text_event']),
         'media': None, # <-- the chat API doesn't know how to generate images (it only _reads_ images)
         'cost': cost,
         'raw': raw,
     } if len(ai_events) > 0 else None
     tool_message: Optional[ChatMessageToolCall] = {
-        'role': ChatMessageRole.TOOL_CALL,
+        'role': 'tool_call',
         'tools': [e[2] for e in tool_events if e[1] == 'tool_call_event'],
         'cost': cost,
         'raw': raw,
@@ -372,7 +371,7 @@ async def _handle_tools(
 ) -> Union[List[ToolResult], None]:
     assert len(messages) > 0
     message = messages[-1]   # <-- the tool message will be last, if at all
-    if message['role'] != ChatMessageRole.TOOL_CALL:
+    if message['role'] != 'tool_call':
         return None
     to_gather: List[asyncio.Task[ToolResult]] = []
     for t in message['tools']:
@@ -400,7 +399,7 @@ async def _handle_tools(
 
 def _build_tool_response_message(tool_results: List[ToolResult]) -> ChatMessage:
     return {
-        'role': ChatMessageRole.TOOL_RES,
+        'role': 'tool_res',
         'tools': tool_results,
         'cost': None,
         'raw': None,
@@ -500,7 +499,7 @@ class LasagnaOpenAI(LLM):
             if tools_results is None:
                 break
             for tool_result in tools_results:
-                await event_callback((ChatMessageRole.TOOL_RES, 'tool_res_event', tool_result))
+                await event_callback(('tool_res', 'tool_res_event', tool_result))
             tool_response_message = _build_tool_response_message(tools_results)
             new_messages.append(tool_response_message)
             messages.append(tool_response_message)

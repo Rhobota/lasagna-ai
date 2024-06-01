@@ -6,7 +6,6 @@ from lasagna.types import (
     AgentSpec,
     EventCallback,
     ChatMessage,
-    ChatMessageRole,
     LLM,
     EventPayload,
 )
@@ -34,11 +33,11 @@ class MockProvider(LLM):
         force_tool: bool = False,
         max_tool_iters: int = 5,
     ) -> List[ChatMessage]:
-        event: EventPayload = ChatMessageRole.AI, 'text_event', 'Hi!'
+        event: EventPayload = 'ai', 'text_event', 'Hi!'
         await event_callback(event)
         res: List[ChatMessage] = [
             {
-                'role': ChatMessageRole.AI,
+                'role': 'ai',
                 'text': f"model: {self.model}",
                 'media': None,
                 'cost': None,
@@ -48,7 +47,7 @@ class MockProvider(LLM):
         for key in sorted(self.model_kwargs.keys()):
             val = self.model_kwargs[key]
             m: ChatMessage = {
-                'role': ChatMessageRole.HUMAN,
+                'role': 'human',
                 'text': f"model_kwarg: {key} = {val}",
                 'media': None,
                 'cost': None,
@@ -89,21 +88,21 @@ async def test_run_with_registered_names():
     new_messages = await run(spec, event_callback, messages)
     assert new_messages == [
         {
-            'role': ChatMessageRole.AI,
+            'role': 'ai',
             'text': f"model: some_model",
             'media': None,
             'cost': None,
             'raw': None,
         },
         {
-            'role': ChatMessageRole.HUMAN,
+            'role': 'human',
             'text': f"model_kwarg: a = yes",
             'media': None,
             'cost': None,
             'raw': None,
         },
         {
-            'role': ChatMessageRole.HUMAN,
+            'role': 'human',
             'text': f"model_kwarg: b = 6",
             'media': None,
             'cost': None,
@@ -111,7 +110,7 @@ async def test_run_with_registered_names():
         },
     ]
     assert events == [
-        (ChatMessageRole.AI, 'text_event', 'Hi!'),
+        ('ai', 'text_event', 'Hi!'),
     ]
 
 
@@ -135,21 +134,21 @@ async def test_run_direct():
     new_messages = await run(spec, event_callback, messages)
     assert new_messages == [
         {
-            'role': ChatMessageRole.AI,
+            'role': 'ai',
             'text': f"model: some_model",
             'media': None,
             'cost': None,
             'raw': None,
         },
         {
-            'role': ChatMessageRole.HUMAN,
+            'role': 'human',
             'text': f"model_kwarg: a = yes",
             'media': None,
             'cost': None,
             'raw': None,
         },
         {
-            'role': ChatMessageRole.HUMAN,
+            'role': 'human',
             'text': f"model_kwarg: b = 6",
             'media': None,
             'cost': None,
@@ -157,5 +156,5 @@ async def test_run_direct():
         },
     ]
     assert events == [
-        (ChatMessageRole.AI, 'text_event', 'Hi!'),
+        ('ai', 'text_event', 'Hi!'),
     ]
