@@ -28,7 +28,6 @@ class Cost(TypedDict):
     input_tokens: Optional[int]
     output_tokens: Optional[int]
     total_tokens: Optional[int]
-    cost_usd_cents: Optional[int]
 
 
 class MediaImage(TypedDict):

@@ -314,7 +314,6 @@ def _get_cost(
         'input_tokens': usage.prompt_tokens,
         'output_tokens': usage.completion_tokens,
         'total_tokens': usage.total_tokens,
-        'cost_usd_cents': None,   # API doesn't give this, unfortunately
     }
 
 
