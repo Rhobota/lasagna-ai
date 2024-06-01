@@ -1,3 +1,5 @@
+![Lasagna AI Logo](./logos/lasagna-ai.png)
+
 # Lasagna AI
 
 [![PyPI - Version](https://img.shields.io/pypi/v/lasagna-ai.svg)](https://pypi.org/project/lasagna-ai)
