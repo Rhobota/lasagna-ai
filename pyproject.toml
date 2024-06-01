@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "lasagna-ai"
 dynamic = ["version"]
-description = 'Agents for your agents!'
+description = 'Layered agents!'
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
