@@ -72,10 +72,10 @@ ChatMessage = Union[ChatMessageContent, ChatMessageToolCall, ChatMessageToolResu
 
 
 EventPayload = Union[
-    Tuple[Literal[ChatMessageRole.AI], Literal['text'], str],
-    Tuple[Literal[ChatMessageRole.TOOL_CALL], Literal['text'], str],
-    Tuple[Literal[ChatMessageRole.TOOL_CALL], Literal['tool_call'], ToolCall],
-    Tuple[Literal[ChatMessageRole.TOOL_RES], Literal['tool_res'], ToolResult],
+    Tuple[Literal[ChatMessageRole.AI], Literal['text_event'], str],
+    Tuple[Literal[ChatMessageRole.TOOL_CALL], Literal['text_event'], str],
+    Tuple[Literal[ChatMessageRole.TOOL_CALL], Literal['tool_call_event'], ToolCall],
+    Tuple[Literal[ChatMessageRole.TOOL_RES], Literal['tool_res_event'], ToolResult],
 ]
 
 

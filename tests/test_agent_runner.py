@@ -34,7 +34,7 @@ class MockProvider(LLM):
         force_tool: bool = False,
         max_tool_iters: int = 5,
     ) -> List[ChatMessage]:
-        event: EventPayload = ChatMessageRole.AI, 'text', 'Hi!'
+        event: EventPayload = ChatMessageRole.AI, 'text_event', 'Hi!'
         await event_callback(event)
         res: List[ChatMessage] = [
             {
@@ -111,7 +111,7 @@ async def test_run_with_registered_names():
         },
     ]
     assert events == [
-        (ChatMessageRole.AI, 'text', 'Hi!'),
+        (ChatMessageRole.AI, 'text_event', 'Hi!'),
     ]
 
 
@@ -157,5 +157,5 @@ async def test_run_direct():
         },
     ]
     assert events == [
-        (ChatMessageRole.AI, 'text', 'Hi!'),
+        (ChatMessageRole.AI, 'text_event', 'Hi!'),
     ]

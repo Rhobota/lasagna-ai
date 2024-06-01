@@ -624,7 +624,7 @@ async def test_process_output_stream__text():
     texts: List[str] = []
     async for role, type_, text in stream:
         assert role == ChatMessageRole.AI
-        assert type_ == 'text'
+        assert type_ == 'text_event'
         assert isinstance(text, str)
         texts.append(text)
     text = ''.join(texts)
@@ -638,9 +638,9 @@ async def test_process_output_stream__tool():
     tool_calls: List[ToolCall] = []
     async for event in stream:
         assert event[0] == ChatMessageRole.TOOL_CALL
-        if event[1] == 'text':
+        if event[1] == 'text_event':
             texts.append(event[2])
-        elif event[1] == 'tool_call':
+        elif event[1] == 'tool_call_event':
             tool_calls.append(event[2])
         else:
             assert False, event[1]
@@ -653,9 +653,9 @@ async def test_process_output_stream__tool():
     tool_calls: List[ToolCall] = []
     async for event in stream:
         assert event[0] == ChatMessageRole.TOOL_CALL
-        if event[1] == 'text':
+        if event[1] == 'text_event':
             texts.append(event[2])
-        elif event[1] == 'tool_call':
+        elif event[1] == 'tool_call_event':
             tool_calls.append(event[2])
         else:
             assert False, event[1]
@@ -674,12 +674,12 @@ async def test_process_output_stream__text_and_tool():
     tool_calls: List[ToolCall] = []
     async for event in stream:
         if event[0] == ChatMessageRole.AI:
-            assert event[1] == 'text'
+            assert event[1] == 'text_event'
             texts.append(event[2])
         elif event[0] == ChatMessageRole.TOOL_CALL:
-            if event[1] == 'text':
+            if event[1] == 'text_event':
                 texts.append(event[2])
-            elif event[1] == 'tool_call':
+            elif event[1] == 'tool_call_event':
                 tool_calls.append(event[2])
             else:
                 assert False, event[1]
@@ -888,8 +888,8 @@ async def test_convert_to_openai_messages():
 
 def test_build_messages_from_openai_payload():
     events: List[EventPayload] = [
-        (ChatMessageRole.AI, 'text', 'Hello'),
-        (ChatMessageRole.AI, 'text', ' Ryan'),
+        (ChatMessageRole.AI, 'text_event', 'Hello'),
+        (ChatMessageRole.AI, 'text_event', ' Ryan'),
     ]
     messages = _build_messages_from_openai_payload([], events)
     assert messages == [{
@@ -905,20 +905,20 @@ def test_build_messages_from_openai_payload():
         {'call_id': 'call_33vMBGeVd96A9BhW6H3r8jHb', 'function': {'arguments': '{"a": 8, "b": 101}', 'name': 'multiply'}, 'call_type': 'function'},
     ]
     events: List[EventPayload] = [
-        (ChatMessageRole.TOOL_CALL, 'text', 'multiply('),
-        (ChatMessageRole.TOOL_CALL, 'text', '{"a"'),
-        (ChatMessageRole.TOOL_CALL, 'text', ': 5, '),
-        (ChatMessageRole.TOOL_CALL, 'text', '"b": 7'),
-        (ChatMessageRole.TOOL_CALL, 'text', '}'),
-        (ChatMessageRole.TOOL_CALL, 'text', ')\n'),
-        (ChatMessageRole.TOOL_CALL, 'text', 'multiply('),
-        (ChatMessageRole.TOOL_CALL, 'text', '{"a"'),
-        (ChatMessageRole.TOOL_CALL, 'text', ': 8, '),
-        (ChatMessageRole.TOOL_CALL, 'text', '"b": 1'),
-        (ChatMessageRole.TOOL_CALL, 'text', '01}'),
-        (ChatMessageRole.TOOL_CALL, 'text', ')'),
-        (ChatMessageRole.TOOL_CALL, 'tool_call', tool_calls[0]),
-        (ChatMessageRole.TOOL_CALL, 'tool_call', tool_calls[1]),
+        (ChatMessageRole.TOOL_CALL, 'text_event', 'multiply('),
+        (ChatMessageRole.TOOL_CALL, 'text_event', '{"a"'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', ': 5, '),
+        (ChatMessageRole.TOOL_CALL, 'text_event', '"b": 7'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', '}'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', ')\n'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', 'multiply('),
+        (ChatMessageRole.TOOL_CALL, 'text_event', '{"a"'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', ': 8, '),
+        (ChatMessageRole.TOOL_CALL, 'text_event', '"b": 1'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', '01}'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', ')'),
+        (ChatMessageRole.TOOL_CALL, 'tool_call_event', tool_calls[0]),
+        (ChatMessageRole.TOOL_CALL, 'tool_call_event', tool_calls[1]),
     ]
     messages = _build_messages_from_openai_payload([], events)
     assert messages == [{
@@ -936,22 +936,22 @@ def test_build_messages_from_openai_payload():
         {'call_id': 'call_33vMBGeVd96A9BhW6H3r8jHb', 'function': {'arguments': '{"a": 8, "b": 101}', 'name': 'multiply'}, 'call_type': 'function'},
     ]
     events: List[EventPayload] = [
-        (ChatMessageRole.AI, 'text', 'Hello'),
-        (ChatMessageRole.AI, 'text', ' Ryan'),
-        (ChatMessageRole.TOOL_CALL, 'text', 'multiply('),
-        (ChatMessageRole.TOOL_CALL, 'text', '{"a"'),
-        (ChatMessageRole.TOOL_CALL, 'text', ': 5, '),
-        (ChatMessageRole.TOOL_CALL, 'text', '"b": 7'),
-        (ChatMessageRole.TOOL_CALL, 'text', '}'),
-        (ChatMessageRole.TOOL_CALL, 'text', ')\n'),
-        (ChatMessageRole.TOOL_CALL, 'text', 'multiply('),
-        (ChatMessageRole.TOOL_CALL, 'text', '{"a"'),
-        (ChatMessageRole.TOOL_CALL, 'text', ': 8, '),
-        (ChatMessageRole.TOOL_CALL, 'text', '"b": 1'),
-        (ChatMessageRole.TOOL_CALL, 'text', '01}'),
-        (ChatMessageRole.TOOL_CALL, 'text', ')'),
-        (ChatMessageRole.TOOL_CALL, 'tool_call', tool_calls[0]),
-        (ChatMessageRole.TOOL_CALL, 'tool_call', tool_calls[1]),
+        (ChatMessageRole.AI, 'text_event', 'Hello'),
+        (ChatMessageRole.AI, 'text_event', ' Ryan'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', 'multiply('),
+        (ChatMessageRole.TOOL_CALL, 'text_event', '{"a"'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', ': 5, '),
+        (ChatMessageRole.TOOL_CALL, 'text_event', '"b": 7'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', '}'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', ')\n'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', 'multiply('),
+        (ChatMessageRole.TOOL_CALL, 'text_event', '{"a"'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', ': 8, '),
+        (ChatMessageRole.TOOL_CALL, 'text_event', '"b": 1'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', '01}'),
+        (ChatMessageRole.TOOL_CALL, 'text_event', ')'),
+        (ChatMessageRole.TOOL_CALL, 'tool_call_event', tool_calls[0]),
+        (ChatMessageRole.TOOL_CALL, 'tool_call_event', tool_calls[1]),
     ]
     messages = _build_messages_from_openai_payload([], events)
     assert messages == [

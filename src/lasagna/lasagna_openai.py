@@ -69,18 +69,18 @@ async def _process_text_stream(
         text = delta.content
         if finish_reason is not None:
             if text is not None:
-                yield ChatMessageRole.AI, 'text', str(text)
+                yield ChatMessageRole.AI, 'text_event', str(text)
             return
         if text is None:
             # The model is switching from text to tools!
-            yield ChatMessageRole.AI, 'text', "\n\n"
+            yield ChatMessageRole.AI, 'text_event', "\n\n"
             put_back_val: Tuple[ChoiceDelta, Union[str, None]] = (delta, finish_reason)
             fixed_stream = prefix_stream([put_back_val], stream)
             substream = _process_tool_call_stream(fixed_stream)
             async for subval in substream:
                 yield subval
             return
-        yield ChatMessageRole.AI, 'text', str(text)
+        yield ChatMessageRole.AI, 'text_event', str(text)
 
 
 async def _process_tool_call_stream(
@@ -95,7 +95,7 @@ async def _process_tool_call_stream(
         for tc in delta.tool_calls:
             index = tc.index
             if index != last_index and last_index is not None:
-                yield ChatMessageRole.TOOL_CALL, 'text', ")\n"   # <-- again, assumes no index-interleave
+                yield ChatMessageRole.TOOL_CALL, 'text_event', ")\n"   # <-- again, assumes no index-interleave
             last_index = index
             if index not in recs_by_index:
                 assert tc.type == 'function', f"The only tool type we can do is a function! But got: {tc.type}"
@@ -113,7 +113,7 @@ async def _process_tool_call_stream(
                     },
                 }
                 args_by_index[index] = [a]
-                yield ChatMessageRole.TOOL_CALL, 'text', f"{n}("   # <-- assumes no index-interleave
+                yield ChatMessageRole.TOOL_CALL, 'text_event', f"{n}("   # <-- assumes no index-interleave
             else:
                 # assumes nothing but the argument is in the delta message...
                 args = args_by_index[index]
@@ -122,13 +122,13 @@ async def _process_tool_call_stream(
                 assert not tc.function.name
                 a_delta: str = tc.function.arguments
                 args.append(a_delta)
-                yield ChatMessageRole.TOOL_CALL, 'text', a_delta
+                yield ChatMessageRole.TOOL_CALL, 'text_event', a_delta
     if last_index is not None:
-        yield ChatMessageRole.TOOL_CALL, 'text', ")"   # <-- again, assumes no index-interleave
+        yield ChatMessageRole.TOOL_CALL, 'text_event', ")"   # <-- again, assumes no index-interleave
     for index in sorted(recs_by_index.keys()):
         rec = recs_by_index[index]
         rec['function']['arguments'] = ''.join(args_by_index[index])
-        yield ChatMessageRole.TOOL_CALL, 'tool_call', rec
+        yield ChatMessageRole.TOOL_CALL, 'tool_call_event', rec
 
 
 async def _process_output_stream(
@@ -343,14 +343,14 @@ def _build_messages_from_openai_payload(
     ]
     ai_message: Optional[ChatMessage] = {
         'role': ChatMessageRole.AI,
-        'text': ''.join([e[2] for e in ai_events if e[1] == 'text']),
+        'text': ''.join([e[2] for e in ai_events if e[1] == 'text_event']),
         'media': None, # <-- the chat API doesn't know how to generate images (it only _reads_ images)
         'cost': cost,
         'raw': raw,
     } if len(ai_events) > 0 else None
     tool_message: Optional[ChatMessageToolCall] = {
         'role': ChatMessageRole.TOOL_CALL,
-        'tools': [e[2] for e in tool_events if e[1] == 'tool_call'],
+        'tools': [e[2] for e in tool_events if e[1] == 'tool_call_event'],
         'cost': cost,
         'raw': raw,
     } if len(tool_events) > 0 else None
@@ -500,7 +500,7 @@ class LasagnaOpenAI(LLM):
             if tools_results is None:
                 break
             for tool_result in tools_results:
-                await event_callback((ChatMessageRole.TOOL_RES, 'tool_res', tool_result))
+                await event_callback((ChatMessageRole.TOOL_RES, 'tool_res_event', tool_result))
             tool_response_message = _build_tool_response_message(tools_results)
             new_messages.append(tool_response_message)
             messages.append(tool_response_message)
