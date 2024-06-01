@@ -6,7 +6,7 @@ from lasagna.types import (
     AgentSpec,
     EventCallback,
     ChatMessage,
-    LLM,
+    Model,
     EventPayload,
 )
 
@@ -20,7 +20,7 @@ from lasagna.registrar import (
 from typing import List, Dict, Any, Callable
 
 
-class MockProvider(LLM):
+class MockProvider(Model):
     def __init__(self, model: str, **model_kwargs: Dict[str, Any]):
         self.model = model
         self.model_kwargs = model_kwargs
@@ -56,11 +56,11 @@ class MockProvider(LLM):
 
 
 async def agent_1(
-    llm: LLM,
+    model: Model,
     event_callback: EventCallback,
     messages: List[ChatMessage],
 ) -> List[ChatMessage]:
-    new_messages = await llm.run(event_callback, messages, [])
+    new_messages = await model.run(event_callback, messages, [])
     return new_messages
 
 

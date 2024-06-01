@@ -4,7 +4,7 @@ from .types import (
     ChatMessageToolCall,
     EventCallback,
     EventPayload,
-    LLM,
+    Model,
     ToolCall,
     ToolParam,
     ToolResult,
@@ -404,7 +404,7 @@ def _build_tool_response_message(tool_results: List[ToolResult]) -> ChatMessage:
     }
 
 
-class LasagnaOpenAI(LLM):
+class LasagnaOpenAI(Model):
     def __init__(self, model: str, **model_kwargs: Dict[str, Any]):
         known_model_names = [m['formal_name'] for m in OPENAI_KNOWN_MODELS]
         if model not in known_model_names:

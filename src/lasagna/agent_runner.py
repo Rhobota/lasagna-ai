@@ -37,10 +37,10 @@ async def run(
     if kwargs is None:
         kwargs = {}
 
-    llm = model_factory(model=agent_spec['model'], **kwargs)
+    model = model_factory(model=agent_spec['model'], **kwargs)
 
     return await agent(
-        llm,
+        model,
         event_callback,
         messages,
     )

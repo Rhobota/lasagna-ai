@@ -73,9 +73,13 @@ EventPayload = Union[
 EventCallback = Callable[[EventPayload], Awaitable[None]]
 
 
-class LLM(abc.ABC):
+class Model(abc.ABC):
     """
-    Interface for all Large Language Models (LLMs).
+    Interface for an AI model.
+
+    In many cases this will be an LLM (when you're in pure-text use-cases). But
+    this interface also supports AI models that operate on multimodal content,
+    thus we'll use the phrase "AI model" to be more general.
     """
 
     @abc.abstractmethod
@@ -96,7 +100,7 @@ class LLM(abc.ABC):
         pass
 
 
-AgentCallable = Callable[[LLM, EventCallback, List[ChatMessage]], Awaitable[List[ChatMessage]]]
+AgentCallable = Callable[[Model, EventCallback, List[ChatMessage]], Awaitable[List[ChatMessage]]]
 
 
 class AgentRecord(TypedDict):
@@ -110,7 +114,7 @@ class ModelRecord(TypedDict):
 
 
 class ModelFactory(Protocol):
-    def __call__(self, model: str, **model_kwargs: Dict[str, Any]) -> LLM: ...
+    def __call__(self, model: str, **model_kwargs: Dict[str, Any]) -> Model: ...
 
 
 class ProviderRecord(TypedDict):
