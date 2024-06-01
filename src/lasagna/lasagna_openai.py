@@ -1,7 +1,7 @@
 from .types import (
-    ChatMessage,
-    ChatMessageContent,
-    ChatMessageToolCall,
+    Message,
+    MessageContent,
+    MessageToolCall,
     EventCallback,
     EventPayload,
     Model,
@@ -210,7 +210,7 @@ def _convert_to_openai_tools(tools: List[Callable]) -> Union[NotGiven, List[Chat
 
 
 async def _make_openai_content(
-    message: ChatMessageContent,
+    message: MessageContent,
 ) -> List[ChatCompletionContentPartParam]:
     ret: List[ChatCompletionContentPartParam] = []
     if message['text']:
@@ -234,7 +234,7 @@ async def _make_openai_content(
     return ret
 
 
-async def _convert_to_openai_messages(messages: List[ChatMessage]) -> List[ChatCompletionMessageParam]:
+async def _convert_to_openai_messages(messages: List[Message]) -> List[ChatCompletionMessageParam]:
     ms: List[ChatCompletionMessageParam] = []
     for m in messages:
         if m['role'] == 'tool_call':
@@ -320,7 +320,7 @@ def _get_cost(
 def _build_messages_from_openai_payload(
     payload: List[ChatCompletionChunk],
     events: List[EventPayload],
-) -> List[ChatMessage]:
+) -> List[Message]:
     """
     We either have:
      - all AI events
@@ -339,13 +339,13 @@ def _build_messages_from_openai_payload(
         for event in events
         if event[0] == 'tool_call'
     ]
-    ai_message: Optional[ChatMessage] = {
+    ai_message: Optional[Message] = {
         'role': 'ai',
         'text': ''.join([e[2] for e in ai_events if e[1] == 'text_event']),
         'cost': cost,
         'raw': raw,
     } if len(ai_events) > 0 else None
-    tool_message: Optional[ChatMessageToolCall] = {
+    tool_message: Optional[MessageToolCall] = {
         'role': 'tool_call',
         'tools': [e[2] for e in tool_events if e[1] == 'tool_call_event'],
         'cost': cost,
@@ -364,7 +364,7 @@ def _build_messages_from_openai_payload(
 
 
 async def _handle_tools(
-    messages: List[ChatMessage],
+    messages: List[Message],
     tools_map: Dict[str, Callable],
 ) -> Union[List[ToolResult], None]:
     assert len(messages) > 0
@@ -395,7 +395,7 @@ async def _handle_tools(
     return await asyncio.gather(*to_gather)
 
 
-def _build_tool_response_message(tool_results: List[ToolResult]) -> ChatMessage:
+def _build_tool_response_message(tool_results: List[ToolResult]) -> Message:
     return {
         'role': 'tool_res',
         'tools': tool_results,
@@ -416,10 +416,10 @@ class LasagnaOpenAI(Model):
     async def _run_once(
         self,
         event_callback: EventCallback,
-        messages: List[ChatMessage],
+        messages: List[Message],
         tools: List[Callable],
         force_tool: bool = False,
-    ) -> List[ChatMessage]:
+    ) -> List[Message]:
         tool_choice: Union[ChatCompletionToolChoiceOptionParam, NotGiven]
         if force_tool:
             if len(tools) != 1:
@@ -476,13 +476,13 @@ class LasagnaOpenAI(Model):
     async def run(
         self,
         event_callback: EventCallback,
-        messages: List[ChatMessage],
+        messages: List[Message],
         tools: List[Callable],
         force_tool: bool = False,
         max_tool_iters: int = 5,
-    ) -> List[ChatMessage]:
+    ) -> List[Message]:
         messages = [*messages]  # shallow copy
-        new_messages: List[ChatMessage] = []
+        new_messages: List[Message] = []
         for _ in range(max_tool_iters):
             new_messages_here = await self._run_once(
                 event_callback = event_callback,

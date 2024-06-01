@@ -1,7 +1,7 @@
 import pytest
 
 from lasagna.types import (
-    ChatMessage,
+    Message,
     ToolCall,
     ToolResult,
     EventPayload,
@@ -783,7 +783,7 @@ def test_convert_to_openai_tools():
 
 @pytest.mark.asyncio
 async def test_convert_to_openai_messages():
-    messages: List[ChatMessage] = [
+    messages: List[Message] = [
         {
             'role': 'INVALID', # type: ignore
             'text': 'bla',
@@ -794,7 +794,7 @@ async def test_convert_to_openai_messages():
     with pytest.raises(ValueError):
         await _convert_to_openai_messages(messages)
 
-    messages: List[ChatMessage] = [
+    messages: List[Message] = [
         {'role': 'system', 'text': 'be nice', 'cost': None, 'raw': None},
         {'role': 'human', 'text': 'hi', 'cost': None, 'raw': None},
         {'role': 'ai', 'text': 'oh hi', 'cost': None, 'raw': None},
@@ -814,7 +814,7 @@ async def test_convert_to_openai_messages():
         {'role': 'assistant', 'content': 'double thanks!'},
     ]
 
-    messages: List[ChatMessage] = [{
+    messages: List[Message] = [{
         'role': 'tool_call',
         'tools': [
             {'call_id': 'call_x7zmzwKI0LrwDF2xVMcfzXzN', 'function': {'arguments': '{"a": 5, "b": 7}', 'name': 'multiply'}, 'call_type': 'function'},
@@ -833,7 +833,7 @@ async def test_convert_to_openai_messages():
         ],
     }]
 
-    messages: List[ChatMessage] = [{
+    messages: List[Message] = [{
         'role': 'tool_res',
         'tools': [
             {'call_id': '1002', 'result': 10.8 },
@@ -856,7 +856,7 @@ async def test_convert_to_openai_messages():
         },
     ]
 
-    messages: List[ChatMessage] = [
+    messages: List[Message] = [
         {
             'role': 'ai',
             'text': "I'll use my tools!",
@@ -995,7 +995,7 @@ async def test_handle_tools():
         'tool_async_a': tool_async_a,
         'tool_async_b': tool_async_b,
     }
-    message: ChatMessage = {
+    message: Message = {
         'role': 'tool_call',
         'tools': [
             {'call_id': '1001', 'function': {'arguments': '{"x": 8}', 'name': 'tool_b'}, 'call_type': 'function'},

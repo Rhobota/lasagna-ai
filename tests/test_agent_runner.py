@@ -5,7 +5,7 @@ from lasagna.agent_runner import run
 from lasagna.types import (
     AgentSpec,
     EventCallback,
-    ChatMessage,
+    Message,
     Model,
     EventPayload,
 )
@@ -28,14 +28,14 @@ class MockProvider(Model):
     async def run(
         self,
         event_callback: EventCallback,
-        messages: List[ChatMessage],
+        messages: List[Message],
         tools: List[Callable],
         force_tool: bool = False,
         max_tool_iters: int = 5,
-    ) -> List[ChatMessage]:
+    ) -> List[Message]:
         event: EventPayload = 'ai', 'text_event', 'Hi!'
         await event_callback(event)
-        res: List[ChatMessage] = [
+        res: List[Message] = [
             {
                 'role': 'ai',
                 'text': f"model: {self.model}",
@@ -45,7 +45,7 @@ class MockProvider(Model):
         ]
         for key in sorted(self.model_kwargs.keys()):
             val = self.model_kwargs[key]
-            m: ChatMessage = {
+            m: Message = {
                 'role': 'human',
                 'text': f"model_kwarg: {key} = {val}",
                 'cost': None,
@@ -58,8 +58,8 @@ class MockProvider(Model):
 async def agent_1(
     model: Model,
     event_callback: EventCallback,
-    messages: List[ChatMessage],
-) -> List[ChatMessage]:
+    messages: List[Message],
+) -> List[Message]:
     new_messages = await model.run(event_callback, messages, [])
     return new_messages
 
@@ -82,7 +82,7 @@ async def test_run_with_registered_names():
     events: List[EventPayload] = []
     async def event_callback(event: EventPayload) -> None:
         events.append(event)
-    messages: List[ChatMessage] = []
+    messages: List[Message] = []
     new_messages = await run(spec, event_callback, messages)
     assert new_messages == [
         {
@@ -125,7 +125,7 @@ async def test_run_direct():
     events: List[EventPayload] = []
     async def event_callback(event: EventPayload) -> None:
         events.append(event)
-    messages: List[ChatMessage] = []
+    messages: List[Message] = []
     new_messages = await run(spec, event_callback, messages)
     assert new_messages == [
         {

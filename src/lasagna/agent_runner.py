@@ -4,7 +4,7 @@ from .types import (
     AgentSpec,
     AgentCallable,
     ModelFactory,
-    ChatMessage,
+    Message,
     EventCallback,
 )
 
@@ -16,8 +16,8 @@ from typing import List
 async def run(
     agent_spec: AgentSpec,
     event_callback: EventCallback,
-    messages: List[ChatMessage],
-) -> List[ChatMessage]:
+    messages: List[Message],
+) -> List[Message]:
     agent: AgentCallable
     if isinstance(agent_spec['agent'], str):
         agent = AGENTS[agent_spec['agent']]['runner']
