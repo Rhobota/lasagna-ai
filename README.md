@@ -1,4 +1,4 @@
-![Lasagna AI Logo](./logos/lasagna-ai.png)
+![Lasagna AI Logo]([./logos/lasagna-ai.png](https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/lasagna-ai.png))
 
 # Lasagna AI
 
