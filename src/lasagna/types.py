@@ -1,3 +1,4 @@
+from __future__ import annotations
 import abc
 
 from typing import (
@@ -67,6 +68,9 @@ EventPayload = Union[
     Tuple[Literal['tool_call'], Literal['text_event'],      str],
     Tuple[Literal['tool_call'], Literal['tool_call_event'], ToolCall],
     Tuple[Literal['tool_res'],  Literal['tool_res_event'],  ToolResult],
+    Tuple[Literal['progress'],  Literal['start'],           Tuple[str, str]],    # payload is `(key, details)`
+    Tuple[Literal['progress'],  Literal['update'],          Tuple[str, float]],  # payload is `(key, progress_0_to_1)`
+    Tuple[Literal['progress'],  Literal['end'],             str],                # payload is `key`
 ]
 
 
@@ -100,7 +104,32 @@ class Model(abc.ABC):
         pass
 
 
-AgentCallable = Callable[[Model, EventCallback, List[Message]], Awaitable[List[Message]]]
+class AgentRunBase(TypedDict):
+    agent: str
+    provider: str
+    model: str
+    model_kwargs: Optional[Dict[str, Any]]
+
+
+class AgentRunMessageList(AgentRunBase):
+    type: Literal['messages']
+    messages: List[Message]
+
+
+class AgentRunParallel(AgentRunBase):
+    type: Literal['parallel']
+    runs: List[AgentRun]
+
+
+class AgentRunChained(AgentRunBase):
+    type: Literal['chain']
+    runs: List[AgentRun]
+
+
+AgentRun = Union[AgentRunMessageList, AgentRunParallel, AgentRunChained]
+
+
+AgentCallable = Callable[[Model, EventCallback, List[AgentRun]], Awaitable[AgentRun]]
 
 
 class AgentRecord(TypedDict):
@@ -128,7 +157,6 @@ class AgentSpec(TypedDict):
     provider: Union[str, ModelFactory]
     model: str
     model_kwargs: Optional[Dict[str, Any]]
-    # TODO: make it hierarchical!
 
 
 class ToolParam(TypedDict):
