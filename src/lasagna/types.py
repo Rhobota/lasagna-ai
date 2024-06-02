@@ -105,10 +105,10 @@ class Model(abc.ABC):
 
 
 class AgentRunBase(TypedDict):
-    agent: str
-    provider: str
-    model: str
-    model_kwargs: Optional[Dict[str, Any]]
+    agent: NotRequired[str]
+    provider: NotRequired[str]
+    model: NotRequired[str]
+    model_kwargs: NotRequired[Dict[str, Any]]
 
 
 class AgentRunMessageList(AgentRunBase):

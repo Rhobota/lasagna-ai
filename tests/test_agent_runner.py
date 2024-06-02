@@ -4,6 +4,7 @@ from lasagna.agent_runner import run
 
 from lasagna.types import (
     AgentSpec,
+    AgentRun,
     EventCallback,
     Message,
     Model,
@@ -58,10 +59,15 @@ class MockProvider(Model):
 async def agent_1(
     model: Model,
     event_callback: EventCallback,
-    messages: List[Message],
-) -> List[Message]:
+    prev_runs: List[AgentRun],
+) -> AgentRun:
+    assert len(prev_runs) == 0
+    messages: List[Message] = []
     new_messages = await model.run(event_callback, messages, [])
-    return new_messages
+    return {
+        'type': 'messages',
+        'messages': new_messages,
+    }
 
 
 @pytest.mark.asyncio
@@ -82,28 +88,38 @@ async def test_run_with_registered_names():
     events: List[EventPayload] = []
     async def event_callback(event: EventPayload) -> None:
         events.append(event)
-    messages: List[Message] = []
-    new_messages = await run(spec, event_callback, messages)
-    assert new_messages == [
-        {
-            'role': 'ai',
-            'text': f"model: some_model",
-            'cost': None,
-            'raw': None,
+    prev_runs: List[AgentRun] = []
+    new_run = await run(spec, event_callback, prev_runs)
+    assert new_run == {
+        'agent': 'agent_1',
+        'provider': 'mock_provider',
+        'model': 'some_model',
+        'model_kwargs': {
+            'b': 6,
+            'a': 'yes',
         },
-        {
-            'role': 'human',
-            'text': f"model_kwarg: a = yes",
-            'cost': None,
-            'raw': None,
-        },
-        {
-            'role': 'human',
-            'text': f"model_kwarg: b = 6",
-            'cost': None,
-            'raw': None,
-        },
-    ]
+        'type': 'messages',
+        'messages': [
+            {
+                'role': 'ai',
+                'text': f"model: some_model",
+                'cost': None,
+                'raw': None,
+            },
+            {
+                'role': 'human',
+                'text': f"model_kwarg: a = yes",
+                'cost': None,
+                'raw': None,
+            },
+            {
+                'role': 'human',
+                'text': f"model_kwarg: b = 6",
+                'cost': None,
+                'raw': None,
+            },
+        ],
+    }
     assert events == [
         ('ai', 'text_event', 'Hi!'),
     ]
@@ -125,28 +141,38 @@ async def test_run_direct():
     events: List[EventPayload] = []
     async def event_callback(event: EventPayload) -> None:
         events.append(event)
-    messages: List[Message] = []
-    new_messages = await run(spec, event_callback, messages)
-    assert new_messages == [
-        {
-            'role': 'ai',
-            'text': f"model: some_model",
-            'cost': None,
-            'raw': None,
+    prev_runs: List[AgentRun] = []
+    new_run = await run(spec, event_callback, prev_runs)
+    assert new_run == {
+        'agent': 'agent_1',
+        'provider': 'MockProvider',
+        'model': 'some_model',
+        'model_kwargs': {
+            'b': 6,
+            'a': 'yes',
         },
-        {
-            'role': 'human',
-            'text': f"model_kwarg: a = yes",
-            'cost': None,
-            'raw': None,
-        },
-        {
-            'role': 'human',
-            'text': f"model_kwarg: b = 6",
-            'cost': None,
-            'raw': None,
-        },
-    ]
+        'type': 'messages',
+        'messages': [
+            {
+                'role': 'ai',
+                'text': f"model: some_model",
+                'cost': None,
+                'raw': None,
+            },
+            {
+                'role': 'human',
+                'text': f"model_kwarg: a = yes",
+                'cost': None,
+                'raw': None,
+            },
+            {
+                'role': 'human',
+                'text': f"model_kwarg: b = 6",
+                'cost': None,
+                'raw': None,
+            },
+        ],
+    }
     assert events == [
         ('ai', 'text_event', 'Hi!'),
     ]
