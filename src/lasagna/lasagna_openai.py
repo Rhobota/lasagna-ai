@@ -44,6 +44,10 @@ import copy
 import json
 import inspect
 
+import logging
+
+_LOG = logging.getLogger(__name__)
+
 
 OPENAI_KNOWN_MODELS: List[ModelRecord] = [
     {
@@ -404,6 +408,13 @@ def _build_tool_response_message(tool_results: List[ToolResult]) -> Message:
     }
 
 
+def _log_dumps(val: Any) -> str:
+    if isinstance(val, dict):
+        return json.dumps(val)
+    else:
+        return str(val)
+
+
 class LasagnaOpenAI(Model):
     def __init__(self, model: str, **model_kwargs: Dict[str, Any]):
         known_model_names = [m['formal_name'] for m in OPENAI_KNOWN_MODELS]
@@ -433,6 +444,8 @@ class LasagnaOpenAI(Model):
 
         tools_spec = _convert_to_openai_tools(tools)
 
+        openai_messages = await _convert_to_openai_messages(messages)
+
         frequency_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['frequency_penalty']) if 'frequency_penalty' in self.model_kwargs else NOT_GIVEN
         presence_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['presence_penalty']) if 'presence_penalty' in self.model_kwargs else NOT_GIVEN
         max_tokens: Union[int, NotGiven] = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else NOT_GIVEN
@@ -441,9 +454,11 @@ class LasagnaOpenAI(Model):
         top_p: Union[float, NotGiven] = cast(float, self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
         user: Union[str, NotGiven] = cast(str, self.model_kwargs['user']) if 'user' in self.model_kwargs else NOT_GIVEN
 
+        _LOG.info(f"Invoking {self.model} with:\n  messages: {_log_dumps(openai_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
+
         completion: AsyncIterator[ChatCompletionChunk] = await self.client.chat.completions.create(
             model        = self.model,
-            messages     = (await _convert_to_openai_messages(messages)),
+            messages     = openai_messages,
             tools        = tools_spec,
             tool_choice  = tool_choice,
             stream       = True,
@@ -470,6 +485,8 @@ class LasagnaOpenAI(Model):
         raw_payload = [v async for v in raw_stream]
 
         new_messages = _build_messages_from_openai_payload(raw_payload, events)
+
+        _LOG.info(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1]['cost'])}")
 
         return new_messages
 
