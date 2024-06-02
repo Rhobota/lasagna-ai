@@ -282,7 +282,16 @@ SAMPLE_TEXT_STREAM: List[ChatCompletionChunk] = [
             "model": "gpt-3.5-turbo-0125",
             "object": "chat.completion.chunk",
             "system_fingerprint": "fp_c2295e73ad"
-        }
+        },
+        {
+            'id': 'chatcmpl-9ViswdADZmieYlPfvYf7J2UgTgFC7',
+            'choices': [],
+            'created': 1717347734,
+            'model': 'gpt-3.5-turbo-0125',
+            'object': 'chat.completion.chunk',
+            'system_fingerprint': None,
+            'usage': {'completion_tokens': 22, 'prompt_tokens': 21, 'total_tokens': 43},
+        },
     ]
 ]
 
@@ -595,7 +604,7 @@ CORRECT_PARSED_TOOLS: List[ToolCall] = [
 
 @pytest.mark.asyncio
 async def test_extract_deltas():
-    stream = fake_async(SAMPLE_TEXT_STREAM[:2] + SAMPLE_TEXT_STREAM[-1:])
+    stream = fake_async(SAMPLE_TEXT_STREAM[:2] + SAMPLE_TEXT_STREAM[-2:])
     vals = [(d.to_dict(), s) async for d, s in _extract_deltas(stream)]
     assert vals == [
         ({'content': '', 'role': 'assistant'}, None),
@@ -667,7 +676,7 @@ async def test_process_output_stream__tool():
 async def test_process_output_stream__text_and_tool():
     # The model can start with text and switch to tools!
     stream = _process_output_stream(_extract_deltas(fake_async(
-        SAMPLE_TEXT_STREAM[:-1] + SAMPLE_TOOL_STREAM[1:]
+        SAMPLE_TEXT_STREAM[:-2] + SAMPLE_TOOL_STREAM[1:]
     )))
     texts: List[str] = []
     tool_calls: List[ToolCall] = []
@@ -950,7 +959,7 @@ def test_build_messages_from_openai_payload():
         ('tool_call', 'tool_call_event', tool_calls[0]),
         ('tool_call', 'tool_call_event', tool_calls[1]),
     ]
-    messages = _build_messages_from_openai_payload([], events)
+    messages = _build_messages_from_openai_payload(SAMPLE_TEXT_STREAM[-3:], events)
     assert messages == [
         {
             'role': 'ai',
@@ -964,8 +973,15 @@ def test_build_messages_from_openai_payload():
                 {'call_id': 'call_x7zmzwKI0LrwDF2xVMcfzXzN', 'function': {'arguments': '{"a": 5, "b": 7}', 'name': 'multiply'}, 'call_type': 'function'},
                 {'call_id': 'call_33vMBGeVd96A9BhW6H3r8jHb', 'function': {'arguments': '{"a": 8, "b": 101}', 'name': 'multiply'}, 'call_type': 'function'},
             ],
-            'cost': None,
-            'raw': [],
+            'cost': {
+                'input_tokens': 21,
+                'output_tokens': 22,
+                'total_tokens': 43,
+            },
+            'raw': [
+                v.to_dict()
+                for v in SAMPLE_TEXT_STREAM[-3:]
+            ],
         },
     ]
 
