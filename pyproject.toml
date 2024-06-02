@@ -5,11 +5,11 @@ build-backend = "hatchling.build"
 [project]
 name = "lasagna-ai"
 dynamic = ["version"]
-description = 'Agents for your agents!'
+description = 'Layered agents!'
 readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
-keywords = ["ai", "agents", "llm", "hierarchical"]
+keywords = ["ai", "agent", "agents", "llm", "hierarchical", "layers", "layered"]
 authors = [
   { name = "Ryan Henning", email = "ryan@rhobota.com" },
 ]
@@ -32,7 +32,7 @@ Source = "https://github.com/Rhobota/lasagna-ai"
 
 [project.optional-dependencies]
 openai = [
-  "openai>=1.23.2",
+  "openai>=1.30.3",
 ]
 anthropic = [
   "anthropic>=0.26.1",

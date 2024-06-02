@@ -2,12 +2,12 @@ import pytest
 
 from lasagna.registrar import (
     register_agent,
-    register_model_provider,
+    register_provider,
     AGENTS,
-    MODEL_PROVIDERS,
+    PROVIDERS,
 )
 
-from lasagna.types import AgentCallable, ProviderFactory, ModelRecord
+from lasagna.types import AgentCallable, ModelFactory, ModelRecord
 
 from typing import List
 
@@ -27,16 +27,16 @@ def test_register_agent():
 
 
 def test_register_model_provider():
-    MODEL_PROVIDERS.clear()
-    factory: ProviderFactory = 'mock'   # type: ignore
+    PROVIDERS.clear()
+    factory: ModelFactory = 'mock'   # type: ignore
     models: List[ModelRecord] = [
         {
             'formal_name': 'mymodel',
             'display_name': 'My Model',
         }
     ]
-    register_model_provider('myprovider', 'My Provider', factory, models)
-    assert MODEL_PROVIDERS == {
+    register_provider('myprovider', 'My Provider', factory, models)
+    assert PROVIDERS == {
         'myprovider': {
             'name': 'My Provider',
             'factory': factory,
@@ -44,4 +44,4 @@ def test_register_model_provider():
         },
     }
     with pytest.raises(RuntimeError):
-        register_model_provider('myprovider', 'My Provider', factory, models)
+        register_provider('myprovider', 'My Provider', factory, models)
