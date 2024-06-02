@@ -58,7 +58,7 @@ async def run(
         agent_run['provider'] = provider_str
     if 'model' not in agent_run:
         agent_run['model'] = model_name
-    if 'model_kwargs' not in agent_run:
+    if 'model_kwargs' not in agent_run and 'model_kwargs' in agent_spec:
         agent_run['model_kwargs'] = model_kwargs
 
     return agent_run

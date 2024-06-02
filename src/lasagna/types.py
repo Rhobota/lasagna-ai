@@ -156,7 +156,7 @@ class AgentSpec(TypedDict):
     agent: Union[str, AgentCallable]
     provider: Union[str, ModelFactory]
     model: str
-    model_kwargs: Optional[Dict[str, Any]]
+    model_kwargs: NotRequired[Dict[str, Any]]
 
 
 class ToolParam(TypedDict):
