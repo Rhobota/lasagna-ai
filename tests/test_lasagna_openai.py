@@ -1065,6 +1065,4 @@ def test_build_tool_response_message():
     assert message == {
         'role': 'tool_res',
         'tools': res,
-        'cost': None,
-        'raw': None,
     }
