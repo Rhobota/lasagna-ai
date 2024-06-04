@@ -403,8 +403,6 @@ def _build_tool_response_message(tool_results: List[ToolResult]) -> Message:
     return {
         'role': 'tool_res',
         'tools': tool_results,
-        'cost': None,
-        'raw': None,
     }
 
 
@@ -486,7 +484,7 @@ class LasagnaOpenAI(Model):
 
         new_messages = _build_messages_from_openai_payload(raw_payload, events)
 
-        _LOG.info(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1]['cost'])}")
+        _LOG.info(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
 
         return new_messages
 

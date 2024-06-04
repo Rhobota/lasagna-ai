@@ -1,6 +1,15 @@
 from .registrar import register_provider
 
 
+def attempt_load_all_known_providers() -> None:
+    """
+    Use this function when you want to populate the registrar
+    at the start of the application. E.g. If you display a list of
+    all known providers in the UI somewhere.
+    """
+    attempt_load_known_providers('openai')
+
+
 def attempt_load_known_providers(provider: str) -> None:
     """
     Attempt to load known providers at runtime, only when we *actually* need
