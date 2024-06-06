@@ -64,6 +64,7 @@ Message = Union[MessageContent, MessageToolCall, MessageToolResult]
 
 
 EventPayload = Union[
+    Tuple[Literal['human'],     Literal['echo_event'],      MessageContent],
     Tuple[Literal['ai'],        Literal['text_event'],      str],
     Tuple[Literal['tool_call'], Literal['text_event'],      str],
     Tuple[Literal['tool_call'], Literal['tool_call_event'], ToolCall],
