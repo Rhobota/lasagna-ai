@@ -22,6 +22,7 @@ from .util import (
     parse_docstring,
     combine_pairs,
     convert_to_image_url,
+    exponential_backoff_retry_delays,
 )
 
 from openai import AsyncOpenAI, NOT_GIVEN, NotGiven
@@ -33,6 +34,7 @@ from openai.types.chat import (
     ChatCompletionContentPartParam,
 )
 from openai.types.chat.chat_completion_chunk import ChoiceDelta
+from openai import APIError
 
 from typing import (
     List, Callable, AsyncIterator, Any, cast,
@@ -420,14 +422,16 @@ class LasagnaOpenAI(Model):
             raise ValueError(f'unknown model: {model}')
         self.model = model
         self.model_kwargs = copy.deepcopy(model_kwargs or {})
-        self.client = AsyncOpenAI()
+        self.n_retries: int = cast(int, self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
+        if not isinstance(self.n_retries, int) or self.n_retries < 0:
+            raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.model_kwargs['retries']})")
 
     async def _run_once(
         self,
         event_callback: EventCallback,
         messages: List[Message],
         tools: List[Callable],
-        force_tool: bool = False,
+        force_tool: bool,
     ) -> List[Message]:
         tool_choice: Union[ChatCompletionToolChoiceOptionParam, NotGiven]
         if force_tool:
@@ -457,7 +461,8 @@ class LasagnaOpenAI(Model):
 
         _LOG.info(f"Invoking {self.model} with:\n  messages: {_log_dumps(openai_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
 
-        completion: AsyncIterator[ChatCompletionChunk] = await self.client.chat.completions.create(
+        client = AsyncOpenAI()
+        completion: AsyncIterator[ChatCompletionChunk] = await client.chat.completions.create(
             model        = self.model,
             messages     = openai_messages,
             tools        = tools_spec,
@@ -491,6 +496,47 @@ class LasagnaOpenAI(Model):
 
         return new_messages
 
+    async def _retrying_run_once(
+        self,
+        event_callback: EventCallback,
+        messages: List[Message],
+        tools: List[Callable],
+        force_tool: bool,
+    ) -> List[Message]:
+        last_error: Union[APIError, None] = None
+        assert self.n_retries + 1 > 0   # <-- we know this is true from the check in __init__
+        for delay_on_error in exponential_backoff_retry_delays(self.n_retries + 1):
+            try:
+                return await self._run_once(
+                    event_callback = event_callback,
+                    messages = messages,
+                    tools = tools,
+                    force_tool = force_tool,
+                )
+            except APIError as e:
+                # Some errors should be retried, some should not. Below
+                # is the logic to decide when to retry vs when to not.
+                # It's likely this will change as we get more usage and see
+                # where OpenAI tends to fail, and when we know more what is
+                # recoverable vs not.
+                last_error = e
+                if e.type == 'invalid_request_error':
+                    if e.code == 'context_length_exceeded':
+                        raise
+                    elif e.code == 'invalid_api_key':
+                        raise
+                    else:
+                        raise
+                elif e.type == 'server_error':
+                    pass  # <-- we will retry this one! I've seen these work when you just try again.
+                else:
+                    pass  # <-- this must be one we don't know about yet, so ... recoverable, maybe?
+                if delay_on_error > 0.0:
+                    _LOG.warning(f"Got a maybe-recoverable error (will retry in {delay_on_error:.2f} seconds): {e}")
+                    await asyncio.sleep(delay_on_error)
+        assert last_error is not None   # <-- we know this is true because `n_retries + 1 > 0`
+        raise last_error
+
     async def run(
         self,
         event_callback: EventCallback,
@@ -502,7 +548,7 @@ class LasagnaOpenAI(Model):
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
         for _ in range(max_tool_iters):
-            new_messages_here = await self._run_once(
+            new_messages_here = await self._retrying_run_once(
                 event_callback = event_callback,
                 messages       = messages,
                 tools          = tools,

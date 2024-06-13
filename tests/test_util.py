@@ -4,6 +4,7 @@ from lasagna.util import (
     parse_docstring,
     combine_pairs,
     convert_to_image_url,
+    exponential_backoff_retry_delays,
 )
 
 from typing import List
@@ -307,3 +308,14 @@ async def test_convert_to_image_url():
 
     with pytest.raises(ValueError):
         await convert_to_image_url(os.path.join('does', 'not', 'exist.png'))
+
+
+def test_exponential_backoff_retry_delays():
+    with pytest.raises(AssertionError):
+        exponential_backoff_retry_delays(0)
+    assert exponential_backoff_retry_delays(1, 3.0, 1e10) == [0.0]
+    assert exponential_backoff_retry_delays(2, 3.0, 1e10) == [3.0, 0.0]
+    assert exponential_backoff_retry_delays(3, 3.0, 1e10) == [3.0, 9.0, 0.0]
+    assert exponential_backoff_retry_delays(4, 3.0, 1e10) == [3.0, 9.0, 27.0, 0.0]
+    assert exponential_backoff_retry_delays(4, 5.0, 1e10) == [5.0, 25.0, 125.0, 0.0]
+    assert exponential_backoff_retry_delays(4, 5.0, 30.0) == [5.0, 25.0, 30.0, 0.0]

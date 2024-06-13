@@ -98,3 +98,14 @@ def convert_to_image_url_sync(image_filepath_or_url: str) -> str:
 async def convert_to_image_url(image_filepath_or_url: str) -> str:
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, convert_to_image_url_sync, image_filepath_or_url)
+
+
+def exponential_backoff_retry_delays(
+    n_total_tries: int,
+    base: float = 2.0,
+    max_delay: float = 60.0,
+) -> List[float]:
+    assert n_total_tries > 0
+    delay_list = [(base ** exponent) for exponent in range(1, n_total_tries + 1)]
+    delay_list[-1] = 0.0    # <-- after the *last* failure, you should not delay at all
+    return [min(d, max_delay) for d in delay_list]
