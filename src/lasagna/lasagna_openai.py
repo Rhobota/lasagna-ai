@@ -431,14 +431,17 @@ class LasagnaOpenAI(Model):
     ) -> List[Message]:
         tool_choice: Union[ChatCompletionToolChoiceOptionParam, NotGiven]
         if force_tool:
-            if len(tools) != 1:
-                raise ValueError(f"When `force_tool` is set, you must pass exactly one tool, not {len(tools)}.")
-            tool_choice = {
-                "type": "function",
-                "function": {"name": tools[0].__name__},
-            }
+            if len(tools) == 0:
+                raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
+            elif len(tools) == 1:
+                tool_choice = {
+                    "type": "function",
+                    "function": {"name": tools[0].__name__},
+                }
+            else:
+                tool_choice = 'required'  # <-- model must use a tool, but is allowed to choose which one on its own
         else:
-            tool_choice = NOT_GIVEN
+            tool_choice = NOT_GIVEN  # <-- if tools given, the model can choose to use them or not
 
         tools_spec = _convert_to_openai_tools(tools)
 
