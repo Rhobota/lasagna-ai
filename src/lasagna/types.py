@@ -132,6 +132,8 @@ AgentRun = Union[AgentRunMessageList, AgentRunParallel, AgentRunChained]
 
 AgentCallable = Callable[[Model, EventCallback, List[AgentRun]], Awaitable[AgentRun]]
 
+BoundAgentCallable = Callable[[EventCallback, List[AgentRun]], Awaitable[AgentRun]]
+
 
 class AgentRecord(TypedDict):
     name: str

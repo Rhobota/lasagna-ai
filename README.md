@@ -9,16 +9,19 @@
 - 🥞  **Layered agents!**
   - Agents for your agents!
   - Tool-use and layering FTW 💪
-  - Built-in parallel tool-calling.
+  - Ever wanted a _recursive_ agent? Now you can have one! 🤯
+  - _Parallel_ tool-calling by default.
   - Fully asyncio.
-  - Ever wanted a recursive agent? 🤯
-  - Strongly typed (if you're into that).
+  - 100% Python type hints.
+  - Functional-style 😎
 
 - 🚣  **Streamable!**
-  - Event streams for everything.
+  - Event streams for _everything_.
+  - Asyncio generators are awesome.
 
 - 🗃️ **Easy database integration!**
   - Don't rage when trying to store raw messages and token counts. 😡 🤬
+  - Yes, you _can_ have _both_ streaming and easy database storage.
 
 - ↔️ **Provider/model agnostic and interoperable!**
   - Native support for OpenAI, Anthropic, MistralAI (+ more to come).
@@ -45,3 +48,8 @@ pip install -U lasagna-ai[openai,anthropic]
 ## License
 
 `lasagna-ai` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+
+## Joke Acronym
+
+Layered Agents with toolS And aGeNts and Ai
+
