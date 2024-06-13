@@ -9,6 +9,7 @@ from .types import (
     AgentCallable,
     BoundAgentCallable,
     EventCallback,
+    Message,
 )
 
 from .agent_runner import run
@@ -31,3 +32,20 @@ def bind_model(
             return await run(spec, event_callback, messages)
         return bound_agent
     return decorator
+
+
+def recursive_extract_messages(agent_runs: List[AgentRun]) -> List[Message]:
+    messages: List[Message] = []
+    for run in agent_runs:
+        if run['type'] == 'messages':
+            messages.extend(run['messages'])
+        else:
+            messages.extend(recursive_extract_messages(run['runs']))
+    return messages
+
+
+def flat_messages(messages: List[Message]) -> AgentRun:
+    return {
+        'type': 'messages',
+        'messages': messages,
+    }

@@ -4,6 +4,8 @@ from typing import List
 
 from lasagna.agent_util import (
     bind_model,
+    recursive_extract_messages,
+    flat_messages,
 )
 
 from lasagna.types import (
@@ -74,3 +76,107 @@ async def test_bind_model():
     assert events == [
         ('ai', 'text_event', 'Hi!'),
     ]
+
+
+def test_recursive_extract_messages():
+    agent_run: AgentRun = {
+        'type': 'chain',
+        'runs': [
+            {
+                'type': 'parallel',
+                'runs': [
+                    {
+                        'type': 'messages',
+                        'messages': [
+                            {
+                                'role': 'system',
+                                'text': 'You are a robot.',
+                            },
+                            {
+                                'role': 'human',
+                                'text': 'What are you?',
+                            },
+                        ],
+                    },
+                    {
+                        'type': 'messages',
+                        'messages': [
+                            {
+                                'role': 'system',
+                                'text': 'You are a cat.',
+                            },
+                            {
+                                'role': 'human',
+                                'text': 'Here kitty kitty!',
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                'type': 'messages',
+                'messages': [
+                    {
+                        'role': 'system',
+                        'text': 'You aggregate other AI systems.',
+                    },
+                    {
+                        'role': 'human',
+                        'text': 'Summarize the previous AI conversations, please.',
+                    },
+                ],
+            },
+        ],
+    }
+    assert recursive_extract_messages([agent_run]) == [
+        {
+            'role': 'system',
+            'text': 'You are a robot.',
+        },
+        {
+            'role': 'human',
+            'text': 'What are you?',
+        },
+        {
+            'role': 'system',
+            'text': 'You are a cat.',
+        },
+        {
+            'role': 'human',
+            'text': 'Here kitty kitty!',
+        },
+        {
+            'role': 'system',
+            'text': 'You aggregate other AI systems.',
+        },
+        {
+            'role': 'human',
+            'text': 'Summarize the previous AI conversations, please.',
+        },
+    ]
+
+
+def test_flat_messages():
+    messages: List[Message] = [
+        {
+            'role': 'system',
+            'text': 'You are a cat.',
+        },
+        {
+            'role': 'human',
+            'text': 'Here kitty kitty!',
+        },
+    ]
+    assert flat_messages(messages) == {
+        'type': 'messages',
+        'messages': [
+            {
+                'role': 'system',
+                'text': 'You are a cat.',
+            },
+            {
+                'role': 'human',
+                'text': 'Here kitty kitty!',
+            },
+        ],
+    }
