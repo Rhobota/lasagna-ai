@@ -166,3 +166,16 @@ class ToolParam(TypedDict):
     name: str
     type: str
     description: str
+
+
+class CacheEventPayload(TypedDict):
+    delta_time: float   # <-- when this event arrived (as the number of second since the start of the agent's execution)
+    event: EventPayload
+
+
+CacheKey = str
+
+
+class CacheRecord(TypedDict):
+    events: List[CacheEventPayload]
+    run: AgentRun

@@ -28,8 +28,8 @@ def bind_model(
             'model_kwargs': model_kwargs or {},
         }
         @functools.wraps(agent, assigned=['__module__', '__name__', '__qualname__', '__doc__'])
-        async def bound_agent(event_callback: EventCallback, messages: List[AgentRun]) -> AgentRun:
-            return await run(spec, event_callback, messages)
+        async def bound_agent(event_callback: EventCallback, prev_runs: List[AgentRun]) -> AgentRun:
+            return await run(spec, event_callback, prev_runs)
         return bound_agent
     return decorator
 
