@@ -3,7 +3,7 @@ import time
 import functools
 import hashlib
 
-from typing import Callable, Union, List, Awaitable
+from typing import Callable, Union, List, Awaitable, Dict
 
 from .types import (
     AgentCallable,
@@ -35,6 +35,7 @@ def cached_agent(
             start_time = time.time()
 
             if old_cached_record is not None:
+                # TODO: log that we have a cache hit
                 for event in old_cached_record['events']:
                     if simulate_time:
                         to_wait = event['delta_time'] - (time.time() - start_time)
@@ -42,6 +43,8 @@ def cached_agent(
                             await asyncio.sleep(to_wait)
                     await event_callback(event['event'])
                 return old_cached_record['run']
+
+            # TODO: log that we have a cache miss
 
             captured_events: List[CacheEventPayload] = []
             async def event_callback_wrapper(event: EventPayload) -> None:
@@ -54,17 +57,50 @@ def cached_agent(
             run = await agent(model, event_callback_wrapper, prev_runs)
 
             if await should_cache_record(model, prev_runs, run):
+                # TODO: log that we are storing this!
                 new_cached_record: CacheRecord = {
                     'events': captured_events,
                     'run': run,
                 }
                 await save_record(hash, new_cached_record)
+            else:
+                # TODO: log that we are NOT storing this!
 
             return run
 
         return new_agent
 
     return decorator
+
+
+def in_memory_cached_agent(agent: AgentCallable) -> AgentCallable:
+    """
+    This is mostly just for demo to show how to use the @cached_agent
+    decorator.
+    A real system would use an external database, and would probably
+    do some sort of LRU thing in the database so you don't cache too much.
+    Also consider only caching *short* runs (because long runs are unlikely
+    to every see a cache-hit, so it's not worth it).
+    """
+    cache: Dict[CacheKey, CacheRecord] = {}
+
+    async def in_memory_query_record(key: CacheKey) -> Union[CacheRecord, None]:
+        return cache.get(key)
+
+    async def in_memory_should_cache_record(model: Model, prev_runs: List[AgentRun], this_run: AgentRun) -> bool:
+        return len(cache) < 1000   # !!! just a demo, don't read into this
+
+    async def in_memory_save_record(key: CacheKey, record: CacheRecord) -> None:
+        cache[key] = record
+
+    decorator = cached_agent(
+        query_record = in_memory_query_record,
+        should_cache_record = in_memory_should_cache_record,
+        save_record = in_memory_save_record,
+        simulate_time=True,
+    )
+
+    return decorator(agent)
 
 
 async def _hash_agent_runs(model: Model, runs: List[AgentRun]) -> CacheKey:
