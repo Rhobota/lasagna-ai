@@ -1,11 +1,13 @@
 from urllib.parse import urlparse
 import mimetypes
 import asyncio
+import hashlib
 import base64
 import os
 import re
 
-from typing import Tuple, List, Literal, Union, TypeVar, Callable
+from typing import Tuple, List, Literal, Union, TypeVar, Callable, Protocol, Any
+from typing_extensions import Buffer
 
 from .types import ToolParam
 
@@ -98,3 +100,68 @@ def convert_to_image_url_sync(image_filepath_or_url: str) -> str:
 async def convert_to_image_url(image_filepath_or_url: str) -> str:
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, convert_to_image_url_sync, image_filepath_or_url)
+
+
+def exponential_backoff_retry_delays(
+    n_total_tries: int,
+    base: float = 2.0,
+    max_delay: float = 60.0,
+) -> List[float]:
+    assert n_total_tries > 0
+    delay_list = [(base ** exponent) for exponent in range(1, n_total_tries + 1)]
+    delay_list[-1] = 0.0    # <-- after the *last* failure, you should not delay at all
+    return [min(d, max_delay) for d in delay_list]
+
+
+class HashAlgorithm(Protocol):
+    """
+    All the hashlib algorithms conform to this, like:
+      - hashlib.md5
+      - hashlib.sha1
+      - hashlib.sha256
+      - ...
+    """
+    def update(self, data: Buffer, /) -> None: ...
+    def hexdigest(self) -> str: ...
+
+
+HashAlgorithmFactory = Callable[[], HashAlgorithm]
+
+
+def recursive_hash(
+    seed: Union[str, None],
+    obj: Any,
+    alg_factory: HashAlgorithmFactory = lambda: hashlib.md5(),
+) -> str:
+    alg = alg_factory()
+    def _r(obj: Any) -> None:
+        if isinstance(obj, dict):
+            items = sorted(obj.items())  # <-- it's critical to sort them so we get canonical hashes
+            alg.update('__open_dict__'.encode('utf-8'))
+            _r(items)
+            alg.update('__close_dict__'.encode('utf-8'))
+        elif isinstance(obj, (list, tuple)):
+            alg.update('__open_list__'.encode('utf-8'))
+            for o in obj:
+                _r(o)
+            alg.update('__close_list__'.encode('utf-8'))
+        elif isinstance(obj, str):
+            alg.update('__str__'.encode('utf-8'))
+            alg.update(obj.encode('utf-8'))
+        elif isinstance(obj, bool):
+            alg.update('__bool__'.encode('utf-8'))
+            alg.update(f'{1 if obj else 0}'.encode('utf-8'))
+        elif isinstance(obj, int):
+            alg.update('__int__'.encode('utf-8'))
+            alg.update(f'{obj}'.encode('utf-8'))
+        elif isinstance(obj, float):
+            alg.update('__float__'.encode('utf-8'))
+            alg.update(f'{obj:.8e}'.encode('utf-8'))
+        elif obj is None:
+            alg.update('__None__'.encode('utf-8'))
+        else:
+            raise ValueError(f"unsupported type: {type(obj)}")
+    if seed is not None:
+        _r(seed)
+    _r(obj)
+    return alg.hexdigest()

@@ -104,6 +104,16 @@ class Model(abc.ABC):
         """
         pass
 
+    @abc.abstractmethod
+    def config_hash(self) -> str:
+        """
+        Returns a hash of this models configuration. This likely contains
+        the provider's name, model's name, and any model_kwargs. You can use
+        any algorithm you'd like as long as it's stable from one Python version
+        to the next; e.g., we recommend you use `util.recursive_hash()`.
+        """
+        pass
+
 
 class AgentRunBase(TypedDict):
     agent: NotRequired[str]
@@ -131,6 +141,8 @@ AgentRun = Union[AgentRunMessageList, AgentRunParallel, AgentRunChained]
 
 
 AgentCallable = Callable[[Model, EventCallback, List[AgentRun]], Awaitable[AgentRun]]
+
+BoundAgentCallable = Callable[[EventCallback, List[AgentRun]], Awaitable[AgentRun]]
 
 
 class AgentRecord(TypedDict):
@@ -164,3 +176,16 @@ class ToolParam(TypedDict):
     name: str
     type: str
     description: str
+
+
+class CacheEventPayload(TypedDict):
+    delta_time: float   # <-- when this event arrived (as the number of second since the start of the agent's execution)
+    event: EventPayload
+
+
+CacheKey = str
+
+
+class CacheRecord(TypedDict):
+    events: List[CacheEventPayload]
+    run: AgentRun

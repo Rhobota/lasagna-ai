@@ -32,7 +32,7 @@ Source = "https://github.com/Rhobota/lasagna-ai"
 
 [project.optional-dependencies]
 openai = [
-  "openai>=1.30.3",
+  "openai>=1.34.0",
 ]
 anthropic = [
   "anthropic>=0.26.1",
