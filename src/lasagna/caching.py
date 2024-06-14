@@ -20,6 +20,10 @@ from .util import recursive_hash
 
 from . import __version__
 
+import logging
+
+_LOG = logging.getLogger(__name__)
+
 
 def cached_agent(
     query_record: Callable[[CacheKey], Awaitable[Union[CacheRecord, None]]],
@@ -35,7 +39,7 @@ def cached_agent(
             start_time = time.time()
 
             if old_cached_record is not None:
-                # TODO: log that we have a cache hit
+                _LOG.info(f"Cache **HIT**: {hash}")
                 for event in old_cached_record['events']:
                     if simulate_time:
                         to_wait = event['delta_time'] - (time.time() - start_time)
@@ -44,7 +48,7 @@ def cached_agent(
                     await event_callback(event['event'])
                 return old_cached_record['run']
 
-            # TODO: log that we have a cache miss
+            _LOG.info(f"Cache miss: {hash}")
 
             captured_events: List[CacheEventPayload] = []
             async def event_callback_wrapper(event: EventPayload) -> None:
@@ -57,14 +61,14 @@ def cached_agent(
             run = await agent(model, event_callback_wrapper, prev_runs)
 
             if await should_cache_record(model, prev_runs, run):
-                # TODO: log that we are storing this!
+                _LOG.info(f"Will store in cache: {hash}")
                 new_cached_record: CacheRecord = {
                     'events': captured_events,
                     'run': run,
                 }
                 await save_record(hash, new_cached_record)
             else:
-                # TODO: log that we are NOT storing this!
+                _LOG.info(f"Will *not* store in cache: {hash}")
 
             return run
 
