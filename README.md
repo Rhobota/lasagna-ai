@@ -14,6 +14,7 @@
   - Fully asyncio.
   - 100% Python type hints.
   - Functional-style 😎
+  - (optional) Easy & pluggable caching! 🏦
 
 - 🚣  **Streamable!**
   - Event streams for _everything_.
