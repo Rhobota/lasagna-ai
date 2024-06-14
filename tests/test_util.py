@@ -5,11 +5,13 @@ from lasagna.util import (
     combine_pairs,
     convert_to_image_url,
     exponential_backoff_retry_delays,
+    recursive_hash,
 )
 
 from typing import List
 
 import tempfile
+import hashlib
 import os
 
 
@@ -319,3 +321,38 @@ def test_exponential_backoff_retry_delays():
     assert exponential_backoff_retry_delays(4, 3.0, 1e10) == [3.0, 9.0, 27.0, 0.0]
     assert exponential_backoff_retry_delays(4, 5.0, 1e10) == [5.0, 25.0, 125.0, 0.0]
     assert exponential_backoff_retry_delays(4, 5.0, 30.0) == [5.0, 25.0, 30.0, 0.0]
+
+
+def test_recursive_hash():
+    obj = {
+        'b': -5,
+        'a': [4, True, False, 'hi', (3.5, 7.0), None],
+    }
+    got = recursive_hash('hola', obj, hashlib.md5())
+    s = ''.join([v.strip() for v in '''
+        __str__hola
+        __open_dict__
+            __open_list__
+                __open_list__
+                    __str__a
+                    __open_list__
+                        __int__4
+                        __bool__1
+                        __bool__0
+                        __str__hi
+                        __open_list__
+                            __float__3.50000000e+00
+                            __float__7.00000000e+00
+                        __close_list__
+                        __None__
+                    __close_list__
+                __close_list__
+                __open_list__
+                    __str__b
+                    __int__-5
+                __close_list__
+            __close_list__
+        __close_dict__
+        '''.strip().split()])
+    correct = hashlib.md5(s.encode('utf-8')).hexdigest()
+    assert got == correct
