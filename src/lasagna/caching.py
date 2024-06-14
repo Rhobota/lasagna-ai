@@ -1,6 +1,7 @@
 import asyncio
 import time
 import functools
+import hashlib
 
 from typing import Callable, Union, List, Awaitable
 
@@ -15,6 +16,10 @@ from .types import (
     CacheEventPayload,
 )
 
+from .util import recursive_hash
+
+from . import __version__
+
 
 def cached_agent(
     query_record: Callable[[CacheKey], Awaitable[Union[CacheRecord, None]]],
@@ -25,7 +30,7 @@ def cached_agent(
     def decorator(agent: AgentCallable) -> AgentCallable:
         @functools.wraps(agent, assigned=['__module__', '__name__', '__qualname__', '__doc__'])
         async def new_agent(model: Model, event_callback: EventCallback, prev_runs: List[AgentRun]) -> AgentRun:
-            hash = _hash_agent_runs(model, prev_runs)
+            hash = await _hash_agent_runs(model, prev_runs)
             old_cached_record = await query_record(hash)
             start_time = time.time()
 
@@ -62,5 +67,10 @@ def cached_agent(
     return decorator
 
 
-def _hash_agent_runs(model: Model, runs: List[AgentRun]) -> CacheKey:
-    return ''  # TODO (also LOG)
+async def _hash_agent_runs(model: Model, runs: List[AgentRun]) -> CacheKey:
+    model_name = model.__class__.__name__
+    seed = f"__version__{__version__}__model__{model_name}"
+    def _do() -> CacheKey:
+        return recursive_hash(seed, runs, hashlib.md5())
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, _do)
