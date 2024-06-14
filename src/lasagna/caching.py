@@ -24,16 +24,26 @@ import logging
 _LOG = logging.getLogger(__name__)
 
 
+async def _hash_agent_runs(model: Model, runs: List[AgentRun]) -> CacheKey:
+    model_config_hash = model.config_hash()
+    seed = f"__version__{__version__}__model__{model_config_hash}"
+    def _do() -> CacheKey:
+        return recursive_hash(seed, runs)
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, _do)
+
+
 def cached_agent(
     query_record: Callable[[CacheKey], Awaitable[Union[CacheRecord, None]]],
     should_cache_record: Callable[[Model, List[AgentRun], AgentRun], Awaitable[bool]],
     save_record: Callable[[CacheKey, CacheRecord], Awaitable[None]],
     simulate_time: bool,
+    hash_function: Callable[[Model, List[AgentRun]], Awaitable[CacheKey]] = _hash_agent_runs,
 ) -> Callable[[AgentCallable], AgentCallable]:
     def decorator(agent: AgentCallable) -> AgentCallable:
         @functools.wraps(agent, assigned=['__module__', '__name__', '__qualname__', '__doc__'])
         async def new_agent(model: Model, event_callback: EventCallback, prev_runs: List[AgentRun]) -> AgentRun:
-            hash = await _hash_agent_runs(model, prev_runs)
+            hash = await hash_function(model, prev_runs)
             old_cached_record = await query_record(hash)
             start_time = time.time()
 
@@ -104,12 +114,3 @@ def in_memory_cached_agent(agent: AgentCallable) -> AgentCallable:
     )
 
     return decorator(agent)
-
-
-async def _hash_agent_runs(model: Model, runs: List[AgentRun]) -> CacheKey:
-    model_config_hash = model.config_hash()
-    seed = f"__version__{__version__}__model__{model_config_hash}"
-    def _do() -> CacheKey:
-        return recursive_hash(seed, runs)
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, _do)
