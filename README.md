@@ -46,6 +46,25 @@
 pip install -U lasagna-ai[openai,anthropic]
 ```
 
+## Quickstart
+
+TODO
+
+## Debug Logging
+
+This library logs using Python's builtin `logging` module. It logs mostly to `INFO`, so here's a snippet of code you can put in _your_ app to see those traces:
+
+```python
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+)
+
+# ... now use Lasagna as you normally would, but you'll see extra log traces!
+```
+
 ## License
 
 `lasagna-ai` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.

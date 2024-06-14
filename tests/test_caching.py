@@ -1,5 +1,6 @@
 import pytest
 import hashlib
+import random
 from typing import List
 
 from lasagna.caching import (
@@ -7,7 +8,9 @@ from lasagna.caching import (
     _hash_agent_runs,
 )
 
-from lasagna.types import AgentRun
+from lasagna.types import AgentRun, Model, EventCallback, Message
+
+from lasagna.agent_util import bind_model
 
 from lasagna import __version__
 
@@ -29,9 +32,55 @@ _PREV_RUNS: List[AgentRun] = [
 ]
 
 
+def _make_agent():
+    # We need this factory so we can make as many separately-cached agents as we want.
+    @bind_model(MockProvider, 'some_model')
+    @in_memory_cached_agent
+    async def my_agent(
+        model: Model,
+        event_callback: EventCallback,
+        prev_runs: List[AgentRun],
+    ) -> AgentRun:
+        assert prev_runs == _PREV_RUNS
+        messages: List[Message] = []
+        new_messages = await model.run(event_callback, messages, [])
+        return {
+            'type': 'messages',
+            'messages': [
+                *new_messages,
+                {
+                    'role': 'human',
+                    'text': f"Here is a random value {random.random()}.",
+                },
+            ],
+        }
+
+    return my_agent
+
+
 @pytest.mark.asyncio
 async def test_in_memory_cached_agent():
-    pass  # TODO
+    """
+    We test the *in-memory* cache just as a concrete way to test the
+    underlying cache decorator.
+    """
+    async def callback(event):
+        pass
+
+    agent1 = _make_agent()
+    result1 = await agent1(callback, _PREV_RUNS)
+
+    agent2 = _make_agent()
+    result2 = await agent2(callback, _PREV_RUNS)
+
+    assert result1 != result2   # because of the use of random.random() in the final message, these will be different (in the *vast* likelihood)
+
+    for _ in range(5):
+        result1_again = await agent1(callback, _PREV_RUNS)
+        result2_again = await agent2(callback, _PREV_RUNS)
+
+        assert result1 == result1_again  # because it was cached
+        assert result2 == result2_again  # because it was cached
 
 
 @pytest.mark.asyncio
