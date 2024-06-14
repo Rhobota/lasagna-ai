@@ -353,6 +353,6 @@ def test_recursive_hash():
                 __close_list__
             __close_list__
         __close_dict__
-        '''.strip().split()])
+        '''.strip().splitlines()])
     correct = hashlib.md5(s.encode('utf-8')).hexdigest()
     assert got == correct
