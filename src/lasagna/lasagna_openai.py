@@ -23,6 +23,7 @@ from .util import (
     combine_pairs,
     convert_to_image_url,
     exponential_backoff_retry_delays,
+    recursive_hash,
 )
 
 from openai import AsyncOpenAI, NOT_GIVEN, NotGiven
@@ -425,6 +426,13 @@ class LasagnaOpenAI(Model):
         self.n_retries: int = cast(int, self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
         if not isinstance(self.n_retries, int) or self.n_retries < 0:
             raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.model_kwargs['retries']})")
+
+    def config_hash(self) -> str:
+        return recursive_hash(None, {
+            'provider': 'openai',
+            'model': self.model,
+            'model_kwargs': self.model_kwargs,
+        })
 
     async def _run_once(
         self,

@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
 import mimetypes
 import asyncio
+import hashlib
 import base64
 import os
 import re
@@ -124,11 +125,15 @@ class HashAlgorithm(Protocol):
     def hexdigest(self) -> str: ...
 
 
+HashAlgorithmFactory = Callable[[], HashAlgorithm]
+
+
 def recursive_hash(
     seed: Union[str, None],
     obj: Any,
-    alg: HashAlgorithm,
+    alg_factory: HashAlgorithmFactory = lambda: hashlib.md5(),
 ) -> str:
+    alg = alg_factory()
     def _r(obj: Any) -> None:
         if isinstance(obj, dict):
             items = sorted(obj.items())  # <-- it's critical to sort them so we get canonical hashes

@@ -14,7 +14,7 @@ from lasagna.agent_util import bind_model
 
 from lasagna import __version__
 
-from .test_agent_runner import (
+from lasagna.mock_provider import (
     MockProvider,
 )
 
@@ -86,9 +86,35 @@ async def test_in_memory_cached_agent():
 @pytest.mark.asyncio
 async def test_hash_agent_runs():
     model = MockProvider(model='something')
-    got = await _hash_agent_runs(model, _PREV_RUNS)
+
     s = ''.join([v.strip() for v in f'''
-        __str____version__{__version__}__model__MockProvider
+        __open_dict__
+            __open_list__
+                __open_list__
+                    __str__model
+                    __str__something
+                __close_list__
+                __open_list__
+                    __str__model_kwargs
+                    __open_dict__
+                        __open_list__
+                        __close_list__
+                    __close_dict__
+                __close_list__
+                __open_list__
+                    __str__provider
+                    __str__mock
+                __close_list__
+            __close_list__
+        __close_dict__
+        '''.strip().splitlines()])
+
+    model_config_hash = hashlib.md5(s.encode('utf-8')).hexdigest()
+
+    got = await _hash_agent_runs(model, _PREV_RUNS)
+
+    s = ''.join([v.strip() for v in f'''
+        __str____version__{__version__}__model__{model_config_hash}
         __open_list__
             __open_dict__
                 __open_list__
@@ -117,5 +143,7 @@ async def test_hash_agent_runs():
             __close_dict__
         __close_list__
         '''.strip().splitlines()])
+
     correct = hashlib.md5(s.encode('utf-8')).hexdigest()
+
     assert got == correct

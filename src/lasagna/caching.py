@@ -1,7 +1,6 @@
 import asyncio
 import time
 import functools
-import hashlib
 
 from typing import Callable, Union, List, Awaitable, Dict
 
@@ -108,9 +107,9 @@ def in_memory_cached_agent(agent: AgentCallable) -> AgentCallable:
 
 
 async def _hash_agent_runs(model: Model, runs: List[AgentRun]) -> CacheKey:
-    model_name = model.__class__.__name__  # TODO: ideally, this would be model.config_hash()
-    seed = f"__version__{__version__}__model__{model_name}"
+    model_config_hash = model.config_hash()
+    seed = f"__version__{__version__}__model__{model_config_hash}"
     def _do() -> CacheKey:
-        return recursive_hash(seed, runs, hashlib.md5())
+        return recursive_hash(seed, runs)
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, _do)

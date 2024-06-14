@@ -16,7 +16,7 @@ from lasagna.types import (
     EventPayload,
 )
 
-from .test_agent_runner import (
+from lasagna.mock_provider import (
     MockProvider,
 )
 

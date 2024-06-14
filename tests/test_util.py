@@ -328,7 +328,7 @@ def test_recursive_hash():
         'b': -5,
         'a': [4, True, False, 'hi', (3.5, 7.0), None],
     }
-    got = recursive_hash('hola', obj, hashlib.md5())
+    got = recursive_hash('hola', obj)
     s = ''.join([v.strip() for v in '''
         __str__hola
         __open_dict__
