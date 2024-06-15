@@ -189,3 +189,6 @@ CacheKey = str
 class CacheRecord(TypedDict):
     events: List[CacheEventPayload]
     run: AgentRun
+
+
+ImageMimeTypes = Literal['image/jpeg', 'image/png', 'image/gif', 'image/webp']

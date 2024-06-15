@@ -7,7 +7,6 @@ from .types import (
     Model,
     ToolCall,
     ToolParam,
-    ToolResult,
     ModelRecord,
     Cost,
 )
@@ -25,6 +24,8 @@ from .util import (
     exponential_backoff_retry_delays,
     recursive_hash,
 )
+
+from .tools import handle_tools, build_tool_response_message
 
 from openai import AsyncOpenAI, NOT_GIVEN, NotGiven
 from openai.types.chat import (
@@ -45,7 +46,6 @@ from typing import (
 import asyncio
 import copy
 import json
-import inspect
 
 import logging
 
@@ -370,45 +370,6 @@ def _build_messages_from_openai_payload(
         raise ValueError('no events')
 
 
-async def _handle_tools(
-    messages: List[Message],
-    tools_map: Dict[str, Callable],
-) -> Union[List[ToolResult], None]:
-    assert len(messages) > 0
-    message = messages[-1]   # <-- the tool message will be last, if at all
-    if message['role'] != 'tool_call':
-        return None
-    to_gather: List[asyncio.Task[ToolResult]] = []
-    for t in message['tools']:
-        assert t['call_type'] == 'function'
-        async def _go(t: ToolCall) -> ToolResult:
-            call_id = 'unknown'
-            try:
-                call_id = t['call_id']
-                func = tools_map[t['function']['name']]
-                args = t['function']['arguments']
-                if inspect.iscoroutinefunction(func):
-                    res = await func(**json.loads(args))
-                else:
-                    def _wrapped_sync() -> Any:
-                        return func(**json.loads(args))
-                    loop = asyncio.get_running_loop()
-                    res = await loop.run_in_executor(None, _wrapped_sync)
-                return {'call_id': call_id, 'result': res}
-            except Exception as e:
-                error = f"{type(e).__name__}: {e}"
-                return {'call_id': call_id, 'result': error}
-        to_gather.append(asyncio.create_task(_go(t)))
-    return await asyncio.gather(*to_gather)
-
-
-def _build_tool_response_message(tool_results: List[ToolResult]) -> Message:
-    return {
-        'role': 'tool_res',
-        'tools': tool_results,
-    }
-
-
 def _log_dumps(val: Any) -> str:
     if isinstance(val, dict):
         return json.dumps(val)
@@ -565,12 +526,12 @@ class LasagnaOpenAI(Model):
             tools_map = {tool.__name__: tool for tool in tools}
             new_messages.extend(new_messages_here)
             messages.extend(new_messages_here)
-            tools_results = await _handle_tools(new_messages_here, tools_map)
+            tools_results = await handle_tools(new_messages_here, tools_map)
             if tools_results is None:
                 break
             for tool_result in tools_results:
                 await event_callback(('tool_res', 'tool_res_event', tool_result))
-            tool_response_message = _build_tool_response_message(tools_results)
+            tool_response_message = build_tool_response_message(tools_results)
             new_messages.append(tool_response_message)
             messages.append(tool_response_message)
         return new_messages
