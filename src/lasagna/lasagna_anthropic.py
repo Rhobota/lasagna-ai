@@ -6,15 +6,8 @@ from .types import (
     EventPayload,
     Model,
     ToolCall,
-    ToolParam,
-    ToolResult,
     ModelRecord,
     Cost,
-)
-
-from typing import (
-    List, Callable, AsyncIterator, Any, cast,
-    Tuple, Dict, Optional, Union, Literal,
 )
 
 from .stream import (
@@ -26,15 +19,18 @@ from .stream import (
 from .util import (
     parse_docstring,
     combine_pairs,
-    convert_to_image_base64,
+    convert_to_image_url,
     exponential_backoff_retry_delays,
     recursive_hash,
 )
 
-from .tools import handle_tools, build_tool_response_message
+from .tools import (
+    convert_to_json_schema,
+    handle_tools,
+    build_tool_response_message,
+)
 
 from anthropic import AsyncAnthropic, NOT_GIVEN
-
 from anthropic.types import MessageParam
 from anthropic.types.message import Message as AnthropicMessage
 from anthropic.lib.streaming._types import MessageStreamEvent
@@ -44,10 +40,14 @@ from anthropic.types.image_block_param import ImageBlockParam
 from anthropic.types.tool_use_block_param import ToolUseBlockParam
 from anthropic.types.tool_result_block_param import ToolResultBlockParam
 
+from typing import (
+    List, Callable, AsyncIterator, Any, cast,
+    Tuple, Dict, Optional, Union, Literal,
+)
+
 import asyncio
 import copy
 import json
-import inspect
 
 import logging
 
@@ -202,38 +202,89 @@ class LasagnaAnthropic(Model):
         tools: List[Callable],
         force_tool: bool,
     ) -> List[Message]:
-        # TODO use `force_tool`
+        #tool_choice: Union[ChatCompletionToolChoiceOptionParam, NotGiven]
+        #if force_tool:
+        #    if len(tools) == 0:
+        #        raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
+        #    elif len(tools) == 1:
+        #        tool_choice = {
+        #            "type": "function",
+        #            "function": {"name": tools[0].__name__},
+        #        }
+        #    else:
+        #        tool_choice = 'required'  # <-- model must use a tool, but is allowed to choose which one on its own
+        #else:
+        #    tool_choice = NOT_GIVEN  # <-- if tools given, the model can choose to use them or not
+        tool_choice = NOT_GIVEN  # TODO remove me when above is done
 
         #tools_spec = _convert_to_anthropic_tools(tools)
+        tools_spec = {}  # TODO remove me when above is done
 
         system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
 
-        # TODO use self.model_kwargs
+        max_tokens: int = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else 4096
+        #frequency_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['frequency_penalty']) if 'frequency_penalty' in self.model_kwargs else NOT_GIVEN
+        #presence_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['presence_penalty']) if 'presence_penalty' in self.model_kwargs else NOT_GIVEN
+        #max_tokens: Union[int, NotGiven] = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else NOT_GIVEN
+        #stop: Union[List[str], NotGiven] = cast(List[str], self.model_kwargs['stop']) if 'stop' in self.model_kwargs else NOT_GIVEN
+        #temperature: Union[float, NotGiven] = cast(float, self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
+        #top_p: Union[float, NotGiven] = cast(float, self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
+        #user: Union[str, NotGiven] = cast(str, self.model_kwargs['user']) if 'user' in self.model_kwargs else NOT_GIVEN
 
-        #_LOG.info(f"Invoking {self.model} with:\n  system_prompt: {system_prompt}\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
-        _LOG.info(f"Invoking {self.model} with:\n  system_prompt: {system_prompt}\n  messages: {_log_dumps(anthropic_messages)}")
+        _LOG.info(f"Invoking {self.model} with:\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
 
         client = AsyncAnthropic()
         async with client.messages.stream(
             model    = self.model,
             system   = system_prompt or NOT_GIVEN,
             messages = anthropic_messages,
-            max_tokens = 1024,
-            # logprobs?
+            max_tokens = max_tokens,
+            # TODO pass tools, tool_choice, logprobs, model_kwargs
         ) as stream:
             raw_stream, rt_stream = adup(stream)
             async for event in _process_stream(rt_stream):
                 await event_callback(event)
             raw_events = [v.to_dict() async for v in raw_stream]
             anthropic_message = await stream.get_final_message()
-
-        new_messages = _build_messages_from_anthropic_payload(raw_events, anthropic_message)
+            new_messages = _build_messages_from_anthropic_payload(raw_events, anthropic_message)
 
         _LOG.info(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
 
         return new_messages
 
-    # TODO: retry method
+    async def _retrying_run_once(
+        self,
+        event_callback: EventCallback,
+        messages: List[Message],
+        tools: List[Callable],
+        force_tool: bool,
+    ) -> List[Message]:
+        last_error: Union[Exception, None] = None
+        assert self.n_retries + 1 > 0   # <-- we know this is true from the check in __init__
+        for delay_on_error in exponential_backoff_retry_delays(self.n_retries + 1):
+            try:
+                return await self._run_once(
+                    event_callback = event_callback,
+                    messages = messages,
+                    tools = tools,
+                    force_tool = force_tool,
+                )
+            except Exception as e:
+                # Some errors should be retried, some should not. Below
+                # is the logic to decide when to retry vs when to not.
+                # It's likely this will change as we get more usage and see
+                # where Anthropic tends to fail, and when we know more what is
+                # recoverable vs not.
+                last_error = e
+                # TODO: need to figure out what errors are throw for, e.g.:
+                #  - no/invalid api key (not recoverable)
+                #  - context lenght exceeded (not recoverable)
+                #  - server error (recoverable)
+                if delay_on_error > 0.0:
+                    _LOG.warning(f"Got a maybe-recoverable error (will retry in {delay_on_error:.2f} seconds): {e}")
+                    await asyncio.sleep(delay_on_error)
+        assert last_error is not None   # <-- we know this is true because `n_retries + 1 > 0`
+        raise last_error
 
     async def run(
         self,
@@ -246,7 +297,7 @@ class LasagnaAnthropic(Model):
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
         for _ in range(max_tool_iters):
-            new_messages_here = await self._run_once(
+            new_messages_here = await self._retrying_run_once(
                 event_callback = event_callback,
                 messages       = messages,
                 tools          = tools,
