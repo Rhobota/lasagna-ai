@@ -216,6 +216,8 @@ async def _convert_to_openai_messages(messages: List[Message]) -> List[ChatCompl
     for m in messages:
         if m['role'] == 'tool_call':
             tool_calls = m['tools']
+            for t in tool_calls:
+                assert t['call_type'] == 'function', 'OpenAI only supports function tools, so far.'
             ms.append({
                 'role': 'assistant',
                 'content': None,

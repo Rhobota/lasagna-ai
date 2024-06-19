@@ -23,6 +23,7 @@ class ToolCall(TypedDict):
 class ToolResult(TypedDict):
     call_id: str
     result: Any
+    is_error: NotRequired[bool]
 
 
 class Cost(TypedDict):

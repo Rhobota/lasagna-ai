@@ -2,6 +2,7 @@ from .types import (
     Message,
     MessageContent,
     MessageToolCall,
+    MessageToolResult,
     EventCallback,
     EventPayload,
     Model,
@@ -19,7 +20,7 @@ from .stream import (
 from .util import (
     parse_docstring,
     combine_pairs,
-    convert_to_image_url,
+    convert_to_image_base64,
     exponential_backoff_retry_delays,
     recursive_hash,
 )
@@ -30,11 +31,10 @@ from .tools import (
     build_tool_response_message,
 )
 
-from anthropic import AsyncAnthropic, NOT_GIVEN
+from anthropic import AsyncAnthropic, NOT_GIVEN, NotGiven
 from anthropic.types import MessageParam
 from anthropic.types.message import Message as AnthropicMessage
 from anthropic.lib.streaming._types import MessageStreamEvent
-from anthropic.types.content_block import ContentBlock
 from anthropic.types.text_block_param import TextBlockParam
 from anthropic.types.image_block_param import ImageBlockParam
 from anthropic.types.tool_use_block_param import ToolUseBlockParam
@@ -98,6 +98,66 @@ async def _build_anthropic_content(
     return ret
 
 
+async def _build_anthropic_tool_use(
+    message: MessageToolCall,
+) -> List[ToolUseBlockParam]:
+    ret: List[ToolUseBlockParam] = []
+    for tool in message['tools']:
+        if tool['call_type'] == 'function':
+            ret.append({
+                'type': 'tool_use',
+                'id': tool['call_id'],
+                'name': tool['function']['name'],
+                'input': json.loads(tool['function']['arguments']),
+            })
+        else:
+            raise ValueError(f"unknown tool type: {tool['call_type']}")
+    if len(ret) == 0:
+        raise ValueError(f"no content")
+    return ret
+
+
+async def _build_anthropic_tool_result(
+    message: MessageToolResult,
+) -> List[ToolResultBlockParam]:
+    ret: List[ToolResultBlockParam] = []
+    for tool in message['tools']:
+        obj: ToolResultBlockParam = {
+            'type': 'tool_result',
+            'tool_use_id': tool['call_id'],
+            'content': [
+                {
+                    'type': 'text',
+                    'text': str(tool['result']),
+                },
+            ],
+        }
+        if 'is_error' in tool and tool['is_error']:
+            obj['is_error'] = True
+        ret.append(obj)
+    if len(ret) == 0:
+        raise ValueError(f"no content")
+    return ret
+
+
+def _collapse_anthropic_messages(
+    messages: List[MessageParam],
+) -> List[MessageParam]:
+    ms: List[MessageParam] = []
+    for i, m in enumerate(messages):
+        if i == 0:
+            ms.append(m)
+            continue
+        prev_m = ms[-1]
+        if prev_m['role'] == m['role']:
+            assert isinstance(prev_m['content'], list)
+            assert isinstance(m['content'], list)
+            prev_m['content'].extend(m['content'])
+        else:
+            ms.append(m)
+    return ms
+
+
 async def _convert_to_anthropic_messages(
     messages: List[Message],
 ) -> Tuple[Union[str, None], List[MessageParam]]:
@@ -107,12 +167,12 @@ async def _convert_to_anthropic_messages(
         first_message = messages[0]
         if first_message['role'] == 'system':
             if first_message.get('media'):
-                raise ValueError(f"You may not pass media in the system prompt.")
+                raise ValueError(f"For this model, you may not pass media in the system prompt.")
             system_prompt = first_message['text']
             messages = messages[1:]
         for m in messages:
             if m['role'] == 'system':
-                raise ValueError(f"You can only have a system prompt as the first message!")
+                raise ValueError(f"For this model, you can only have a system prompt as the first message!")
             elif m['role'] == 'ai':
                 ret.append({
                     'role': 'assistant',
@@ -124,19 +184,19 @@ async def _convert_to_anthropic_messages(
                     'content': await _build_anthropic_content(m),
                 })
             elif m['role'] == 'tool_call':
-                pass
+                ret.append({
+                    'role': 'assistant',
+                    'content': await _build_anthropic_tool_use(m),
+                })
             elif m['role'] == 'tool_res':
-                pass
+                ret.append({
+                    'role': 'user',
+                    'content': await _build_anthropic_tool_result(m),
+                })
             else:
                 raise ValueError(f"Unknown role: {m['role']}")
+    ret = _collapse_anthropic_messages(ret)
     return system_prompt, ret
-
-
-async def _process_stream(stream: AsyncIterator[MessageStreamEvent]) -> AsyncIterator[EventPayload]:
-    async for event in stream:
-        # TODO
-        e: EventPayload = ('ai', 'text_event', '')
-        yield e
 
 
 def _build_messages_from_anthropic_payload(
@@ -168,6 +228,13 @@ def _build_messages_from_anthropic_payload(
         'message': message.to_dict(),
     }
     return ms
+
+
+async def _process_stream(stream: AsyncIterator[MessageStreamEvent]) -> AsyncIterator[EventPayload]:
+    async for event in stream:
+        # TODO
+        e: EventPayload = ('ai', 'text_event', '')
+        yield e
 
 
 def _log_dumps(val: Any) -> str:
