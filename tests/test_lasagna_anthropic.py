@@ -12,9 +12,18 @@ from lasagna.types import (
     Message,
 )
 
+from lasagna.stream import fake_async
+
 from typing import List
 
 from anthropic.types.message import Message as AnthropicMessage
+from anthropic.lib.streaming._types import (
+    MessageStreamEvent,
+    TextEvent,
+    ContentBlockStopEvent,
+)
+from anthropic.types.raw_content_block_start_event import RawContentBlockStartEvent
+from anthropic.types.raw_content_block_delta_event import RawContentBlockDeltaEvent
 
 import os
 import tempfile
@@ -494,4 +503,297 @@ async def test_build_messages_from_anthropic_payload():
                 'message': raw,
             },
         },
+    ]
+
+
+def test_convert_to_anthropic_tools():
+    def multiply(a, b):
+        """
+        Use this tool to get the product of two values.
+        :param: a: float: the first value
+        :param: b: float: the second value
+        """
+        return a * b
+    assert _convert_to_anthropic_tools([multiply]) == [
+        {
+            'name': 'multiply',
+            'description': 'Use this tool to get the product of two values.',
+            'input_schema': {
+                'type': 'object',
+                'properties': {
+                    'a': {'type': 'number', 'description': 'the first value'},
+                    'b': {'type': 'number', 'description': 'the second value'},
+                },
+                'required': ['a', 'b'],
+            },
+        },
+    ]
+
+
+def test_make_raw_event():
+    event = TextEvent.model_validate({
+        'type': 'text',
+        'text': '!',
+        'snapshot': 'Hello!',
+    })
+    assert _make_raw_event(event) == {
+        'type': 'text',
+        'text': '!'
+    }
+
+
+@pytest.mark.asyncio
+async def test_process_stream():
+    events: List[MessageStreamEvent] = [
+        RawContentBlockStartEvent.model_validate({
+            "content_block": {
+                "text": "",
+                "type": "text"
+            },
+            "index": 0,
+            "type": "content_block_start"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": "Hello",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": "!",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": " I",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": "'m",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": " Bob",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": ",",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": " an",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": " AI",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": " assistant",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": ".",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": " Let",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": " me",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": " help",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": " you",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": " with",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": " those",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": " calculations",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "text": ":",
+                "type": "text_delta"
+            },
+            "index": 0,
+            "type": "content_block_delta"
+        }),
+        ContentBlockStopEvent.model_validate({
+            "index": 0,
+            "type": "content_block_stop",
+            "content_block": {
+                "text": "Hello! I'm Bob, an AI assistant. Let me help you with those calculations:",
+                "type": "text"
+            }
+        }),
+        RawContentBlockStartEvent.model_validate({
+            "content_block": {
+                "id": "toolu_01JxBsKfpT7qKZVhHnHub9tv",
+                "input": {},
+                "name": "multiply",
+                "type": "tool_use"
+            },
+            "index": 1,
+            "type": "content_block_start"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "partial_json": "",
+                "type": "input_json_delta"
+            },
+            "index": 1,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "partial_json": "{\"a\": 5",
+                "type": "input_json_delta"
+            },
+            "index": 1,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "partial_json": ", ",
+                "type": "input_json_delta"
+            },
+            "index": 1,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "partial_json": "\"b\": 8",
+                "type": "input_json_delta"
+            },
+            "index": 1,
+            "type": "content_block_delta"
+        }),
+        RawContentBlockDeltaEvent.model_validate({
+            "delta": {
+                "partial_json": "1}",
+                "type": "input_json_delta"
+            },
+            "index": 1,
+            "type": "content_block_delta"
+        }),
+        ContentBlockStopEvent.model_validate({
+            "index": 1,
+            "type": "content_block_stop",
+            "content_block": {
+                "id": "toolu_01JxBsKfpT7qKZVhHnHub9tv",
+                "input": {
+                    "a": 5,
+                    "b": 81
+                },
+                "name": "multiply",
+                "type": "tool_use"
+            }
+        }),
+    ]
+    new_events = [e async for e in _process_stream(fake_async(events))]
+    assert new_events == [
+        ('ai', 'text_event', 'Hello'),
+        ('ai', 'text_event', '!'),
+        ('ai', 'text_event', ' I'),
+        ('ai', 'text_event', "'m"),
+        ('ai', 'text_event', ' Bob'),
+        ('ai', 'text_event', ','),
+        ('ai', 'text_event', ' an'),
+        ('ai', 'text_event', ' AI'),
+        ('ai', 'text_event', ' assistant'),
+        ('ai', 'text_event', '.'),
+        ('ai', 'text_event', ' Let'),
+        ('ai', 'text_event', ' me'),
+        ('ai', 'text_event', ' help'),
+        ('ai', 'text_event', ' you'),
+        ('ai', 'text_event', ' with'),
+        ('ai', 'text_event', ' those'),
+        ('ai', 'text_event', ' calculations'),
+        ('ai', 'text_event', ':'),
+        ('tool_call', 'text_event', 'multiply('),
+        ('tool_call', 'text_event', '{"a": 5'),
+        ('tool_call', 'text_event', ', '),
+        ('tool_call', 'text_event', '"b": 8'),
+        ('tool_call', 'text_event', '1}'),
+        ('tool_call', 'text_event', ')\n'),
+        ('tool_call', 'tool_call_event', {'call_type': 'function', 'call_id': 'toolu_01JxBsKfpT7qKZVhHnHub9tv', 'function': {'name': 'multiply', 'arguments': '{"a": 5, "b": 81}'}}),
     ]

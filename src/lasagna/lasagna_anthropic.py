@@ -5,6 +5,7 @@ from .types import (
     MessageToolResult,
     EventCallback,
     EventPayload,
+    ToolCall,
     Model,
     ModelRecord,
     Cost,
@@ -46,7 +47,7 @@ from anthropic.types.tool_result_block_param import ToolResultBlockParam
 
 from typing import (
     List, Callable, AsyncIterator, Any, cast,
-    Tuple, Dict, Union,
+    Tuple, Dict, Union, Literal,
 )
 
 import asyncio
@@ -287,13 +288,52 @@ def _make_raw_event(event: MessageStreamEvent) -> Dict[str, Any]:
 
 
 async def _process_stream(stream: AsyncIterator[MessageStreamEvent]) -> AsyncIterator[EventPayload]:
+    content: Dict[int, Tuple[Literal['text', 'tool_use'], str, List[str]]] = {}
     async for event in stream:
-        if event.type == 'text':
-            e: EventPayload = ('ai', 'text_event', event.text)
-            yield e
+        if event.type == 'content_block_start':
+            assert event.index not in content
+            if event.content_block.type == 'text':
+                content[event.index] = event.content_block.type, '', [event.content_block.text]
+                if event.content_block.text:
+                    yield 'ai', 'text_event', event.content_block.text
+            elif event.content_block.type == 'tool_use':
+                assert event.content_block.input == {}
+                content[event.index] = event.content_block.type, event.content_block.name, []
+                yield 'tool_call', 'text_event', f'{event.content_block.name}('
+            else:
+                raise ValueError(f"unknown content block type: {event.content_block.type}")
+        elif event.type == 'content_block_delta':
+            assert event.index in content
+            if event.delta.type == 'text_delta':
+                content[event.index][2].append(event.delta.text)
+                if event.delta.text:
+                    yield 'ai', 'text_event', event.delta.text
+            elif event.delta.type == 'input_json_delta':
+                content[event.index][2].append(event.delta.partial_json)
+                if event.delta.partial_json:
+                    yield 'tool_call', 'text_event', event.delta.partial_json
+            else:
+                raise ValueError(f"unknown delta type: {event.delta.type}")
+        elif event.type == 'content_block_stop':
+            assert event.index in content
+            if event.content_block.type == 'text':
+                pass  # nothing more to do... we already streamed all the text
+            elif event.content_block.type == 'tool_use':
+                yield 'tool_call', 'text_event', ')\n'
+                tool_call: ToolCall = {
+                    'call_type': 'function',
+                    'call_id': event.content_block.id,
+                    'function': {
+                        'name': event.content_block.name,
+                        'arguments': json.dumps(event.content_block.input),
+                    },
+                }
+                yield 'tool_call', 'tool_call_event', tool_call
+            else:
+                raise ValueError(f"unknown content block type: {event.content_block.type}")
         else:
-            # TODO
-            _LOG.warning(f"unhandled event type: {event.type}")
+            # The other events we can ignore, I think.
+            pass
 
 
 def _log_dumps(val: Any) -> str:
