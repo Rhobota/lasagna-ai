@@ -10,5 +10,5 @@ def test_attempt_load_known_providers():
     AGENTS.clear()
     PROVIDERS.clear()
     attempt_load_all_known_providers()
-    assert len(PROVIDERS) == 1
+    assert len(PROVIDERS) == 2
     assert len(AGENTS) == 0
