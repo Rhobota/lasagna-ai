@@ -8,7 +8,41 @@ from .types import (
     Message,
     ToolCall,
     ToolResult,
+    ToolParam,
 )
+
+
+def convert_to_json_schema(params: List[ToolParam]) -> Dict[str, object]:
+    def convert_type(t: str) -> Dict[str, object]:
+        if t.startswith('enum '):
+            return {
+                "type": "string",
+                "enum": t.split()[1:],
+            }
+        else:
+            return {
+                "type": {
+                    'str': 'string',
+                    'float': 'number',
+                    'int': 'integer',
+                    'bool': 'boolean',
+                }[t],
+            }
+    return {
+        "type": "object",
+        "properties": {
+            p['name']: {
+                **convert_type(p['type']),
+                "description": p['description'],
+            }
+            for p in params
+        },
+        "required": [
+            p['name']
+            for p in params
+            if not p['description'].startswith('(optional)')
+        ],
+    }
 
 
 async def handle_tools(

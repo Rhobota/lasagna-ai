@@ -6,7 +6,6 @@ from .types import (
     EventPayload,
     Model,
     ToolCall,
-    ToolParam,
     ModelRecord,
     Cost,
 )
@@ -25,7 +24,11 @@ from .util import (
     recursive_hash,
 )
 
-from .tools import handle_tools, build_tool_response_message
+from .tools import (
+    convert_to_json_schema,
+    handle_tools,
+    build_tool_response_message,
+)
 
 from openai import AsyncOpenAI, NOT_GIVEN, NotGiven
 from openai.types.chat import (
@@ -164,39 +167,6 @@ async def _extract_deltas(
         yield single_choice.delta, single_choice.finish_reason
 
 
-def _convert_to_json_schema(params: List[ToolParam]) -> Dict[str, object]:
-    def convert_type(t: str) -> Dict[str, object]:
-        if t.startswith('enum '):
-            return {
-                "type": "string",
-                "enum": t.split()[1:],
-            }
-        else:
-            return {
-                "type": {
-                    'str': 'string',
-                    'float': 'number',
-                    'int': 'integer',
-                    'bool': 'boolean',
-                }[t],
-            }
-    return {
-        "type": "object",
-        "properties": {
-            p['name']: {
-                **convert_type(p['type']),
-                "description": p['description'],
-            }
-            for p in params
-        },
-        "required": [
-            p['name']
-            for p in params
-            if not p['description'].startswith('(optional)')
-        ],
-    }
-
-
 def _convert_to_openai_tool(tool: Callable) -> ChatCompletionToolParam:
     description, params = parse_docstring(tool.__doc__ or '')
     return {
@@ -204,7 +174,7 @@ def _convert_to_openai_tool(tool: Callable) -> ChatCompletionToolParam:
         'function': {
             'name': tool.__name__,
             'description': description,
-            'parameters': _convert_to_json_schema(params),
+            'parameters': convert_to_json_schema(params),
         },
     }
 
