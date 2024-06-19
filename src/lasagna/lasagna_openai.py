@@ -6,8 +6,6 @@ from .types import (
     EventPayload,
     Model,
     ToolCall,
-    ToolParam,
-    ToolResult,
     ModelRecord,
     Cost,
 )
@@ -24,6 +22,12 @@ from .util import (
     convert_to_image_url,
     exponential_backoff_retry_delays,
     recursive_hash,
+)
+
+from .tools import (
+    convert_to_json_schema,
+    handle_tools,
+    build_tool_response_message,
 )
 
 from openai import AsyncOpenAI, NOT_GIVEN, NotGiven
@@ -45,7 +49,6 @@ from typing import (
 import asyncio
 import copy
 import json
-import inspect
 
 import logging
 
@@ -164,39 +167,6 @@ async def _extract_deltas(
         yield single_choice.delta, single_choice.finish_reason
 
 
-def _convert_to_json_schema(params: List[ToolParam]) -> Dict[str, object]:
-    def convert_type(t: str) -> Dict[str, object]:
-        if t.startswith('enum '):
-            return {
-                "type": "string",
-                "enum": t.split()[1:],
-            }
-        else:
-            return {
-                "type": {
-                    'str': 'string',
-                    'float': 'number',
-                    'int': 'integer',
-                    'bool': 'boolean',
-                }[t],
-            }
-    return {
-        "type": "object",
-        "properties": {
-            p['name']: {
-                **convert_type(p['type']),
-                "description": p['description'],
-            }
-            for p in params
-        },
-        "required": [
-            p['name']
-            for p in params
-            if not p['description'].startswith('(optional)')
-        ],
-    }
-
-
 def _convert_to_openai_tool(tool: Callable) -> ChatCompletionToolParam:
     description, params = parse_docstring(tool.__doc__ or '')
     return {
@@ -204,7 +174,7 @@ def _convert_to_openai_tool(tool: Callable) -> ChatCompletionToolParam:
         'function': {
             'name': tool.__name__,
             'description': description,
-            'parameters': _convert_to_json_schema(params),
+            'parameters': convert_to_json_schema(params),
         },
     }
 
@@ -246,28 +216,30 @@ async def _convert_to_openai_messages(messages: List[Message]) -> List[ChatCompl
     for m in messages:
         if m['role'] == 'tool_call':
             tool_calls = m['tools']
+            for tool_call in tool_calls:
+                assert tool_call['call_type'] == 'function', 'OpenAI only supports function tools, so far.'
             ms.append({
                 'role': 'assistant',
                 'content': None,
                 'tool_calls': [
                     {
-                        'id': t['call_id'],
-                        'type': t['call_type'],
+                        'id': tool_call['call_id'],
+                        'type': tool_call['call_type'],
                         'function': {
-                            'name': t['function']['name'],
-                            'arguments': t['function']['arguments'],
+                            'name': tool_call['function']['name'],
+                            'arguments': tool_call['function']['arguments'],
                         },
                     }
-                    for t in tool_calls
+                    for tool_call in tool_calls
                 ],
             })
         elif m['role'] == 'tool_res':
             tool_results = m['tools']
-            for t in tool_results:
+            for tool_result in tool_results:
                 ms.append({
                     'role': 'tool',
-                    'content': str(t['result']),
-                    'tool_call_id': t['call_id'],
+                    'content': str(tool_result['result']),
+                    'tool_call_id': tool_result['call_id'],
                 })
         elif m['role'] == 'system':
             if 'media' in m and len(m['media']) > 0:
@@ -368,45 +340,6 @@ def _build_messages_from_openai_payload(
         return [tool_message]
     else:
         raise ValueError('no events')
-
-
-async def _handle_tools(
-    messages: List[Message],
-    tools_map: Dict[str, Callable],
-) -> Union[List[ToolResult], None]:
-    assert len(messages) > 0
-    message = messages[-1]   # <-- the tool message will be last, if at all
-    if message['role'] != 'tool_call':
-        return None
-    to_gather: List[asyncio.Task[ToolResult]] = []
-    for t in message['tools']:
-        assert t['call_type'] == 'function'
-        async def _go(t: ToolCall) -> ToolResult:
-            call_id = 'unknown'
-            try:
-                call_id = t['call_id']
-                func = tools_map[t['function']['name']]
-                args = t['function']['arguments']
-                if inspect.iscoroutinefunction(func):
-                    res = await func(**json.loads(args))
-                else:
-                    def _wrapped_sync() -> Any:
-                        return func(**json.loads(args))
-                    loop = asyncio.get_running_loop()
-                    res = await loop.run_in_executor(None, _wrapped_sync)
-                return {'call_id': call_id, 'result': res}
-            except Exception as e:
-                error = f"{type(e).__name__}: {e}"
-                return {'call_id': call_id, 'result': error}
-        to_gather.append(asyncio.create_task(_go(t)))
-    return await asyncio.gather(*to_gather)
-
-
-def _build_tool_response_message(tool_results: List[ToolResult]) -> Message:
-    return {
-        'role': 'tool_res',
-        'tools': tool_results,
-    }
 
 
 def _log_dumps(val: Any) -> str:
@@ -565,12 +498,12 @@ class LasagnaOpenAI(Model):
             tools_map = {tool.__name__: tool for tool in tools}
             new_messages.extend(new_messages_here)
             messages.extend(new_messages_here)
-            tools_results = await _handle_tools(new_messages_here, tools_map)
+            tools_results = await handle_tools(new_messages_here, tools_map)
             if tools_results is None:
                 break
             for tool_result in tools_results:
                 await event_callback(('tool_res', 'tool_res_event', tool_result))
-            tool_response_message = _build_tool_response_message(tools_results)
+            tool_response_message = build_tool_response_message(tools_results)
             new_messages.append(tool_response_message)
             messages.append(tool_response_message)
         return new_messages

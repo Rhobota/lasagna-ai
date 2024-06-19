@@ -23,7 +23,9 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+  "aiohttp[speedups]",
+]
 
 [project.urls]
 Documentation = "https://github.com/Rhobota/lasagna-ai#readme"
@@ -35,7 +37,7 @@ openai = [
   "openai>=1.34.0",
 ]
 anthropic = [
-  "anthropic>=0.26.1",
+  "anthropic>=0.28.1",
 ]
 dev = [
   "mypy>=1.10.0",

@@ -3,13 +3,14 @@ import mimetypes
 import asyncio
 import hashlib
 import base64
+import aiohttp
 import os
 import re
 
 from typing import Tuple, List, Literal, Union, TypeVar, Callable, Protocol, Any
 from typing_extensions import Buffer
 
-from .types import ToolParam
+from .types import ToolParam, ImageMimeTypes
 
 
 T = TypeVar('T')
@@ -75,11 +76,11 @@ def combine_pairs(
     return res
 
 
-def convert_to_image_url_sync(image_filepath_or_url: str) -> str:
+def _is_remote_or_local(image_filepath_or_url: str) -> Tuple[bool, str]:
     parsed_url = urlparse(image_filepath_or_url)
     if parsed_url.scheme in ('http', 'https'):
         # The string is already a remote URL, so just return it.
-        return image_filepath_or_url
+        return True, image_filepath_or_url
 
     if image_filepath_or_url.startswith('file://'):
         local_path = image_filepath_or_url[7:]
@@ -89,10 +90,37 @@ def convert_to_image_url_sync(image_filepath_or_url: str) -> str:
     if not os.path.isfile(local_path):
         raise ValueError(f'cannot find file: {image_filepath_or_url}')
 
-    mimetype = mimetypes.guess_type(local_path)[0]
+    return False, local_path
 
-    with open(local_path, "rb") as f:
-        img_encoded = base64.b64encode(f.read()).decode('utf-8')
+
+def _read_as_base64(filepath: str) -> str:
+    with open(filepath, "rb") as f:
+        return base64.b64encode(f.read()).decode('utf-8')
+
+
+async def _http_get_as_base64(url: str) -> str:
+    async with aiohttp.ClientSession(raise_for_status=True) as session:
+        async with session.get(url) as response:
+            data = await response.read()
+            return base64.b64encode(data).decode('utf-8')
+
+
+def _get_image_mimetype(path: str) -> ImageMimeTypes:
+    mimetype = mimetypes.guess_type(path)[0]
+    if mimetype is None:
+        raise ValueError(f"unknown mimetype for file: {path}")
+    return mimetype  # type: ignore
+
+
+def convert_to_image_url_sync(image_filepath_or_url: str) -> str:
+    is_remote, image_filepath_or_url = _is_remote_or_local(image_filepath_or_url)
+    if is_remote:
+        return image_filepath_or_url
+    else:
+        local_path = image_filepath_or_url
+
+    mimetype = _get_image_mimetype(local_path)
+    img_encoded = _read_as_base64(local_path)
 
     return f"data:{mimetype};base64,{img_encoded}"
 
@@ -100,6 +128,17 @@ def convert_to_image_url_sync(image_filepath_or_url: str) -> str:
 async def convert_to_image_url(image_filepath_or_url: str) -> str:
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(None, convert_to_image_url_sync, image_filepath_or_url)
+
+
+async def convert_to_image_base64(image_filepath_or_url: str) -> Tuple[ImageMimeTypes, str]:
+    is_remote, image_filepath_or_url = _is_remote_or_local(image_filepath_or_url)
+    mimetype = _get_image_mimetype(image_filepath_or_url)
+    if is_remote:
+        data = await _http_get_as_base64(image_filepath_or_url)
+    else:
+        loop = asyncio.get_running_loop()
+        data = await loop.run_in_executor(None, _read_as_base64, image_filepath_or_url)
+    return mimetype, data
 
 
 def exponential_backoff_retry_delays(
