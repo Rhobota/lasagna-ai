@@ -50,7 +50,7 @@ async def handle_tools(
     tools_map: Dict[str, Callable],
 ) -> Union[List[ToolResult], None]:
     assert len(messages) > 0
-    message = messages[-1]   # <-- the tool message will be last, if at all
+    message = messages[-1]   # <-- the tool message will be last, if at all TODO: is this true for Anthropic?
     if message['role'] != 'tool_call':
         return None
     to_gather: List[asyncio.Task[ToolResult]] = []

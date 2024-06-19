@@ -6,20 +6,16 @@ from .types import (
     EventCallback,
     EventPayload,
     Model,
-    ToolCall,
     ModelRecord,
     Cost,
 )
 
 from .stream import (
-    apeek,
     adup,
-    prefix_stream,
 )
 
 from .util import (
     parse_docstring,
-    combine_pairs,
     convert_to_image_base64,
     exponential_backoff_retry_delays,
     recursive_hash,
@@ -31,9 +27,17 @@ from .tools import (
     build_tool_response_message,
 )
 
-from anthropic import AsyncAnthropic, NOT_GIVEN, NotGiven
-from anthropic.types import MessageParam
+from anthropic import (
+    AsyncAnthropic,
+    NOT_GIVEN,
+    NotGiven,
+    AnthropicError,
+    APIConnectionError,
+    APIStatusError,
+)
+from anthropic.types import MessageParam, ToolParam
 from anthropic.types.message import Message as AnthropicMessage
+from anthropic.types.message_create_params import ToolChoice
 from anthropic.lib.streaming._types import MessageStreamEvent
 from anthropic.types.text_block_param import TextBlockParam
 from anthropic.types.image_block_param import ImageBlockParam
@@ -42,7 +46,7 @@ from anthropic.types.tool_result_block_param import ToolResultBlockParam
 
 from typing import (
     List, Callable, AsyncIterator, Any, cast,
-    Tuple, Dict, Optional, Union, Literal,
+    Tuple, Dict, Union,
 )
 
 import asyncio
@@ -158,6 +162,22 @@ def _collapse_anthropic_messages(
     return ms
 
 
+def _collapse_tool_call_messages(
+    messages: List[Message],
+) -> List[Message]:
+    ms: List[Message] = []
+    for i, m in enumerate(messages):
+        if i == 0:
+            ms.append(m)
+            continue
+        prev_m = ms[-1]
+        if prev_m['role'] == 'tool_call' and m['role'] == 'tool_call':
+            prev_m['tools'].extend(m['tools'])
+        else:
+            ms.append(m)
+    return ms
+
+
 async def _convert_to_anthropic_messages(
     messages: List[Message],
 ) -> Tuple[Union[str, None], List[MessageParam]]:
@@ -211,9 +231,20 @@ def _build_messages_from_anthropic_payload(
                 'text': c.text,
             })
         elif c.type == 'tool_use':
-            pass  # TODO
+            ms.append({
+                'role': 'tool_call',
+                'tools': [{
+                    'call_id': c.id,
+                    'call_type': 'function',
+                    'function': {
+                        'name': c.name,
+                        'arguments': json.dumps(c.input),
+                    },
+                }],
+            })
         else:
             raise ValueError(f"unknown content type: {c.type}")
+    ms = _collapse_tool_call_messages(ms)
     if len(ms) == 0:
         raise ValueError("no content")
     last_message = ms[-1]
@@ -230,11 +261,39 @@ def _build_messages_from_anthropic_payload(
     return ms
 
 
+def _convert_to_anthropic_tool(tool: Callable) -> ToolParam:
+    description, params = parse_docstring(tool.__doc__ or '')
+    return {
+        'name': tool.__name__,
+        'description': description,
+        'input_schema': convert_to_json_schema(params),
+    }
+
+
+def _convert_to_anthropic_tools(tools: List[Callable]) -> Union[NotGiven, List[ToolParam]]:
+    if len(tools) == 0:
+        return NOT_GIVEN
+    specs = [_convert_to_anthropic_tool(tool) for tool in tools]
+    return specs
+
+
+def _make_raw_event(event: MessageStreamEvent) -> Dict[str, Any]:
+    d = event.to_dict()
+    if 'snapshot' in d:
+        # This accumulated text is overkill.
+        # It is O(n^2) in storage, so we don't want this in our database.
+        del d['snapshot']
+    return d
+
+
 async def _process_stream(stream: AsyncIterator[MessageStreamEvent]) -> AsyncIterator[EventPayload]:
     async for event in stream:
-        # TODO
-        e: EventPayload = ('ai', 'text_event', '')
-        yield e
+        if event.type == 'text':
+            e: EventPayload = ('ai', 'text_event', event.text)
+            yield e
+        else:
+            # TODO
+            _LOG.warning(f"unhandled event type: {event.type}")
 
 
 def _log_dumps(val: Any) -> str:
@@ -269,49 +328,56 @@ class LasagnaAnthropic(Model):
         tools: List[Callable],
         force_tool: bool,
     ) -> List[Message]:
-        #tool_choice: Union[ChatCompletionToolChoiceOptionParam, NotGiven]
-        #if force_tool:
-        #    if len(tools) == 0:
-        #        raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
-        #    elif len(tools) == 1:
-        #        tool_choice = {
-        #            "type": "function",
-        #            "function": {"name": tools[0].__name__},
-        #        }
-        #    else:
-        #        tool_choice = 'required'  # <-- model must use a tool, but is allowed to choose which one on its own
-        #else:
-        #    tool_choice = NOT_GIVEN  # <-- if tools given, the model can choose to use them or not
-        tool_choice = NOT_GIVEN  # TODO remove me when above is done
+        tool_choice: Union[ToolChoice, NotGiven]
+        if force_tool:
+            if len(tools) == 0:
+                raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
+            elif len(tools) == 1:
+                tool_choice = {
+                    "type": "tool",
+                    "name": tools[0].__name__,
+                }
+            else:
+                tool_choice = {
+                    "type": "any",   # <-- model must use a tool, but is allowed to choose which one on its own
+                }
+        else:
+            tool_choice = NOT_GIVEN  # <-- if tools given, the model can choose to use them or not
 
-        #tools_spec = _convert_to_anthropic_tools(tools)
-        tools_spec = {}  # TODO remove me when above is done
+        tools_spec = _convert_to_anthropic_tools(tools)
 
         system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
 
         max_tokens: int = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else 4096
-        #frequency_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['frequency_penalty']) if 'frequency_penalty' in self.model_kwargs else NOT_GIVEN
-        #presence_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['presence_penalty']) if 'presence_penalty' in self.model_kwargs else NOT_GIVEN
-        #max_tokens: Union[int, NotGiven] = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else NOT_GIVEN
-        #stop: Union[List[str], NotGiven] = cast(List[str], self.model_kwargs['stop']) if 'stop' in self.model_kwargs else NOT_GIVEN
-        #temperature: Union[float, NotGiven] = cast(float, self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
-        #top_p: Union[float, NotGiven] = cast(float, self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
-        #user: Union[str, NotGiven] = cast(str, self.model_kwargs['user']) if 'user' in self.model_kwargs else NOT_GIVEN
+        stop: Union[List[str], NotGiven] = cast(List[str], self.model_kwargs['stop']) if 'stop' in self.model_kwargs else NOT_GIVEN
+        temperature: Union[float, NotGiven] = cast(float, self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
+        top_p: Union[float, NotGiven] = cast(float, self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
+        top_k: Union[int, NotGiven] = cast(int, self.model_kwargs['top_k']) if 'top_k' in self.model_kwargs else NOT_GIVEN
+        user: Union[str, None] = cast(str, self.model_kwargs['user']) if 'user' in self.model_kwargs else None
 
         _LOG.info(f"Invoking {self.model} with:\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
 
         client = AsyncAnthropic()
         async with client.messages.stream(
-            model    = self.model,
-            system   = system_prompt or NOT_GIVEN,
-            messages = anthropic_messages,
-            max_tokens = max_tokens,
-            # TODO pass tools, tool_choice, logprobs, model_kwargs
+            model       = self.model,
+            system      = system_prompt or NOT_GIVEN,
+            messages    = anthropic_messages,
+            max_tokens  = max_tokens,
+            tools       = tools_spec,
+            tool_choice = tool_choice,
+            temperature = temperature,
+            top_p       = top_p,
+            top_k       = top_k,
+            metadata    = {
+                'user_id': user,
+            },
+            stop_sequences = stop,
+            # Anthropic doesn't support sending logprobs 👎
         ) as stream:
             raw_stream, rt_stream = adup(stream)
             async for event in _process_stream(rt_stream):
                 await event_callback(event)
-            raw_events = [v.to_dict() async for v in raw_stream]
+            raw_events = [_make_raw_event(v) async for v in raw_stream]
             anthropic_message = await stream.get_final_message()
             new_messages = _build_messages_from_anthropic_payload(raw_events, anthropic_message)
 
@@ -336,17 +402,29 @@ class LasagnaAnthropic(Model):
                     tools = tools,
                     force_tool = force_tool,
                 )
-            except Exception as e:
+            except AnthropicError as e:
                 # Some errors should be retried, some should not. Below
                 # is the logic to decide when to retry vs when to not.
                 # It's likely this will change as we get more usage and see
                 # where Anthropic tends to fail, and when we know more what is
                 # recoverable vs not.
                 last_error = e
-                # TODO: need to figure out what errors are throw for, e.g.:
-                #  - no/invalid api key (not recoverable)
-                #  - context lenght exceeded (not recoverable)
-                #  - server error (recoverable)
+                if isinstance(e, APIConnectionError):
+                    # Network connection error. We can retry this.
+                    pass
+                elif isinstance(e, APIStatusError):
+                    if 400 <= e.status_code < 500:
+                        # This is a request error. Not recoverable.
+                        raise
+                    elif e.status_code >= 500:
+                        # Server error, so we can retry this.
+                        pass
+                    else:
+                        # Something else??? This is weird, so let's bail.
+                        raise
+                else:
+                    # Some other error that we don't know about. Let's bail.
+                    raise
                 if delay_on_error > 0.0:
                     _LOG.warning(f"Got a maybe-recoverable error (will retry in {delay_on_error:.2f} seconds): {e}")
                     await asyncio.sleep(delay_on_error)
