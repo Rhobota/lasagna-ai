@@ -315,14 +315,16 @@ async def test_convert_to_image_url():
 
 @pytest.mark.asyncio
 async def test_convert_to_image_base64():
-    url = 'https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/lasagna-ai.png'
-    mimetype, s = await convert_to_image_base64(url)
-    assert mimetype == 'image/png'
-    assert len(s) > 1000
+    # Disabled so that our tests don't make remote calls.
+    #url = 'https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/lasagna-ai.png'
+    #mimetype, s = await convert_to_image_base64(url)
+    #assert mimetype == 'image/png'
+    #assert len(s) > 1000
 
-    with pytest.raises(Exception):
-        url = 'https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/DOES_NOT_EXIST.png'
-        await convert_to_image_base64(url)
+    # Disabled so that our tests don't make remote calls.
+    #with pytest.raises(Exception):
+    #    url = 'https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/DOES_NOT_EXIST.png'
+    #    await convert_to_image_base64(url)
 
     with tempfile.TemporaryDirectory() as tmp:
         fn = os.path.join(tmp, 'a.jpeg')

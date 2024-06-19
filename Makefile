@@ -10,7 +10,7 @@ help :
 	@echo
 
 test :
-	hatch test -i python=3.8 -v
+	hatch test -i python=3.8 -vv
 
 check :
 	hatch run +python=3.8 types:check
