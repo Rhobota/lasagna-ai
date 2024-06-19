@@ -14,6 +14,72 @@ from lasagna.tools import (
 )
 
 
+def test_convert_to_json_schema():
+    j = convert_to_json_schema([
+        {
+            'name': 'a',
+            'type': 'str',
+            'description': 'param a',
+        },
+        {
+            'name': 'second',
+            'type': 'float',
+            'description': 'second param',
+        },
+        {
+            'name': 'another',
+            'type': 'int',
+            'description': 'another param',
+        },
+        {
+            'name': 'yet_another',
+            'type': 'bool',
+            'description': 'yet another param',
+        },
+        {
+            'name': 'an_enum',
+            'type': 'enum cat dog house',
+            'description': 'an enum param',
+        },
+        {
+            'name': 'last_param',
+            'type': 'bool',
+            'description': '(optional) you can pass this if you want',
+        },
+    ])
+    assert j == {
+        'type': 'object',
+        'properties': {
+            'a': {
+                'type': 'string',
+                'description': 'param a',
+            },
+            'second': {
+                'type': 'number',
+                'description': 'second param',
+            },
+            'another': {
+                'type': 'integer',
+                'description': 'another param',
+            },
+            'yet_another': {
+                'type': 'boolean',
+                'description': 'yet another param',
+            },
+            'an_enum': {
+                'type': 'string',
+                'enum': ['cat', 'dog', 'house'],
+                'description': 'an enum param',
+            },
+            'last_param': {
+                'type': 'boolean',
+                'description': '(optional) you can pass this if you want',
+            },
+        },
+        'required': ['a', 'second', 'another', 'yet_another', 'an_enum'],
+    }
+
+
 def tool_a(first, second, third=5):
     return first + second + third
 
