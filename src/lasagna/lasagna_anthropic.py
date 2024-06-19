@@ -395,7 +395,7 @@ class LasagnaAnthropic(Model):
         top_k: Union[int, NotGiven] = cast(int, self.model_kwargs['top_k']) if 'top_k' in self.model_kwargs else NOT_GIVEN
         user: Union[str, None] = cast(str, self.model_kwargs['user']) if 'user' in self.model_kwargs else None
 
-        _LOG.info(f"Invoking {self.model} with:\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
+        _LOG.info(f"Invoking {self.model} with:\n  system_prompt: {system_prompt}\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
 
         client = AsyncAnthropic()
         async with client.messages.stream(

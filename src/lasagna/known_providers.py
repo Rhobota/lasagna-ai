@@ -8,6 +8,7 @@ def attempt_load_all_known_providers() -> None:
     all known providers in the UI somewhere.
     """
     attempt_load_known_providers('openai')
+    attempt_load_known_providers('anthropic')
 
 
 def attempt_load_known_providers(provider: str) -> None:
@@ -40,6 +41,18 @@ def attempt_load_known_providers(provider: str) -> None:
             name = 'OpenAI',
             factory = LasagnaOpenAI,
             models = OPENAI_KNOWN_MODELS,
+        )
+
+    elif provider == 'anthropic':
+        from .lasagna_anthropic import (
+            ANTHROPIC_KNOWN_MODELS,
+            LasagnaAnthropic,
+        )
+        register_provider(
+            key  = 'anthropic',
+            name = 'Anthropic',
+            factory = LasagnaAnthropic,
+            models = ANTHROPIC_KNOWN_MODELS,
         )
 
     else:
