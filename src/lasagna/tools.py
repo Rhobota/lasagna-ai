@@ -72,7 +72,7 @@ async def handle_tools(
                 return {'call_id': call_id, 'result': res}
             except Exception as e:
                 error = f"{type(e).__name__}: {e}"
-                return {'call_id': call_id, 'result': error}
+                return {'call_id': call_id, 'result': error, 'is_error': True}
         to_gather.append(asyncio.create_task(_go(t)))
     return await asyncio.gather(*to_gather)
 
