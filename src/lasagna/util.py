@@ -3,6 +3,7 @@ import mimetypes
 import asyncio
 import hashlib
 import base64
+import aiohttp
 import os
 import re
 
@@ -97,6 +98,13 @@ def _read_as_base64(filepath: str) -> str:
         return base64.b64encode(f.read()).decode('utf-8')
 
 
+async def _http_get_as_base64(url: str) -> str:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            data = await response.read()
+            return base64.b64encode(data).decode('utf-8')
+
+
 def _get_image_mimetype(path: str) -> ImageMimeTypes:
     mimetype = mimetypes.guess_type(path)[0]
     if mimetype is None:
@@ -126,7 +134,7 @@ async def convert_to_image_base64(image_filepath_or_url: str) -> Tuple[ImageMime
     is_remote, image_filepath_or_url = _is_remote_or_local(image_filepath_or_url)
     mimetype = _get_image_mimetype(image_filepath_or_url)
     if is_remote:
-        data = await http_get(image_filepath_or_url)
+        data = await _http_get_as_base64(image_filepath_or_url)
     else:
         loop = asyncio.get_running_loop()
         data = await loop.run_in_executor(None, _read_as_base64, image_filepath_or_url)

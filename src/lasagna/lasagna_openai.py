@@ -216,30 +216,30 @@ async def _convert_to_openai_messages(messages: List[Message]) -> List[ChatCompl
     for m in messages:
         if m['role'] == 'tool_call':
             tool_calls = m['tools']
-            for t in tool_calls:
-                assert t['call_type'] == 'function', 'OpenAI only supports function tools, so far.'
+            for tool_call in tool_calls:
+                assert tool_call['call_type'] == 'function', 'OpenAI only supports function tools, so far.'
             ms.append({
                 'role': 'assistant',
                 'content': None,
                 'tool_calls': [
                     {
-                        'id': t['call_id'],
-                        'type': t['call_type'],
+                        'id': tool_call['call_id'],
+                        'type': tool_call['call_type'],
                         'function': {
-                            'name': t['function']['name'],
-                            'arguments': t['function']['arguments'],
+                            'name': tool_call['function']['name'],
+                            'arguments': tool_call['function']['arguments'],
                         },
                     }
-                    for t in tool_calls
+                    for tool_call in tool_calls
                 ],
             })
         elif m['role'] == 'tool_res':
             tool_results = m['tools']
-            for t in tool_results:
+            for tool_result in tool_results:
                 ms.append({
                     'role': 'tool',
-                    'content': str(t['result']),
-                    'tool_call_id': t['call_id'],
+                    'content': str(tool_result['result']),
+                    'tool_call_id': tool_result['call_id'],
                 })
         elif m['role'] == 'system':
             if 'media' in m and len(m['media']) > 0:

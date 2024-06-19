@@ -23,7 +23,9 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+  "aiohttp[speedups]",
+]
 
 [project.urls]
 Documentation = "https://github.com/Rhobota/lasagna-ai#readme"
