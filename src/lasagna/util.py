@@ -99,7 +99,7 @@ def _read_as_base64(filepath: str) -> str:
 
 
 async def _http_get_as_base64(url: str) -> str:
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(raise_for_status=True) as session:
         async with session.get(url) as response:
             data = await response.read()
             return base64.b64encode(data).decode('utf-8')

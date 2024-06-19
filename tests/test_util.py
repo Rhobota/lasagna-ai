@@ -4,6 +4,7 @@ from lasagna.util import (
     parse_docstring,
     combine_pairs,
     convert_to_image_url,
+    convert_to_image_base64,
     exponential_backoff_retry_delays,
     recursive_hash,
 )
@@ -310,6 +311,50 @@ async def test_convert_to_image_url():
 
     with pytest.raises(ValueError):
         await convert_to_image_url(os.path.join('does', 'not', 'exist.png'))
+
+
+@pytest.mark.asyncio
+async def test_convert_to_image_base64():
+    url = 'https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/lasagna-ai.png'
+    mimetype, s = await convert_to_image_base64(url)
+    assert mimetype == 'image/png'
+    assert len(s) > 1000
+
+    with pytest.raises(Exception):
+        url = 'https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/DOES_NOT_EXIST.png'
+        await convert_to_image_base64(url)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        fn = os.path.join(tmp, 'a.jpeg')
+        with open(fn, 'wb') as f:
+            f.write(b'1234')
+        mimetype, s = await convert_to_image_base64(fn)
+        assert mimetype == 'image/jpeg'
+        assert s == 'MTIzNA=='
+
+        fn = os.path.join(tmp, 'a.png')
+        with open(fn, 'wb') as f:
+            f.write(b'1235')
+        mimetype, s = await convert_to_image_base64(fn)
+        assert mimetype == 'image/png'
+        assert s == 'MTIzNQ=='
+
+        fn = os.path.abspath(fn)
+        with open(fn, 'wb') as f:
+            f.write(b'1235')
+        mimetype, s = await convert_to_image_base64(fn)
+        assert mimetype == 'image/png'
+        assert s == 'MTIzNQ=='
+
+        fn_with_schema = f"file://{fn}"
+        with open(fn, 'wb') as f:
+            f.write(b'1235')
+        mimetype, s = await convert_to_image_base64(fn_with_schema)
+        assert mimetype == 'image/png'
+        assert s == 'MTIzNQ=='
+
+    with pytest.raises(ValueError):
+        await convert_to_image_base64(os.path.join('does', 'not', 'exist.png'))
 
 
 def test_exponential_backoff_retry_delays():
