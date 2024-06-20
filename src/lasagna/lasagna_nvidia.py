@@ -49,6 +49,7 @@ from typing import (
 import asyncio
 import copy
 import json
+import os
 
 import logging
 
@@ -400,8 +401,10 @@ class LasagnaNVIDIA(Model):
         })
 
     def _make_client(self) -> AsyncOpenAI:
-        api_key: Union[str, None] = cast(str, self.model_kwargs['api_key']) if 'api_key' in self.model_kwargs else None
-        base_url: Union[str, None] = cast(str, self.model_kwargs['base_url']) if 'base_url' in self.model_kwargs else None
+        default_api_key = os.environ.get('NGC_API_KEY', None)
+        default_base_url = 'https://integrate.api.nvidia.com/v1'
+        api_key: Union[str, None] = cast(str, self.model_kwargs['api_key']) if 'api_key' in self.model_kwargs else default_api_key
+        base_url: Union[str, None] = cast(str, self.model_kwargs['base_url']) if 'base_url' in self.model_kwargs else default_base_url
         client = AsyncOpenAI(
             api_key  = api_key,
             base_url = base_url,
