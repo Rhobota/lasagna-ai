@@ -1,3 +1,12 @@
+"""
+This module is the Lasagna adapter for the NVIDIA NIM/NGC service.
+
+For more information about the NVIDIA services this adapter is for, see:
+ - https://org.ngc.nvidia.com/
+ - https://build.nvidia.com/explore/reasoning
+ - https://docs.nvidia.com/nim/large-language-models/latest/getting-started.html
+"""
+
 from .types import (
     Message,
     MessageContent,
@@ -92,10 +101,6 @@ NVIDIA_KNOWN_MODELS: List[ModelRecord] = [
     {
         'formal_name': 'microsoft/phi-3-mini-128k-instruct',
         'display_name': 'microsoft/phi-3-mini-128k-instruct',
-    },
-    {
-        'formal_name': 'nvidia/nemotron-4-340b-reward',
-        'display_name': 'nvidia/nemotron-4-340b-reward',
     },
     {
         'formal_name': 'snowflake/arctic',
@@ -507,7 +512,7 @@ class LasagnaNVIDIA(Model):
                 # Some errors should be retried, some should not. Below
                 # is the logic to decide when to retry vs when to not.
                 # It's likely this will change as we get more usage and see
-                # where NVIDIA NIM tends to fail, and when we know more what is
+                # where NVIDIA tends to fail, and when we know more what is
                 # recoverable vs not.
                 last_error = e
                 if e.type == 'invalid_request_error':
