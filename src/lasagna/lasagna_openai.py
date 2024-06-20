@@ -401,6 +401,8 @@ class LasagnaOpenAI(Model):
 
         openai_messages = await _convert_to_openai_messages(messages)
 
+        logprobs: Union[bool, NotGiven] = cast(bool, self.model_kwargs['logprobs']) if 'logprobs' in self.model_kwargs else NOT_GIVEN
+        top_logprobs: Union[int, NotGiven] = cast(int, self.model_kwargs['top_logprobs']) if 'top_logprobs' in self.model_kwargs else (20 if logprobs else NOT_GIVEN)
         frequency_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['frequency_penalty']) if 'frequency_penalty' in self.model_kwargs else NOT_GIVEN
         presence_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['presence_penalty']) if 'presence_penalty' in self.model_kwargs else NOT_GIVEN
         max_tokens: Union[int, NotGiven] = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else NOT_GIVEN
@@ -419,8 +421,8 @@ class LasagnaOpenAI(Model):
             tool_choice  = tool_choice,
             stream       = True,
             stream_options = {'include_usage': True},
-            logprobs     = True,
-            top_logprobs = 20,
+            logprobs     = logprobs,
+            top_logprobs = top_logprobs,
             frequency_penalty = frequency_penalty,
             presence_penalty = presence_penalty,
             max_tokens = max_tokens,
