@@ -361,6 +361,15 @@ class LasagnaAnthropic(Model):
             'model_kwargs': self.model_kwargs,
         })
 
+    def _make_client(self) -> AsyncAnthropic:
+        api_key: Union[str, None] = cast(str, self.model_kwargs['api_key']) if 'api_key' in self.model_kwargs else None
+        base_url: Union[str, None] = cast(str, self.model_kwargs['base_url']) if 'base_url' in self.model_kwargs else None
+        client = AsyncAnthropic(
+            api_key  = api_key,
+            base_url = base_url,
+        )
+        return client
+
     async def _run_once(
         self,
         event_callback: EventCallback,
@@ -397,7 +406,7 @@ class LasagnaAnthropic(Model):
 
         _LOG.info(f"Invoking {self.model} with:\n  system_prompt: {system_prompt}\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
 
-        client = AsyncAnthropic()
+        client = self._make_client()
         async with client.messages.stream(
             model       = self.model,
             system      = system_prompt or NOT_GIVEN,
