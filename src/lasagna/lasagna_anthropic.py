@@ -1,3 +1,10 @@
+"""
+This module is the Lasagna adapter for the Anthropic models.
+
+For more information about the Anthropic models this adapter is for, see:
+ - https://docs.anthropic.com/en/docs/welcome
+"""
+
 from .types import (
     Message,
     MessageContent,

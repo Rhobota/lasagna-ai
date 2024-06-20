@@ -1,3 +1,10 @@
+"""
+This module is the Lasagna adapter for the OpenAI models.
+
+For more information about the OpenAI models this adapter is for, see:
+ - https://platform.openai.com/docs/models
+"""
+
 from .types import (
     Message,
     MessageContent,
