@@ -9,6 +9,7 @@ def attempt_load_all_known_providers() -> None:
     """
     attempt_load_known_providers('openai')
     attempt_load_known_providers('anthropic')
+    attempt_load_known_providers('nvidia')
 
 
 def attempt_load_known_providers(provider: str) -> None:
@@ -53,6 +54,18 @@ def attempt_load_known_providers(provider: str) -> None:
             name = 'Anthropic',
             factory = LasagnaAnthropic,
             models = ANTHROPIC_KNOWN_MODELS,
+        )
+
+    elif provider == 'nvidia':
+        from .lasagna_nvidia import (
+            NVIDIA_KNOWN_MODELS,
+            LasagnaNVIDIA,
+        )
+        register_provider(
+            key  = 'nvidia',
+            name = 'NVIDIA',
+            factory = LasagnaNVIDIA,
+            models = NVIDIA_KNOWN_MODELS,
         )
 
     else:
