@@ -25,6 +25,7 @@ classifiers = [
 ]
 dependencies = [
   "aiohttp[speedups]",
+  "python-dotenv",
 ]
 
 [project.urls]
