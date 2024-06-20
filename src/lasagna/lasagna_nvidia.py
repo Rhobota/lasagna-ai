@@ -113,7 +113,7 @@ async def _process_text_stream(
             if text is not None:
                 yield 'ai', 'text_event', str(text)
             return
-        if text is None:
+        elif delta.tool_calls is not None:
             # The model is switching from text to tools!
             yield 'ai', 'text_event', "\n\n"
             put_back_val: Tuple[ChoiceDelta, Union[str, None]] = (delta, finish_reason)
@@ -122,7 +122,8 @@ async def _process_text_stream(
             async for subval in substream:
                 yield subval
             return
-        yield 'ai', 'text_event', str(text)
+        elif text is not None:
+            yield 'ai', 'text_event', str(text)
 
 
 async def _process_tool_call_stream(
@@ -178,7 +179,7 @@ async def _process_output_stream(
 ) -> AsyncIterator[EventPayload]:
     first, stream = await apeek(stream, n=1)
     first_delta, _ = first[0]
-    is_text = first_delta.content is not None   # <-- hacky, but works?
+    is_text = first_delta.tool_calls is None   # <-- hacky, but works?
     if is_text:
         gen = _process_text_stream
     else:
@@ -221,9 +222,11 @@ def _convert_to_openai_tools(tools: List[Callable]) -> Union[NotGiven, List[Chat
 
 async def _make_openai_content(
     message: MessageContent,
-) -> List[ChatCompletionContentPartParam]:
+) -> Union[str, List[ChatCompletionContentPartParam]]:
     ret: List[ChatCompletionContentPartParam] = []
-    if message['text']:
+    if message['text'] and not message.get('media'):
+        return message['text']
+    elif message['text']:
         ret.append({
             'type': 'text',
             'text': message['text'],
@@ -440,7 +443,7 @@ class LasagnaNVIDIA(Model):
         top_logprobs: Union[int, NotGiven] = cast(int, self.model_kwargs['top_logprobs']) if 'top_logprobs' in self.model_kwargs else (5 if logprobs else NOT_GIVEN)
         frequency_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['frequency_penalty']) if 'frequency_penalty' in self.model_kwargs else NOT_GIVEN
         presence_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['presence_penalty']) if 'presence_penalty' in self.model_kwargs else NOT_GIVEN
-        max_tokens: Union[int, NotGiven] = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else NOT_GIVEN
+        max_tokens: Union[int, NotGiven] = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else 1024
         stop: Union[List[str], NotGiven] = cast(List[str], self.model_kwargs['stop']) if 'stop' in self.model_kwargs else NOT_GIVEN
         temperature: Union[float, NotGiven] = cast(float, self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
         top_p: Union[float, NotGiven] = cast(float, self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
@@ -455,7 +458,7 @@ class LasagnaNVIDIA(Model):
             tools        = tools_spec,
             tool_choice  = tool_choice,
             stream       = True,
-            stream_options = {'include_usage': True},
+            #stream_options = {'include_usage': True},
             logprobs     = logprobs,
             top_logprobs = top_logprobs,
             frequency_penalty = frequency_penalty,
