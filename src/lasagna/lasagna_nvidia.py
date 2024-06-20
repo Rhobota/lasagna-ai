@@ -1,8 +1,10 @@
 """
-This module is the Lasagna adapter for the OpenAI models.
+This module is the Lasagna adapter for the NVIDIA NIM/NGC service.
 
-For more information about the OpenAI models this adapter is for, see:
- - https://platform.openai.com/docs/models
+For more information about the NVIDIA services this adapter is for, see:
+ - https://org.ngc.nvidia.com/
+ - https://build.nvidia.com/explore/reasoning
+ - https://docs.nvidia.com/nim/large-language-models/latest/getting-started.html
 """
 
 from .types import (
@@ -56,24 +58,53 @@ from typing import (
 import asyncio
 import copy
 import json
+import os
 
 import logging
 
 _LOG = logging.getLogger(__name__)
 
 
-OPENAI_KNOWN_MODELS: List[ModelRecord] = [
+NVIDIA_KNOWN_MODELS: List[ModelRecord] = [
     {
-        'formal_name': 'gpt-4o-2024-05-13',
-        'display_name': 'GPT-4o',
+        'formal_name': 'meta/llama3-70b-instruct',
+        'display_name': 'meta/llama3-70b-instruct',
     },
     {
-        'formal_name': 'gpt-4-turbo-2024-04-09',
-        'display_name': 'GPT-4',
+        'formal_name': 'meta/llama3-8b-instruct',
+        'display_name': 'meta/llama3-8b-instruct',
     },
     {
-        'formal_name': 'gpt-3.5-turbo-0125',
-        'display_name': 'GPT-3.5',
+        'formal_name': 'mistralai/mistral-large',
+        'display_name': 'mistralai/mistral-large',
+    },
+    {
+        'formal_name': 'mistralai/codestral-22b-instruct-v0.1',
+        'display_name': 'mistralai/codestral-22b-instruct-v0.1',
+    },
+    {
+        'formal_name': 'mistralai/mixtral-8x22b-instruct-v0.1',
+        'display_name': 'mistralai/mixtral-8x22b-instruct-v0.1',
+    },
+    {
+        'formal_name': 'mistralai/mixtral-8x7b-instruct-v0.1',
+        'display_name': 'mistralai/mixtral-8x7b-instruct-v0.1',
+    },
+    {
+        'formal_name': 'google/gemma-7b',
+        'display_name': 'google/gemma-7b',
+    },
+    {
+        'formal_name': 'google/recurrentgemma-2b',
+        'display_name': 'google/recurrentgemma-2b',
+    },
+    {
+        'formal_name': 'microsoft/phi-3-mini-128k-instruct',
+        'display_name': 'microsoft/phi-3-mini-128k-instruct',
+    },
+    {
+        'formal_name': 'snowflake/arctic',
+        'display_name': 'snowflake/arctic',
     },
 ]
 
@@ -87,7 +118,7 @@ async def _process_text_stream(
             if text is not None:
                 yield 'ai', 'text_event', str(text)
             return
-        if text is None:
+        elif delta.tool_calls is not None:
             # The model is switching from text to tools!
             yield 'ai', 'text_event', "\n\n"
             put_back_val: Tuple[ChoiceDelta, Union[str, None]] = (delta, finish_reason)
@@ -96,7 +127,8 @@ async def _process_text_stream(
             async for subval in substream:
                 yield subval
             return
-        yield 'ai', 'text_event', str(text)
+        elif text is not None:
+            yield 'ai', 'text_event', str(text)
 
 
 async def _process_tool_call_stream(
@@ -152,7 +184,7 @@ async def _process_output_stream(
 ) -> AsyncIterator[EventPayload]:
     first, stream = await apeek(stream, n=1)
     first_delta, _ = first[0]
-    is_text = first_delta.content is not None   # <-- hacky, but works?
+    is_text = first_delta.tool_calls is None   # <-- hacky, but works?
     if is_text:
         gen = _process_text_stream
     else:
@@ -195,9 +227,11 @@ def _convert_to_openai_tools(tools: List[Callable]) -> Union[NotGiven, List[Chat
 
 async def _make_openai_content(
     message: MessageContent,
-) -> List[ChatCompletionContentPartParam]:
+) -> Union[str, List[ChatCompletionContentPartParam]]:
     ret: List[ChatCompletionContentPartParam] = []
-    if message['text']:
+    if message['text'] and not message.get('media'):
+        return message['text']
+    elif message['text']:
         ret.append({
             'type': 'text',
             'text': message['text'],
@@ -224,7 +258,7 @@ async def _convert_to_openai_messages(messages: List[Message]) -> List[ChatCompl
         if m['role'] == 'tool_call':
             tool_calls = m['tools']
             for tool_call in tool_calls:
-                assert tool_call['call_type'] == 'function', 'OpenAI only supports function tools, so far.'
+                assert tool_call['call_type'] == 'function'
             ms.append({
                 'role': 'assistant',
                 'content': None,
@@ -356,11 +390,11 @@ def _log_dumps(val: Any) -> str:
         return str(val)
 
 
-class LasagnaOpenAI(Model):
+class LasagnaNVIDIA(Model):
     def __init__(self, model: str, **model_kwargs: Dict[str, Any]):
-        known_model_names = [m['formal_name'] for m in OPENAI_KNOWN_MODELS]
+        known_model_names = [m['formal_name'] for m in NVIDIA_KNOWN_MODELS]
         if model not in known_model_names:
-            raise ValueError(f'unknown model: {model}')
+            _LOG.warning(f'untested model: {model} (may or may not work)')
         self.model = model
         self.model_kwargs = copy.deepcopy(model_kwargs or {})
         self.n_retries: int = cast(int, self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
@@ -369,14 +403,16 @@ class LasagnaOpenAI(Model):
 
     def config_hash(self) -> str:
         return recursive_hash(None, {
-            'provider': 'openai',
+            'provider': 'nvidia',
             'model': self.model,
             'model_kwargs': self.model_kwargs,
         })
 
     def _make_client(self) -> AsyncOpenAI:
-        api_key: Union[str, None] = cast(str, self.model_kwargs['api_key']) if 'api_key' in self.model_kwargs else None
-        base_url: Union[str, None] = cast(str, self.model_kwargs['base_url']) if 'base_url' in self.model_kwargs else None
+        default_api_key = os.environ.get('NGC_API_KEY', None)
+        default_base_url = 'https://integrate.api.nvidia.com/v1'
+        api_key: Union[str, None] = cast(str, self.model_kwargs['api_key']) if 'api_key' in self.model_kwargs else default_api_key
+        base_url: Union[str, None] = cast(str, self.model_kwargs['base_url']) if 'base_url' in self.model_kwargs else default_base_url
         client = AsyncOpenAI(
             api_key  = api_key,
             base_url = base_url,
@@ -409,10 +445,10 @@ class LasagnaOpenAI(Model):
         openai_messages = await _convert_to_openai_messages(messages)
 
         logprobs: Union[bool, NotGiven] = cast(bool, self.model_kwargs['logprobs']) if 'logprobs' in self.model_kwargs else NOT_GIVEN
-        top_logprobs: Union[int, NotGiven] = cast(int, self.model_kwargs['top_logprobs']) if 'top_logprobs' in self.model_kwargs else (20 if logprobs is True else NOT_GIVEN)
+        top_logprobs: Union[int, NotGiven] = cast(int, self.model_kwargs['top_logprobs']) if 'top_logprobs' in self.model_kwargs else (5 if logprobs is True else NOT_GIVEN)
         frequency_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['frequency_penalty']) if 'frequency_penalty' in self.model_kwargs else NOT_GIVEN
         presence_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['presence_penalty']) if 'presence_penalty' in self.model_kwargs else NOT_GIVEN
-        max_tokens: Union[int, NotGiven] = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else NOT_GIVEN
+        max_tokens: Union[int, NotGiven] = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else 1024
         stop: Union[List[str], NotGiven] = cast(List[str], self.model_kwargs['stop']) if 'stop' in self.model_kwargs else NOT_GIVEN
         temperature: Union[float, NotGiven] = cast(float, self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
         top_p: Union[float, NotGiven] = cast(float, self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
@@ -427,7 +463,7 @@ class LasagnaOpenAI(Model):
             tools        = tools_spec,
             tool_choice  = tool_choice,
             stream       = True,
-            stream_options = {'include_usage': True},
+            #stream_options = {'include_usage': True},
             logprobs     = logprobs,
             top_logprobs = top_logprobs,
             frequency_penalty = frequency_penalty,
@@ -476,7 +512,7 @@ class LasagnaOpenAI(Model):
                 # Some errors should be retried, some should not. Below
                 # is the logic to decide when to retry vs when to not.
                 # It's likely this will change as we get more usage and see
-                # where OpenAI tends to fail, and when we know more what is
+                # where NVIDIA tends to fail, and when we know more what is
                 # recoverable vs not.
                 last_error = e
                 if e.type == 'invalid_request_error':
