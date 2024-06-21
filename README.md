@@ -54,7 +54,7 @@ pip install -U lasagna-ai[openai,anthropic]
 
 Lasagna is used in production by:
 
-[![AutoAuto](https://raw.githubusercontent.com/Rhobota/lasagna-ai/cleanup/logos/autoauto.png)](https://www.autoauto.ai/)
+[![AutoAuto](https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/autoauto.png)](https://www.autoauto.ai/)
 
 ## Quickstart
 
@@ -161,7 +161,9 @@ logging.basicConfig(
 
 ## Special Thanks
 
-TODO
+Special thanks to those who inspired this library:
+- Numa Dhamani (buy her book: [Introduction to Generative AI](https://a.co/d/03dHnRmX))
+- Dave DeCaprio's [voice-stream library](https://github.com/DaveDeCaprio/voice-stream)
 
 ## License
 
