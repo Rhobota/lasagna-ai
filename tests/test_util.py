@@ -200,6 +200,13 @@ def test_parse_docstring():
         },
     ]
 
+    desc, params = parse_docstring("""
+        Hi this is the docs.
+        And this is a second line.
+    """)
+    assert desc == "Hi this is the docs. And this is a second line."
+    assert params == []
+
     with pytest.raises(ValueError):
         desc, params = parse_docstring("")
 
