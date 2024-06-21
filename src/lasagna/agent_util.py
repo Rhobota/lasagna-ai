@@ -9,6 +9,7 @@ from .types import (
     AgentCallable,
     BoundAgentCallable,
     EventCallback,
+    EventPayload,
     Message,
 )
 
@@ -49,3 +50,20 @@ def flat_messages(messages: List[Message]) -> AgentRun:
         'type': 'messages',
         'messages': messages,
     }
+
+
+async def noop_callback(event: EventPayload) -> None:
+    # "noop" mean "no operation" means DON'T DO ANYTHING!
+    pass
+
+
+def extract_last_message(
+    agent_run_or_runs: Union[AgentRun, List[AgentRun]],
+) -> Message:
+    if isinstance(agent_run_or_runs, list):
+        messages = recursive_extract_messages(agent_run_or_runs)
+    else:
+        messages = recursive_extract_messages([agent_run_or_runs])
+    if len(messages) == 0:
+        raise ValueError('no messages found')
+    return messages[-1]
