@@ -25,6 +25,10 @@ def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
         to_strip = min(ia, first_indent, len(l))
         lines_stripped.append(l[to_strip:].rstrip())
     dedented_docs = "\n".join(lines_stripped).strip()
+    if ':param:' not in dedented_docs:
+        # Special case where this are no parameters.
+        description = ' '.join(dedented_docs.strip().splitlines())
+        return description, []
     description_match = re.search(r"^(.*?)(?=:param:)", dedented_docs, re.DOTALL)
     if description_match is None:
         raise ValueError("no description found")
