@@ -1,5 +1,9 @@
 from .registrar import register_provider
 
+import logging
+
+_LOG = logging.getLogger(__name__)
+
 
 def attempt_load_all_known_providers() -> None:
     """
@@ -7,9 +11,16 @@ def attempt_load_all_known_providers() -> None:
     at the start of the application. E.g. If you display a list of
     all known providers in the UI somewhere.
     """
-    attempt_load_known_providers('openai')
-    attempt_load_known_providers('anthropic')
-    attempt_load_known_providers('nvidia')
+    providers_to_try_to_load = [
+        'openai',
+        'anthropic',
+        'nvidia',
+    ]
+    for provider in providers_to_try_to_load:
+        try:
+            attempt_load_known_providers(provider)
+        except ImportError:
+            _LOG.warning(f"failed to load provider: {provider}")
 
 
 def attempt_load_known_providers(provider: str) -> None:

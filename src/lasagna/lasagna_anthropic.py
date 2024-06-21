@@ -105,8 +105,6 @@ async def _build_anthropic_content(
                 })
             else:
                 raise ValueError(f"unknown media type: {m['media_type']}")
-    if len(ret) == 0:
-        raise ValueError(f"no content")
     return ret
 
 
@@ -223,6 +221,7 @@ async def _convert_to_anthropic_messages(
                 })
             else:
                 raise ValueError(f"Unknown role: {m['role']}")
+    ret = [r for r in ret if len(list(r['content'])) > 0]
     ret = _collapse_anthropic_messages(ret)
     return system_prompt, ret
 
@@ -254,7 +253,10 @@ def _build_messages_from_anthropic_payload(
             raise ValueError(f"unknown content type: {c.type}")
     ms = _collapse_tool_call_messages(ms)
     if len(ms) == 0:
-        raise ValueError("no content")
+        ms.append({
+            'role': 'ai',
+            'text': None,  # <-- sometimes it generates nothing, so we'll show that
+        })
     last_message = ms[-1]
     cost: Cost = {
         'input_tokens': message.usage.input_tokens,
