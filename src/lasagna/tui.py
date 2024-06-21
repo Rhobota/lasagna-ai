@@ -8,7 +8,7 @@ from .types import (
 
 from typing import Union, List
 
-from colorama import just_fix_windows_console, Fore, Style  # type: ignore
+from colorama import just_fix_windows_console, Fore, Style
 
 from dotenv import load_dotenv; load_dotenv()
 
@@ -19,6 +19,7 @@ async def tui_event_callback(event: EventPayload) -> None:
         t = Style.RESET_ALL + event[2]
         print(t, end='', flush=True)
     elif event[0] == 'tool_call' and event[1] == 'text_event':
+        assert isinstance(event[2], str)  # <-- mypy should *know* this, but it doesn't for some reason
         s = Fore.RED + event[2]
         print(s, end='', flush=True)
     elif event[0] == 'tool_res' and event[1] == 'tool_res_event':
