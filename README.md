@@ -38,6 +38,10 @@
 ## Table of Contents
 
 - [Installation](#installation)
+- [Used By](#used-by)
+- [Quickstart](#quickstart)
+- [Debug Logging](#debug-logging)
+- [Special Thanks](#special-thanks)
 - [License](#license)
 
 ## Installation
@@ -45,6 +49,12 @@
 ```console
 pip install -U lasagna-ai[openai,anthropic]
 ```
+
+## Used By
+
+Lasagna is used in production by:
+
+[![AutoAuto](https://raw.githubusercontent.com/Rhobota/lasagna-ai/cleanup/logos/autoauto.png)](https://www.autoauto.ai/)
 
 ## Quickstart
 
@@ -149,6 +159,10 @@ logging.basicConfig(
 # ... now use Lasagna as you normally would, but you'll see extra log traces!
 ```
 
+## Special Thanks
+
+TODO
+
 ## License
 
 `lasagna-ai` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
@@ -156,4 +170,3 @@ logging.basicConfig(
 ## Joke Acronym
 
 Layered Agents with toolS And aGeNts and Ai
-
