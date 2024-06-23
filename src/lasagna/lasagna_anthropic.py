@@ -68,6 +68,10 @@ _LOG = logging.getLogger(__name__)
 
 ANTHROPIC_KNOWN_MODELS: List[ModelRecord] = [
     {
+        'formal_name': 'claude-3-5-sonnet-20240620',
+        'display_name': 'Claude3.5 Sonnet',
+    },
+    {
         'formal_name': 'claude-3-opus-20240229',
         'display_name': 'Claude3 Opus',
     },
