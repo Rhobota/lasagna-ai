@@ -11,6 +11,7 @@ from .types import (
     EventCallback,
     EventPayload,
     Message,
+    Model,
 )
 
 from .agent_runner import run
@@ -50,6 +51,19 @@ def flat_messages(messages: List[Message]) -> AgentRun:
         'type': 'messages',
         'messages': messages,
     }
+
+
+def build_most_simple_agent(tools: List[Callable]) -> AgentCallable:
+    async def most_simple_agent(
+        model: Model,
+        event_callback: EventCallback,
+        prev_runs: List[AgentRun],
+    ) -> AgentRun:
+        messages = recursive_extract_messages(prev_runs)
+        new_messages = await model.run(event_callback, messages, tools)
+        return flat_messages(new_messages)
+
+    return most_simple_agent
 
 
 async def noop_callback(event: EventPayload) -> None:
