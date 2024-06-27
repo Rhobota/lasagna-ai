@@ -76,6 +76,8 @@ from typing import List, Callable
 
 import asyncio
 
+from dotenv import load_dotenv; load_dotenv()
+
 
 MODEL_BINDER = bind_model('openai', 'gpt-3.5-turbo-0125')
 
