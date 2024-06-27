@@ -489,6 +489,7 @@ class LasagnaOpenAI(Model):
                 elif e.type == 'server_error':
                     pass  # <-- we will retry this one! I've seen these work when you just try again.
                 else:
+                    _LOG.warning(f"Got a new error type we don't know about: {e}")
                     pass  # <-- this must be one we don't know about yet, so ... recoverable, maybe?
                 if delay_on_error > 0.0:
                     _LOG.warning(f"Got a maybe-recoverable error (will retry in {delay_on_error:.2f} seconds): {e}")

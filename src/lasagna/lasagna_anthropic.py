@@ -483,6 +483,7 @@ class LasagnaAnthropic(Model):
                         pass
                     else:
                         # Something else??? This is weird, so let's bail.
+                        _LOG.warning(f"Got an unknown error status: {e}")
                         raise
                 else:
                     # Some other error that we don't know about. Let's bail.
