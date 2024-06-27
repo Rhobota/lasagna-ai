@@ -33,7 +33,7 @@ from .util import (
     recursive_hash,
 )
 
-from .tools import (
+from .tools_util import (
     convert_to_json_schema,
     handle_tools,
     build_tool_response_message,
