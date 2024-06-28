@@ -23,7 +23,7 @@ MODEL_BINDER = bind_model('openai', 'gpt-4o-2024-05-13')
 def send_sms(to_phone_number: str, message_body: str) -> None:
     """
     Use this tool to send SMS message (aka, "text messages").
-    :param: to_phone_number: str: the destination phone number to send to (in E.164 format; e.g. '+15128869282', where '+1' is the country code, '512' is the area code and the rest is the 7-digit phone number)
+    :param: to_phone_number: str: the destination phone number to send to (in E.164 format; e.g. '+12223334444', where '+1' is the country code, '222' is the area code and '3334444' is the 7-digit phone number)
     :param: message_body: str: the content (aka, "body") of the SMS message
     """
     client = TwilioClient(
@@ -32,7 +32,7 @@ def send_sms(to_phone_number: str, message_body: str) -> None:
     )
     client.messages.create(
         body=message_body,
-        from_='+15128869282',
+        from_=os.environ['TWILIO_FROM_PHONE'],
         to=to_phone_number,
     )
 
