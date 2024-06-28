@@ -7,7 +7,7 @@ from lasagna.types import (
 
 from typing import List, Dict, Callable
 
-from lasagna.tools import (
+from lasagna.tools_util import (
     convert_to_json_schema,
     handle_tools,
     build_tool_response_message,

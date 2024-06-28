@@ -33,7 +33,7 @@ from .util import (
     recursive_hash,
 )
 
-from .tools import (
+from .tools_util import (
     convert_to_json_schema,
     handle_tools,
     build_tool_response_message,
@@ -238,7 +238,7 @@ async def _make_openai_content(
         })
     if 'media' in message:
         for m in message['media']:
-            if m['media_type'] == 'image':
+            if m['type'] == 'image':
                 ret.append({
                     'type': 'image_url',
                     'image_url': {
@@ -246,7 +246,7 @@ async def _make_openai_content(
                     },
                 })
             else:
-                raise ValueError(f"unknown media type: {m['media_type']}")
+                raise ValueError(f"unknown media type: {m['type']}")
     if len(ret) == 0:
         raise ValueError('no content in this message!')
     return ret

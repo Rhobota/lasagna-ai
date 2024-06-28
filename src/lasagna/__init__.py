@@ -6,6 +6,7 @@ from .agent_util import (
     bind_model,
     recursive_extract_messages,
     flat_messages,
+    build_most_simple_agent,
     noop_callback,
     extract_last_message,
 )
@@ -15,8 +16,9 @@ __all__ = [
     'bind_model',
     'recursive_extract_messages',
     'flat_messages',
+    'build_most_simple_agent',
     'noop_callback',
     'extract_last_message',
 ]
 
-__version__ = "0.6.2"
+__version__ = "0.7.0"

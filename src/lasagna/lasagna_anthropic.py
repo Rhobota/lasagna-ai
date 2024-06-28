@@ -29,7 +29,7 @@ from .util import (
     recursive_hash,
 )
 
-from .tools import (
+from .tools_util import (
     convert_to_json_schema,
     handle_tools,
     build_tool_response_message,
@@ -97,7 +97,7 @@ async def _build_anthropic_content(
         })
     if 'media' in message:
         for m in message['media']:
-            if m['media_type'] == 'image':
+            if m['type'] == 'image':
                 mimetype, data = await convert_to_image_base64(m['image'])
                 ret.append({
                     'type': 'image',
@@ -108,7 +108,7 @@ async def _build_anthropic_content(
                     },
                 })
             else:
-                raise ValueError(f"unknown media type: {m['media_type']}")
+                raise ValueError(f"unknown media type: {m['type']}")
     return ret
 
 
@@ -360,7 +360,7 @@ class LasagnaAnthropic(Model):
     def __init__(self, model: str, **model_kwargs: Dict[str, Any]):
         known_model_names = [m['formal_name'] for m in ANTHROPIC_KNOWN_MODELS]
         if model not in known_model_names:
-            raise ValueError(f'unknown model: {model}')
+            _LOG.warning(f'untested model: {model} (may or may not work)')
         self.model = model
         self.model_kwargs = copy.deepcopy(model_kwargs or {})
         self.n_retries: int = cast(int, self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
@@ -483,6 +483,7 @@ class LasagnaAnthropic(Model):
                         pass
                     else:
                         # Something else??? This is weird, so let's bail.
+                        _LOG.warning(f"Got an unknown error status: {e}")
                         raise
                 else:
                     # Some other error that we don't know about. Let's bail.

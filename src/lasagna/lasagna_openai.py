@@ -31,7 +31,7 @@ from .util import (
     recursive_hash,
 )
 
-from .tools import (
+from .tools_util import (
     convert_to_json_schema,
     handle_tools,
     build_tool_response_message,
@@ -204,7 +204,7 @@ async def _make_openai_content(
         })
     if 'media' in message:
         for m in message['media']:
-            if m['media_type'] == 'image':
+            if m['type'] == 'image':
                 ret.append({
                     'type': 'image_url',
                     'image_url': {
@@ -212,7 +212,7 @@ async def _make_openai_content(
                     },
                 })
             else:
-                raise ValueError(f"unknown media type: {m['media_type']}")
+                raise ValueError(f"unknown media type: {m['type']}")
     if len(ret) == 0:
         raise ValueError('no content in this message!')
     return ret
@@ -360,7 +360,7 @@ class LasagnaOpenAI(Model):
     def __init__(self, model: str, **model_kwargs: Dict[str, Any]):
         known_model_names = [m['formal_name'] for m in OPENAI_KNOWN_MODELS]
         if model not in known_model_names:
-            raise ValueError(f'unknown model: {model}')
+            _LOG.warning(f'untested model: {model} (may or may not work)')
         self.model = model
         self.model_kwargs = copy.deepcopy(model_kwargs or {})
         self.n_retries: int = cast(int, self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
@@ -489,6 +489,7 @@ class LasagnaOpenAI(Model):
                 elif e.type == 'server_error':
                     pass  # <-- we will retry this one! I've seen these work when you just try again.
                 else:
+                    _LOG.warning(f"Got a new error type we don't know about: {e}")
                     pass  # <-- this must be one we don't know about yet, so ... recoverable, maybe?
                 if delay_on_error > 0.0:
                     _LOG.warning(f"Got a maybe-recoverable error (will retry in {delay_on_error:.2f} seconds): {e}")

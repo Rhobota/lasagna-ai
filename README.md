@@ -65,83 +65,39 @@ Anyway, run it in your terminal and you can chat interactively with the model. �
 ```python
 from lasagna import (
     bind_model,
-    recursive_extract_messages,
-    flat_messages,
+    build_most_simple_agent,
 )
 
 from lasagna.tui import (
     tui_input_loop,
-)
-
-import asyncio
-
-
-@bind_model('openai', 'gpt-3.5-turbo-0125')
-async def most_simple_agent(model, event_callback, prev_runs):
-    messages = recursive_extract_messages(prev_runs)
-    tools = []
-    new_messages = await model.run(event_callback, messages, tools)
-    return flat_messages(new_messages)
-
-
-async def main():
-    system_prompt = "You are grumpy."
-    await tui_input_loop(most_simple_agent, system_prompt)
-
-
-if __name__ == '__main__':
-    asyncio.run(main())
-```
-
-The code above does _not_ use Python type hints (lame! 👎). As agents get
-more complex, and you end up with nested data structures and
-agents that call other agents, we promise that type hints will
-be your best friend. So,
-we suggest you use type hints from day 1! Below is the same example, but with
-type hints. Use `mypy` or `pyright` to check your code (because type hints are
-useless unless you have a tool that checks them).
-
-```python
-from lasagna import (
-    bind_model,
-    recursive_extract_messages,
-    flat_messages,
-)
-
-from lasagna.tui import (
-    tui_input_loop,
-)
-
-from lasagna.types import (
-    Model,
-    EventCallback,
-    AgentRun,
 )
 
 from typing import List, Callable
 
 import asyncio
 
+from dotenv import load_dotenv; load_dotenv()
 
-@bind_model('openai', 'gpt-3.5-turbo-0125')
-async def most_simple_agent(
-    model: Model,
-    event_callback: EventCallback,
-    prev_runs: List[AgentRun],
-) -> AgentRun:
-    messages = recursive_extract_messages(prev_runs)
-    tools: List[Callable] = []
-    new_messages = await model.run(event_callback, messages, tools)
-    return flat_messages(new_messages)
+
+MODEL_BINDER = bind_model('openai', 'gpt-3.5-turbo-0125')
 
 
 async def main() -> None:
     system_prompt = "You are grumpy."
-    await tui_input_loop(most_simple_agent, system_prompt)
+    tools: List[Callable] = []
+    my_agent = build_most_simple_agent(tools)
+    my_bound_agent = MODEL_BINDER(my_agent)
+    await tui_input_loop(my_bound_agent, system_prompt)
 
 
 if __name__ == '__main__':
     asyncio.run(main())
+```
+
+Want to add your first tool? Cool! 😎 Let's do it:
+
+```python
+TODO
 ```
 
 ## Debug Logging

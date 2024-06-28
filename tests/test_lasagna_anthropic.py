@@ -88,7 +88,7 @@ async def test_convert_to_anthropic_messages():
                 'text': "Hi, here's a picture.",
                 'media': [
                     {
-                        'media_type': 'image',
+                        'type': 'image',
                         'image': fn,
                     },
                 ],

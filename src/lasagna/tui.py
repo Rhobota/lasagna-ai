@@ -10,8 +10,6 @@ from typing import Union, List
 
 from colorama import just_fix_windows_console, Fore, Style
 
-from dotenv import load_dotenv; load_dotenv()
-
 
 async def tui_event_callback(event: EventPayload) -> None:
     just_fix_windows_console()
