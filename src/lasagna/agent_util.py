@@ -53,7 +53,9 @@ def flat_messages(messages: List[Message]) -> AgentRun:
     }
 
 
-def build_most_simple_agent(tools: List[Callable]) -> AgentCallable:
+def build_most_simple_agent(
+    tools: List[Callable] = [],
+) -> AgentCallable:
     async def most_simple_agent(
         model: Model,
         event_callback: EventCallback,
