@@ -50,6 +50,13 @@
 pip install -U lasagna-ai[openai,anthropic]
 ```
 
+If you want to easily run all the [./examples](./examples), then you can
+install the extra dependencies used by those examples:
+
+```console
+pip install -U lasagna-ai[openai,anthropic,example-deps]
+```
+
 ## Used By
 
 Lasagna is used in production by:
