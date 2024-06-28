@@ -50,6 +50,13 @@
 pip install -U lasagna-ai[openai,anthropic]
 ```
 
+If you want to easily run all the [./examples](./examples), then you can
+install the extra dependencies used by those examples:
+
+```console
+pip install -U lasagna-ai[openai,anthropic,example-deps]
+```
+
 ## Used By
 
 Lasagna is used in production by:
@@ -61,6 +68,8 @@ Lasagna is used in production by:
 Here is the _most simple_ agent (it doesn't add *anything* to the underlying model).
 More complex agents would add tools and/or use layers of agents, but not this one!
 Anyway, run it in your terminal and you can chat interactively with the model. 🤩
+
+(taken from [./examples/quickstart.py](./examples/quickstart.py))
 
 ```python
 from lasagna import (
@@ -94,10 +103,41 @@ if __name__ == '__main__':
     asyncio.run(main())
 ```
 
-Want to add your first tool? Cool! 😎 Let's do it:
+Want to add your first tool? LLMs can't natively do arithmetic
+(beyond simple arithmetic with small numbers), so let's give our
+model a tool for doing arithmetic! 😎
+
+(full example at [./examples/quickstart_with_math_tool.py](./examples/quickstart_with_math_tool.py))
 
 ```python
-TODO
+import sympy as sp
+
+...
+
+def evaluate_math_expression(expression: str) -> float:
+    """
+    This tool evaluates a math expression and returns the result.
+    Pass math expression as a string, for example:
+     - "3 * 6 + 1"
+     - "cos(2 * pi / 3) + log(8)"
+     - "(4.5/2) + (6.3/1.2)"
+     - ... etc
+    :param: expression: str: the math expression to evaluate
+    """
+    expr = sp.sympify(expression)
+    result = cast(float, expr.evalf())
+    return result
+
+...
+
+    ...
+    tools: List[Callable] = [
+        evaluate_math_expression,
+    ]
+    my_agent = build_most_simple_agent(tools)
+    ...
+
+...
 ```
 
 ## Debug Logging

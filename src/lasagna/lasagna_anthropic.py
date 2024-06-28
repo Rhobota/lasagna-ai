@@ -482,9 +482,9 @@ class LasagnaAnthropic(Model):
                         # Server error, so we can retry this.
                         pass
                     else:
-                        # Something else??? This is weird, so let's bail.
+                        # Something else??? This is weird, maybe this is recoverable?
                         _LOG.warning(f"Got an unknown error status: {e}")
-                        raise
+                        pass
                 else:
                     # Some other error that we don't know about. Let's bail.
                     raise

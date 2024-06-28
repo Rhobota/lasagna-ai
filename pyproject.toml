@@ -46,6 +46,10 @@ dev = [
   "pytest>=8.1.1",
   "pytest-asyncio>=0.23.6",
 ]
+example-deps = [
+  "sympy",
+  "twilio",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/lasagna"]
@@ -54,13 +58,13 @@ packages = ["src/lasagna"]
 path = "src/lasagna/__init__.py"
 
 [tool.hatch.envs.types]
-features = ["dev", "openai", "anthropic"]
+features = ["dev", "example-deps", "openai", "anthropic"]
 
 [[tool.hatch.envs.types.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/lasagna tests}"
+check = "mypy --install-types --non-interactive {args:src/lasagna tests examples}"
 
 [tool.hatch.envs.hatch-test]
 features = ["dev", "openai", "anthropic"]
