@@ -804,9 +804,9 @@ async def test_convert_to_openai_messages():
         {'role': 'system', 'text': 'be nice', 'cost': None, 'raw': None},
         {'role': 'human', 'text': 'hi', 'cost': None, 'raw': None},
         {'role': 'ai', 'text': 'oh hi', 'cost': None, 'raw': None},
-        {'role': 'human', 'text': 'here is a picture', 'media': [{'media_type': 'image', 'image': 'http://example.com/img.png'}], 'cost': None, 'raw': None},
+        {'role': 'human', 'text': 'here is a picture', 'media': [{'type': 'image', 'image': 'http://example.com/img.png'}], 'cost': None, 'raw': None},
         {'role': 'ai', 'text': 'thanks!', 'cost': None, 'raw': None},
-        {'role': 'human', 'text': 'here are two', 'media': [{'media_type': 'image', 'image': 'http://example.com/img.png'}, {'media_type': 'image', 'image': 'http://example.com/img2.png'}], 'cost': None, 'raw': None},
+        {'role': 'human', 'text': 'here are two', 'media': [{'type': 'image', 'image': 'http://example.com/img.png'}, {'type': 'image', 'image': 'http://example.com/img2.png'}], 'cost': None, 'raw': None},
         {'role': 'ai', 'text': 'double thanks!', 'cost': None, 'raw': None},
     ]
     ms = await _convert_to_openai_messages(messages)

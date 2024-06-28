@@ -33,7 +33,7 @@ class Cost(TypedDict):
 
 
 class MediaImage(TypedDict):
-    media_type: Literal['image']
+    type: Literal['image']
     image: str   # <-- either a local filepath or a remote URL
 
 

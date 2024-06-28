@@ -97,7 +97,7 @@ async def _build_anthropic_content(
         })
     if 'media' in message:
         for m in message['media']:
-            if m['media_type'] == 'image':
+            if m['type'] == 'image':
                 mimetype, data = await convert_to_image_base64(m['image'])
                 ret.append({
                     'type': 'image',
@@ -108,7 +108,7 @@ async def _build_anthropic_content(
                     },
                 })
             else:
-                raise ValueError(f"unknown media type: {m['media_type']}")
+                raise ValueError(f"unknown media type: {m['type']}")
     return ret
 
 
