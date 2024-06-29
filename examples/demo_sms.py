@@ -11,30 +11,44 @@ from typing import List, Callable
 
 from dotenv import load_dotenv; load_dotenv()
 
-from twilio.rest import Client as TwilioClient   # type: ignore
-
 import asyncio
+import aiohttp
 import os
 
 
 MODEL_BINDER = bind_model('openai', 'gpt-4o-2024-05-13')
 
 
-def send_sms(to_phone_number: str, message_body: str) -> None:
+# LLMs can hallucinate phone numbers, so you should be very cautious
+# about letting them have access to this tool without guard rails!
+# Below is a whitelist of phone numbers the agent is allowed to send to.
+# Thus, if it hallucinates a phone number, we catch its mistake!
+PHONE_NUMBER_WHITELIST: List[str] = [
+    # PUT YOUR PHONE NUMBER(S) HERE, IN E.164 FORMAT
+]
+
+
+async def send_sms(to_phone_number: str, message_body: str) -> None:
     """
     Use this tool to send SMS message (aka, "text messages").
     :param: to_phone_number: str: the destination phone number to send to (in E.164 format; e.g. '+12223334444', where '+1' is the country code, '222' is the area code and '3334444' is the 7-digit phone number)
     :param: message_body: str: the content (aka, "body") of the SMS message
     """
-    client = TwilioClient(
-        os.environ['TWILIO_ACCOUNT_SID'],
-        os.environ['TWILIO_AUTH_TOKEN'],
-    )
-    client.messages.create(
-        body=message_body,
-        from_=os.environ['TWILIO_FROM_PHONE'],
-        to=to_phone_number,
-    )
+    if to_phone_number not in PHONE_NUMBER_WHITELIST:
+        raise PermissionError('you are not allowed to send SMS messages to that phone number')
+    account_sid = os.environ['TWILIO_ACCOUNT_SID']
+    account_auth_token = os.environ['TWILIO_AUTH_TOKEN']
+    from_phone_number = os.environ['TWILIO_FROM_PHONE']
+    payload = {
+        'Body': message_body,
+        'From': from_phone_number,
+        'To':   to_phone_number,
+    }
+    url = f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json"
+    auth = aiohttp.BasicAuth(account_sid, account_auth_token)
+    async with aiohttp.ClientSession(raise_for_status=True, auth=auth) as session:
+        async with session.post(url, data=payload) as request:
+            await request.json()
 
 
 async def main() -> None:

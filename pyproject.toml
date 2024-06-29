@@ -48,7 +48,6 @@ dev = [
 ]
 example-deps = [
   "sympy",
-  "twilio",
 ]
 
 [tool.hatch.build.targets.wheel]
