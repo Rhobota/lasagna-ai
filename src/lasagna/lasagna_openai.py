@@ -488,6 +488,8 @@ class LasagnaOpenAI(Model):
                         raise
                 elif e.type == 'server_error':
                     pass  # <-- we will retry this one! I've seen these work when you just try again.
+                elif e.type == 'tokens':
+                    raise
                 else:
                     _LOG.warning(f"Got a new error type we don't know about: {e}")
                     pass  # <-- this must be one we don't know about yet, so ... recoverable, maybe?
