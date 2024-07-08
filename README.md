@@ -5,6 +5,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/lasagna-ai.svg)](https://pypi.org/project/lasagna-ai)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/lasagna-ai.svg)](https://pypi.org/project/lasagna-ai)
 ![Test Status](https://github.com/Rhobota/lasagna-ai/actions/workflows/test.yml/badge.svg?branch=main)
+[![Downloads](https://static.pepy.tech/badge/lasagna-ai)](https://pepy.tech/project/lasagna-ai)
 
 - 🥞  **Layered agents!**
   - Agents for your agents!
