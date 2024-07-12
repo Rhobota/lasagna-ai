@@ -69,7 +69,7 @@ check = "mypy --install-types --non-interactive {args:src/lasagna tests examples
 features = ["dev", "openai", "anthropic"]
 
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12", "pypy3.10"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
