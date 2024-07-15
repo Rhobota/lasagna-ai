@@ -174,7 +174,7 @@ HashAlgorithmFactory = Callable[[], HashAlgorithm]
 def recursive_hash(
     seed: Union[str, None],
     obj: Any,
-    alg_factory: HashAlgorithmFactory = lambda: hashlib.md5(),
+    alg_factory: HashAlgorithmFactory = lambda: hashlib.sha256(),
 ) -> str:
     alg = alg_factory()
     def _r(obj: Any) -> None:

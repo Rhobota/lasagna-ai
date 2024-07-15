@@ -408,5 +408,5 @@ def test_recursive_hash():
             __close_list__
         __close_dict__
         '''.strip().splitlines()])
-    correct = hashlib.md5(s.encode('utf-8')).hexdigest()
+    correct = hashlib.sha256(s.encode('utf-8')).hexdigest()
     assert got == correct
