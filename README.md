@@ -104,7 +104,7 @@ if __name__ == '__main__':
     asyncio.run(main())
 ```
 
-Want to add your first tool? LLMs can't natively do arithmetic
+**Want to add your first tool?** LLMs can't natively do arithmetic
 (beyond simple arithmetic with small numbers), so let's give our
 model a tool for doing arithmetic! 😎
 
@@ -140,6 +140,9 @@ def evaluate_math_expression(expression: str) -> float:
 
 ...
 ```
+
+**Simple RAG:** Everyone's favorite tool: _Retrieval Augmented Generation_ (RAG). Let's GO! 📚💨  
+See: [./examples/demo_rag.py](./examples/demo_rag.py)
 
 ## Debug Logging
 

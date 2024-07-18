@@ -109,7 +109,7 @@ async def test_hash_agent_runs():
         __close_dict__
         '''.strip().splitlines()])
 
-    model_config_hash = hashlib.md5(s.encode('utf-8')).hexdigest()
+    model_config_hash = hashlib.sha256(s.encode('utf-8')).hexdigest()
 
     got = await _hash_agent_runs(model, _PREV_RUNS)
 
@@ -144,6 +144,6 @@ async def test_hash_agent_runs():
         __close_list__
         '''.strip().splitlines()])
 
-    correct = hashlib.md5(s.encode('utf-8')).hexdigest()
+    correct = hashlib.sha256(s.encode('utf-8')).hexdigest()
 
     assert got == correct
