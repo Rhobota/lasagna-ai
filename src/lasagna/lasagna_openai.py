@@ -64,6 +64,10 @@ _LOG = logging.getLogger(__name__)
 
 OPENAI_KNOWN_MODELS: List[ModelRecord] = [
     {
+        'formal_name': 'gpt-4o-mini-2024-07-18',
+        'display_name': 'GPT-4o mini',
+    },
+    {
         'formal_name': 'gpt-4o-2024-05-13',
         'display_name': 'GPT-4o',
     },
