@@ -13,7 +13,7 @@ import asyncio
 
 from dotenv import load_dotenv; load_dotenv()
 
-import sympy as sp
+import sympy as sp    # type: ignore
 
 
 MODEL_BINDER = bind_model('openai', 'gpt-3.5-turbo-0125')
