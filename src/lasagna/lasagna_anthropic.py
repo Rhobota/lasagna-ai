@@ -78,6 +78,7 @@ ANTHROPIC_KNOWN_MODELS: List[ModelRecord] = [
     {
         'formal_name': 'claude-3-sonnet-20240229',
         'display_name': 'Claude3 Sonnet',
+        'outdated': True,
     },
     {
         'formal_name': 'claude-3-haiku-20240307',

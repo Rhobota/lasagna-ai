@@ -154,6 +154,7 @@ class AgentRecord(TypedDict):
 class ModelRecord(TypedDict):
     formal_name: str
     display_name: str
+    outdated: NotRequired[bool]  # <-- if true, there is another model which replaces this one
 
 
 class ModelFactory(Protocol):

@@ -68,16 +68,23 @@ OPENAI_KNOWN_MODELS: List[ModelRecord] = [
         'display_name': 'GPT-4o mini',
     },
     {
+        'formal_name': 'gpt-4o-2024-08-06',
+        'display_name': 'GPT-4o',
+    },
+    {
         'formal_name': 'gpt-4o-2024-05-13',
         'display_name': 'GPT-4o',
+        'outdated': True,
     },
     {
         'formal_name': 'gpt-4-turbo-2024-04-09',
         'display_name': 'GPT-4',
+        'outdated': True,
     },
     {
         'formal_name': 'gpt-3.5-turbo-0125',
         'display_name': 'GPT-3.5',
+        'outdated': True,
     },
 ]
 
