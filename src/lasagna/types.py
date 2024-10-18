@@ -170,7 +170,7 @@ class ProviderRecord(TypedDict):
 class AgentSpec(TypedDict):
     agent: Union[str, AgentCallable]
     provider: Union[str, ModelFactory]
-    model: str
+    model: Union[str, ModelRecord]
     model_kwargs: NotRequired[Dict[str, Any]]
 
 

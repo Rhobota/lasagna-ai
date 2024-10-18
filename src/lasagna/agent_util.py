@@ -6,6 +6,7 @@ from .types import (
     AgentSpec,
     AgentRun,
     ModelFactory,
+    ModelRecord,
     AgentCallable,
     BoundAgentCallable,
     EventCallback,
@@ -19,7 +20,7 @@ from .agent_runner import run
 
 def bind_model(
     provider: Union[str, ModelFactory],
-    model: str,
+    model: Union[str, ModelRecord],
     model_kwargs: Union[Dict[str, Any], None] = None,
 ) -> Callable[[AgentCallable], BoundAgentCallable]:
     def decorator(agent: AgentCallable) -> BoundAgentCallable:

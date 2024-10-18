@@ -27,7 +27,9 @@ async def run(
         agent = agent_spec['agent']
         agent_name = agent.__name__
 
-    model_name = agent_spec['model']
+    model_name = agent_spec['model'] \
+        if isinstance(agent_spec['model'], str) \
+        else agent_spec['model']['formal_name']
 
     model_kwargs = agent_spec.get('model_kwargs', None)
     if model_kwargs is None:
