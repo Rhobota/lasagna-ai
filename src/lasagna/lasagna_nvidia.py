@@ -39,6 +39,8 @@ from .tools_util import (
     build_tool_response_message,
 )
 
+from .known_models import NVIDIA_KNOWN_MODELS
+
 from openai import AsyncOpenAI, NOT_GIVEN, NotGiven
 from openai.types.chat import (
     ChatCompletionChunk,
@@ -63,50 +65,6 @@ import os
 import logging
 
 _LOG = logging.getLogger(__name__)
-
-
-NVIDIA_KNOWN_MODELS: List[ModelRecord] = [
-    {
-        'formal_name': 'meta/llama3-70b-instruct',
-        'display_name': 'meta/llama3-70b-instruct',
-    },
-    {
-        'formal_name': 'meta/llama3-8b-instruct',
-        'display_name': 'meta/llama3-8b-instruct',
-    },
-    {
-        'formal_name': 'mistralai/mistral-large',
-        'display_name': 'mistralai/mistral-large',
-    },
-    {
-        'formal_name': 'mistralai/codestral-22b-instruct-v0.1',
-        'display_name': 'mistralai/codestral-22b-instruct-v0.1',
-    },
-    {
-        'formal_name': 'mistralai/mixtral-8x22b-instruct-v0.1',
-        'display_name': 'mistralai/mixtral-8x22b-instruct-v0.1',
-    },
-    {
-        'formal_name': 'mistralai/mixtral-8x7b-instruct-v0.1',
-        'display_name': 'mistralai/mixtral-8x7b-instruct-v0.1',
-    },
-    {
-        'formal_name': 'google/gemma-7b',
-        'display_name': 'google/gemma-7b',
-    },
-    {
-        'formal_name': 'google/recurrentgemma-2b',
-        'display_name': 'google/recurrentgemma-2b',
-    },
-    {
-        'formal_name': 'microsoft/phi-3-mini-128k-instruct',
-        'display_name': 'microsoft/phi-3-mini-128k-instruct',
-    },
-    {
-        'formal_name': 'snowflake/arctic',
-        'display_name': 'snowflake/arctic',
-    },
-]
 
 
 async def _process_text_stream(

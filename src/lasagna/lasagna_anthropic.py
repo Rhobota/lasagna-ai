@@ -35,6 +35,8 @@ from .tools_util import (
     build_tool_response_message,
 )
 
+from .known_models import ANTHROPIC_KNOWN_MODELS
+
 from anthropic import (
     AsyncAnthropic,
     NOT_GIVEN,
@@ -64,27 +66,6 @@ import json
 import logging
 
 _LOG = logging.getLogger(__name__)
-
-
-ANTHROPIC_KNOWN_MODELS: List[ModelRecord] = [
-    {
-        'formal_name': 'claude-3-5-sonnet-20240620',
-        'display_name': 'Claude3.5 Sonnet',
-    },
-    {
-        'formal_name': 'claude-3-opus-20240229',
-        'display_name': 'Claude3 Opus',
-    },
-    {
-        'formal_name': 'claude-3-sonnet-20240229',
-        'display_name': 'Claude3 Sonnet',
-        'outdated': True,
-    },
-    {
-        'formal_name': 'claude-3-haiku-20240307',
-        'display_name': 'Claude3 Haiku',
-    },
-]
 
 
 async def _build_anthropic_content(
