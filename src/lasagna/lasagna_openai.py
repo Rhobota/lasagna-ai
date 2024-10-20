@@ -13,8 +13,9 @@ from .types import (
     EventPayload,
     Model,
     ToolCall,
-    ModelRecord,
     Cost,
+    ExtractionType,
+    MessageExtraction,
 )
 
 from .stream import (
@@ -52,7 +53,7 @@ from openai import APIError
 
 from typing import (
     List, Callable, AsyncIterator, Any, cast,
-    Tuple, Dict, Optional, Union, Literal,
+    Tuple, Dict, Optional, Union, Literal, Type,
 )
 
 import asyncio
@@ -514,3 +515,18 @@ class LasagnaOpenAI(Model):
             new_messages.append(tool_response_message)
             messages.append(tool_response_message)
         return new_messages
+
+    async def extract(
+        self,
+        event_callback: EventCallback,
+        messages: List[Message],
+        extraction_type: Type[ExtractionType],
+    ) -> MessageExtraction[ExtractionType]:
+        """
+        Use the AI to extract structured output from the `messages`. The
+        schema of the extracted data will follow `extraction_type`.
+        """
+        return {
+            'role': 'extraction',
+            'parsed': extraction_type(),  # TODO
+        }
