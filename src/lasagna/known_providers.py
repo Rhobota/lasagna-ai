@@ -44,10 +44,8 @@ def attempt_load_known_providers(provider: str) -> None:
           ugliness to a minimum.
     """
     if provider == 'openai':
-        from .lasagna_openai import (
-            OPENAI_KNOWN_MODELS,
-            LasagnaOpenAI,
-        )
+        from .known_models import OPENAI_KNOWN_MODELS
+        from .lasagna_openai import LasagnaOpenAI
         register_provider(
             key  = 'openai',
             name = 'OpenAI',
@@ -56,10 +54,8 @@ def attempt_load_known_providers(provider: str) -> None:
         )
 
     elif provider == 'anthropic':
-        from .lasagna_anthropic import (
-            ANTHROPIC_KNOWN_MODELS,
-            LasagnaAnthropic,
-        )
+        from .known_models import ANTHROPIC_KNOWN_MODELS
+        from .lasagna_anthropic import LasagnaAnthropic
         register_provider(
             key  = 'anthropic',
             name = 'Anthropic',
@@ -68,10 +64,8 @@ def attempt_load_known_providers(provider: str) -> None:
         )
 
     elif provider == 'nvidia':
-        from .lasagna_nvidia import (
-            NVIDIA_KNOWN_MODELS,
-            LasagnaNVIDIA,
-        )
+        from .known_models import NVIDIA_KNOWN_MODELS
+        from .lasagna_nvidia import LasagnaNVIDIA
         register_provider(
             key  = 'nvidia',
             name = 'NVIDIA',

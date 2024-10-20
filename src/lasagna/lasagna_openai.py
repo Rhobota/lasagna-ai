@@ -37,6 +37,8 @@ from .tools_util import (
     build_tool_response_message,
 )
 
+from .known_models import OPENAI_KNOWN_MODELS
+
 from openai import AsyncOpenAI, NOT_GIVEN, NotGiven
 from openai.types.chat import (
     ChatCompletionChunk,
@@ -60,26 +62,6 @@ import json
 import logging
 
 _LOG = logging.getLogger(__name__)
-
-
-OPENAI_KNOWN_MODELS: List[ModelRecord] = [
-    {
-        'formal_name': 'gpt-4o-mini-2024-07-18',
-        'display_name': 'GPT-4o mini',
-    },
-    {
-        'formal_name': 'gpt-4o-2024-05-13',
-        'display_name': 'GPT-4o',
-    },
-    {
-        'formal_name': 'gpt-4-turbo-2024-04-09',
-        'display_name': 'GPT-4',
-    },
-    {
-        'formal_name': 'gpt-3.5-turbo-0125',
-        'display_name': 'GPT-3.5',
-    },
-]
 
 
 async def _process_text_stream(

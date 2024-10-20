@@ -154,6 +154,7 @@ class AgentRecord(TypedDict):
 class ModelRecord(TypedDict):
     formal_name: str
     display_name: str
+    outdated: NotRequired[bool]  # <-- if true, there is another model which replaces this one
 
 
 class ModelFactory(Protocol):
@@ -169,7 +170,7 @@ class ProviderRecord(TypedDict):
 class AgentSpec(TypedDict):
     agent: Union[str, AgentCallable]
     provider: Union[str, ModelFactory]
-    model: str
+    model: Union[str, ModelRecord]
     model_kwargs: NotRequired[Dict[str, Any]]
 
 

@@ -1,14 +1,17 @@
 import pytest
 
-from typing import List
+from typing import Callable, List
 
 from lasagna.agent_util import (
     bind_model,
+    partial_bind_model,
     recursive_extract_messages,
     flat_messages,
 )
 
 from lasagna.types import (
+    AgentCallable,
+    BoundAgentCallable,
     Model,
     EventCallback,
     AgentRun,
@@ -21,7 +24,6 @@ from lasagna.mock_provider import (
 )
 
 
-@bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
 async def my_agent(
     model: Model,
     event_callback: EventCallback,
@@ -36,13 +38,15 @@ async def my_agent(
     }
 
 
-@pytest.mark.asyncio
-async def test_bind_model():
+async def _agent_common_test(
+    binder: Callable[[AgentCallable], BoundAgentCallable],
+    agent: AgentCallable,
+):
     events = []
     async def event_callback(event: EventPayload) -> None:
         events.append(event)
     prev_runs: List[AgentRun] = []
-    new_run = await my_agent(event_callback, prev_runs)
+    new_run = await binder(agent)(event_callback, prev_runs)
     assert new_run == {
         'agent': 'my_agent',
         'provider': 'MockProvider',
@@ -76,6 +80,18 @@ async def test_bind_model():
     assert events == [
         ('ai', 'text_event', 'Hi!'),
     ]
+
+
+@pytest.mark.asyncio
+async def test_bind_model():
+    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    await _agent_common_test(my_binder, my_agent)
+
+
+@pytest.mark.asyncio
+async def test_partial_bind_model():
+    my_binder = partial_bind_model(MockProvider, 'some_model')({'a': 'yes', 'b': 6})
+    await _agent_common_test(my_binder, my_agent)
 
 
 def test_recursive_extract_messages():
