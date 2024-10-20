@@ -38,9 +38,11 @@ from .tools_util import (
     build_tool_response_message,
 )
 
+from .pydantic_util import ensure_pydantic_model
+
 from .known_models import OPENAI_KNOWN_MODELS
 
-from openai import AsyncOpenAI, NOT_GIVEN, NotGiven
+from openai import AsyncOpenAI, NOT_GIVEN, NotGiven, pydantic_function_tool
 from openai.types.chat import (
     ChatCompletionChunk,
     ChatCompletionToolParam,
@@ -52,8 +54,9 @@ from openai.types.chat.chat_completion_chunk import ChoiceDelta
 from openai import APIError
 
 from typing import (
-    List, Callable, AsyncIterator, Any, cast,
-    Tuple, Dict, Optional, Union, Literal, Type,
+    List, Callable, Type, AsyncIterator, Any,
+    Tuple, Dict, Optional, Union, Literal,
+    cast,
 )
 
 import asyncio
@@ -522,11 +525,29 @@ class LasagnaOpenAI(Model):
         messages: List[Message],
         extraction_type: Type[ExtractionType],
     ) -> MessageExtraction[ExtractionType]:
-        """
-        Use the AI to extract structured output from the `messages`. The
-        schema of the extracted data will follow `extraction_type`.
-        """
+        tools_spec = [pydantic_function_tool(ensure_pydantic_model(extraction_type))]
+
+        new_messages = await self._retrying_run_once(
+            event_callback = event_callback,
+            messages       = messages,
+            tools_spec     = tools_spec,
+            force_tool     = True,
+            # TODO: parallel_tool_calls: false
+            # TODO: handle `refusal`
+        )
+
+        assert len(new_messages) == 1
+        new_message = new_messages[0]
+
+        assert new_message['role'] == 'tool_call'
+        tools = new_message['tools']
+
+        assert len(tools) == 1
+        result = json.loads(tools[0]['function']['arguments'])
+
         return {
             'role': 'extraction',
-            'parsed': extraction_type(),  # TODO
+            'parsed': extraction_type(**result),
+            'cost': new_message.get('cost'),
+            'raw': new_message.get('raw'),
         }
