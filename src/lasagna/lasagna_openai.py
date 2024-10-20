@@ -168,6 +168,7 @@ def _convert_to_openai_tool(tool: Callable) -> ChatCompletionToolParam:
         'function': {
             'name': tool.__name__,
             'description': description,
+            'strict': True,
             'parameters': convert_to_json_schema(params),
         },
     }
@@ -374,24 +375,22 @@ class LasagnaOpenAI(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools: List[Callable],
+        tools_spec: Union[NotGiven, List[ChatCompletionToolParam]],
         force_tool: bool,
     ) -> List[Message]:
         tool_choice: Union[ChatCompletionToolChoiceOptionParam, NotGiven]
         if force_tool:
-            if len(tools) == 0:
+            if not tools_spec or len(tools_spec) == 0:
                 raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
-            elif len(tools) == 1:
+            elif len(tools_spec) == 1:
                 tool_choice = {
                     "type": "function",
-                    "function": {"name": tools[0].__name__},
+                    "function": {"name": tools_spec[0]['function']['name']},
                 }
             else:
                 tool_choice = 'required'  # <-- model must use a tool, but is allowed to choose which one on its own
         else:
             tool_choice = NOT_GIVEN  # <-- if tools given, the model can choose to use them or not
-
-        tools_spec = _convert_to_openai_tools(tools)
 
         openai_messages = await _convert_to_openai_messages(messages)
 
@@ -446,7 +445,7 @@ class LasagnaOpenAI(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools: List[Callable],
+        tools_spec: Union[NotGiven, List[ChatCompletionToolParam]],
         force_tool: bool,
     ) -> List[Message]:
         last_error: Union[APIError, None] = None
@@ -456,7 +455,7 @@ class LasagnaOpenAI(Model):
                 return await self._run_once(
                     event_callback = event_callback,
                     messages = messages,
-                    tools = tools,
+                    tools_spec = tools_spec,
                     force_tool = force_tool,
                 )
             except APIError as e:
@@ -496,11 +495,12 @@ class LasagnaOpenAI(Model):
     ) -> List[Message]:
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
+        tools_spec = _convert_to_openai_tools(tools)
         for _ in range(max_tool_iters):
             new_messages_here = await self._retrying_run_once(
                 event_callback = event_callback,
                 messages       = messages,
-                tools          = tools,
+                tools_spec     = tools_spec,
                 force_tool     = force_tool,
             )
             tools_map = {tool.__name__: tool for tool in tools}
