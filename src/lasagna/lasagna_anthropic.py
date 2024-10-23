@@ -36,6 +36,8 @@ from .tools_util import (
     build_tool_response_message,
 )
 
+from .pydantic_util import ensure_pydantic_model
+
 from .known_models import ANTHROPIC_KNOWN_MODELS
 
 from anthropic import (
@@ -54,6 +56,8 @@ from anthropic.types.text_block_param import TextBlockParam
 from anthropic.types.image_block_param import ImageBlockParam
 from anthropic.types.tool_use_block_param import ToolUseBlockParam
 from anthropic.types.tool_result_block_param import ToolResultBlockParam
+
+from openai.lib._pydantic import to_strict_json_schema
 
 from typing import (
     List, Callable, AsyncIterator, Any, Type,
@@ -522,10 +526,39 @@ class LasagnaAnthropic(Model):
         messages: List[Message],
         extraction_type: Type[ExtractionType],
     ) -> MessageExtraction[ExtractionType]:
-        # TODO
-        return {
-            'role': 'extraction',
-            'parsed': extraction_type(),
-            'cost': None,
-            'raw': None,
-        }
+        tools_spec: List[ToolParam] = [
+            {
+                'name': extraction_type.__name__,
+                'description': getattr(extraction_type, '__doc__', ''),
+                'input_schema': to_strict_json_schema(ensure_pydantic_model(extraction_type)),
+            },
+        ]
+
+        new_messages = await self._retrying_run_once(
+            event_callback = event_callback,
+            messages       = messages,
+            tools_spec     = tools_spec,
+            force_tool     = True,
+            disable_parallel_tool_use = True,
+        )
+
+        assert len(new_messages) == 1
+        new_message = new_messages[0]
+
+        if new_message['role'] == 'tool_call':
+            tools = new_message['tools']
+
+            assert len(tools) == 1
+            result = json.loads(tools[0]['function']['arguments'])
+
+            return {
+                'role': 'extraction',
+                'parsed': extraction_type(**result),
+                'cost': new_message.get('cost'),
+                'raw': new_message.get('raw'),
+            }
+
+        else:
+            assert new_message['role'] == 'ai'
+            text = new_message['text']
+            raise RuntimeError(f"Model failed to generate structured output; instead, it output: {text}")

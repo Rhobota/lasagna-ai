@@ -38,6 +38,7 @@ dependencies = [
   "python-dotenv",
   "colorama",
   "pydantic >= 2.7, < 3",
+  "openai>=1.52.0",
 ]
 
 [project.urls]
@@ -47,7 +48,7 @@ Source = "https://github.com/Rhobota/lasagna-ai"
 
 [project.optional-dependencies]
 openai = [
-  "openai>=1.52.0",
+  # This optional dependency name is left here for backward compatibility.
 ]
 anthropic = [
   "anthropic>=0.37.1",
