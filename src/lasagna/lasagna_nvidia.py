@@ -15,8 +15,9 @@ from .types import (
     EventPayload,
     Model,
     ToolCall,
-    ModelRecord,
     Cost,
+    ExtractionType,
+    MessageExtraction,
 )
 
 from .stream import (
@@ -39,9 +40,11 @@ from .tools_util import (
     build_tool_response_message,
 )
 
+from .pydantic_util import ensure_pydantic_model
+
 from .known_models import NVIDIA_KNOWN_MODELS
 
-from openai import AsyncOpenAI, NOT_GIVEN, NotGiven
+from openai import AsyncOpenAI, NOT_GIVEN, NotGiven, pydantic_function_tool
 from openai.types.chat import (
     ChatCompletionChunk,
     ChatCompletionToolParam,
@@ -53,8 +56,9 @@ from openai.types.chat.chat_completion_chunk import ChoiceDelta
 from openai import APIError
 
 from typing import (
-    List, Callable, AsyncIterator, Any, cast,
+    List, Callable, Type, AsyncIterator, Any,
     Tuple, Dict, Optional, Union, Literal,
+    cast,
 )
 
 import asyncio
@@ -70,7 +74,8 @@ _LOG = logging.getLogger(__name__)
 async def _process_text_stream(
     stream: AsyncIterator[Tuple[ChoiceDelta, Union[str, None]]],
 ) -> AsyncIterator[EventPayload]:
-    async for delta, finish_reason in stream:
+    async for record in stream:
+        delta, finish_reason = record
         text = delta.content
         if finish_reason is not None:
             if text is not None:
@@ -79,8 +84,7 @@ async def _process_text_stream(
         elif delta.tool_calls is not None:
             # The model is switching from text to tools!
             yield 'ai', 'text_event', "\n\n"
-            put_back_val: Tuple[ChoiceDelta, Union[str, None]] = (delta, finish_reason)
-            fixed_stream = prefix_stream([put_back_val], stream)
+            fixed_stream = prefix_stream([record], stream)
             substream = _process_tool_call_stream(fixed_stream)
             async for subval in substream:
                 yield subval
@@ -381,24 +385,23 @@ class LasagnaNVIDIA(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools: List[Callable],
+        tools_spec: Union[NotGiven, List[ChatCompletionToolParam]],
         force_tool: bool,
+        parallel_tool_calls: Union[NotGiven, bool],
     ) -> List[Message]:
         tool_choice: Union[ChatCompletionToolChoiceOptionParam, NotGiven]
         if force_tool:
-            if len(tools) == 0:
+            if not tools_spec or len(tools_spec) == 0:
                 raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
-            elif len(tools) == 1:
+            elif len(tools_spec) == 1:
                 tool_choice = {
                     "type": "function",
-                    "function": {"name": tools[0].__name__},
+                    "function": {"name": tools_spec[0]['function']['name']},
                 }
             else:
                 tool_choice = 'required'  # <-- model must use a tool, but is allowed to choose which one on its own
         else:
             tool_choice = NOT_GIVEN  # <-- if tools given, the model can choose to use them or not
-
-        tools_spec = _convert_to_openai_tools(tools)
 
         openai_messages = await _convert_to_openai_messages(messages)
 
@@ -420,6 +423,7 @@ class LasagnaNVIDIA(Model):
             messages     = openai_messages,
             tools        = tools_spec,
             tool_choice  = tool_choice,
+            parallel_tool_calls = parallel_tool_calls,
             stream       = True,
             #stream_options = {'include_usage': True},
             logprobs     = logprobs,
@@ -453,8 +457,9 @@ class LasagnaNVIDIA(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools: List[Callable],
+        tools_spec: Union[NotGiven, List[ChatCompletionToolParam]],
         force_tool: bool,
+        parallel_tool_calls: Union[NotGiven, bool],
     ) -> List[Message]:
         last_error: Union[APIError, None] = None
         assert self.n_retries + 1 > 0   # <-- we know this is true from the check in __init__
@@ -463,8 +468,9 @@ class LasagnaNVIDIA(Model):
                 return await self._run_once(
                     event_callback = event_callback,
                     messages = messages,
-                    tools = tools,
+                    tools_spec = tools_spec,
                     force_tool = force_tool,
+                    parallel_tool_calls = parallel_tool_calls,
                 )
             except APIError as e:
                 # Some errors should be retried, some should not. Below
@@ -500,12 +506,14 @@ class LasagnaNVIDIA(Model):
     ) -> List[Message]:
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
+        tools_spec = _convert_to_openai_tools(tools)
         for _ in range(max_tool_iters):
             new_messages_here = await self._retrying_run_once(
                 event_callback = event_callback,
                 messages       = messages,
-                tools          = tools,
+                tools_spec     = tools_spec,
                 force_tool     = force_tool,
+                parallel_tool_calls = NOT_GIVEN,
             )
             tools_map = {tool.__name__: tool for tool in tools}
             new_messages.extend(new_messages_here)
@@ -519,3 +527,40 @@ class LasagnaNVIDIA(Model):
             new_messages.append(tool_response_message)
             messages.append(tool_response_message)
         return new_messages
+
+    async def extract(
+        self,
+        event_callback: EventCallback,
+        messages: List[Message],
+        extraction_type: Type[ExtractionType],
+    ) -> MessageExtraction[ExtractionType]:
+        tools_spec = [pydantic_function_tool(ensure_pydantic_model(extraction_type))]
+
+        new_messages = await self._retrying_run_once(
+            event_callback = event_callback,
+            messages       = messages,
+            tools_spec     = tools_spec,
+            force_tool     = True,
+            parallel_tool_calls = False,
+        )
+
+        assert len(new_messages) == 1
+        new_message = new_messages[0]
+
+        if new_message['role'] == 'tool_call':
+            tools = new_message['tools']
+
+            assert len(tools) == 1
+            result = json.loads(tools[0]['function']['arguments'])
+
+            return {
+                'role': 'extraction',
+                'parsed': extraction_type(**result),
+                'cost': new_message.get('cost'),
+                'raw': new_message.get('raw'),
+            }
+
+        else:
+            assert new_message['role'] == 'ai'
+            text = new_message['text']
+            raise RuntimeError(f"Model failed to generate structured output; instead, it output: {text}")
