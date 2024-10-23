@@ -371,17 +371,17 @@ class LasagnaAnthropic(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools: List[Callable],
+        tools_spec: Union[NotGiven, List[ToolParam]],
         force_tool: bool,
     ) -> List[Message]:
         tool_choice: Union[ToolChoice, NotGiven]
         if force_tool:
-            if len(tools) == 0:
+            if not tools_spec or len(tools_spec) == 0:
                 raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
-            elif len(tools) == 1:
+            elif len(tools_spec) == 1:
                 tool_choice = {
                     "type": "tool",
-                    "name": tools[0].__name__,
+                    "name": tools_spec[0]['name'],
                 }
             else:
                 tool_choice = {
@@ -389,8 +389,6 @@ class LasagnaAnthropic(Model):
                 }
         else:
             tool_choice = NOT_GIVEN  # <-- if tools given, the model can choose to use them or not
-
-        tools_spec = _convert_to_anthropic_tools(tools)
 
         system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
 
@@ -435,7 +433,7 @@ class LasagnaAnthropic(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools: List[Callable],
+        tools_spec: Union[NotGiven, List[ToolParam]],
         force_tool: bool,
     ) -> List[Message]:
         last_error: Union[Exception, None] = None
@@ -445,7 +443,7 @@ class LasagnaAnthropic(Model):
                 return await self._run_once(
                     event_callback = event_callback,
                     messages = messages,
-                    tools = tools,
+                    tools_spec = tools_spec,
                     force_tool = force_tool,
                 )
             except AnthropicError as e:
@@ -488,11 +486,12 @@ class LasagnaAnthropic(Model):
     ) -> List[Message]:
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
+        tools_spec = _convert_to_anthropic_tools(tools)
         for _ in range(max_tool_iters):
             new_messages_here = await self._retrying_run_once(
                 event_callback = event_callback,
                 messages       = messages,
-                tools          = tools,
+                tools_spec     = tools_spec,
                 force_tool     = force_tool,
             )
             tools_map = {tool.__name__: tool for tool in tools}
