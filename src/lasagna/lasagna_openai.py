@@ -71,8 +71,9 @@ _LOG = logging.getLogger(__name__)
 async def _process_text_stream(
     stream: AsyncIterator[Tuple[ChoiceDelta, Union[str, None]]],
 ) -> AsyncIterator[EventPayload]:
-    async for delta, finish_reason in stream:
-        text = delta.content
+    async for record in stream:
+        delta, finish_reason = record
+        text = delta.refusal or delta.content
         if finish_reason is not None:
             if text is not None:
                 yield 'ai', 'text_event', str(text)
@@ -80,8 +81,7 @@ async def _process_text_stream(
         if text is None:
             # The model is switching from text to tools!
             yield 'ai', 'text_event', "\n\n"
-            put_back_val: Tuple[ChoiceDelta, Union[str, None]] = (delta, finish_reason)
-            fixed_stream = prefix_stream([put_back_val], stream)
+            fixed_stream = prefix_stream([record], stream)
             substream = _process_tool_call_stream(fixed_stream)
             async for subval in substream:
                 yield subval
@@ -142,7 +142,8 @@ async def _process_output_stream(
 ) -> AsyncIterator[EventPayload]:
     first, stream = await apeek(stream, n=1)
     first_delta, _ = first[0]
-    is_text = first_delta.content is not None   # <-- hacky, but works?
+    text = first_delta.refusal or first_delta.content
+    is_text = text is not None   # <-- hacky, but works?
     if is_text:
         gen = _process_text_stream
     else:
@@ -538,7 +539,6 @@ class LasagnaOpenAI(Model):
             tools_spec     = tools_spec,
             force_tool     = True,
             parallel_tool_calls = False,
-            # TODO: handle `refusal`
             # TODO: other impls
             # TODO: tests
             # TODO: bump version (any breaking changes?)
@@ -547,15 +547,20 @@ class LasagnaOpenAI(Model):
         assert len(new_messages) == 1
         new_message = new_messages[0]
 
-        assert new_message['role'] == 'tool_call'
-        tools = new_message['tools']
+        if new_message['role'] == 'tool_call':
+            tools = new_message['tools']
 
-        assert len(tools) == 1
-        result = json.loads(tools[0]['function']['arguments'])
+            assert len(tools) == 1
+            result = json.loads(tools[0]['function']['arguments'])
 
-        return {
-            'role': 'extraction',
-            'parsed': extraction_type(**result),
-            'cost': new_message.get('cost'),
-            'raw': new_message.get('raw'),
-        }
+            return {
+                'role': 'extraction',
+                'parsed': extraction_type(**result),
+                'cost': new_message.get('cost'),
+                'raw': new_message.get('raw'),
+            }
+
+        else:
+            assert new_message['role'] == 'ai'
+            text = new_message['text']
+            raise RuntimeError(f"Model failed to generate structured output; instead, it output: {text}")
