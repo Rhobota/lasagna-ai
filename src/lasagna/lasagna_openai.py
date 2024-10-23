@@ -380,6 +380,7 @@ class LasagnaOpenAI(Model):
         messages: List[Message],
         tools_spec: Union[NotGiven, List[ChatCompletionToolParam]],
         force_tool: bool,
+        parallel_tool_calls: Union[NotGiven, bool],
     ) -> List[Message]:
         tool_choice: Union[ChatCompletionToolChoiceOptionParam, NotGiven]
         if force_tool:
@@ -415,6 +416,7 @@ class LasagnaOpenAI(Model):
             messages     = openai_messages,
             tools        = tools_spec,
             tool_choice  = tool_choice,
+            parallel_tool_calls = parallel_tool_calls,
             stream       = True,
             stream_options = {'include_usage': True},
             logprobs     = logprobs,
@@ -450,6 +452,7 @@ class LasagnaOpenAI(Model):
         messages: List[Message],
         tools_spec: Union[NotGiven, List[ChatCompletionToolParam]],
         force_tool: bool,
+        parallel_tool_calls: Union[NotGiven, bool],
     ) -> List[Message]:
         last_error: Union[APIError, None] = None
         assert self.n_retries + 1 > 0   # <-- we know this is true from the check in __init__
@@ -460,6 +463,7 @@ class LasagnaOpenAI(Model):
                     messages = messages,
                     tools_spec = tools_spec,
                     force_tool = force_tool,
+                    parallel_tool_calls = parallel_tool_calls,
                 )
             except APIError as e:
                 # Some errors should be retried, some should not. Below
@@ -505,6 +509,7 @@ class LasagnaOpenAI(Model):
                 messages       = messages,
                 tools_spec     = tools_spec,
                 force_tool     = force_tool,
+                parallel_tool_calls = NOT_GIVEN,
             )
             tools_map = {tool.__name__: tool for tool in tools}
             new_messages.extend(new_messages_here)
@@ -532,8 +537,9 @@ class LasagnaOpenAI(Model):
             messages       = messages,
             tools_spec     = tools_spec,
             force_tool     = True,
-            # TODO: parallel_tool_calls: false
+            parallel_tool_calls = False,
             # TODO: handle `refusal`
+            # TODO: other impls
             # TODO: tests
             # TODO: bump version (any breaking changes?)
         )
