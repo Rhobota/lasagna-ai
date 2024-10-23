@@ -23,7 +23,7 @@ def create_pydantic_model_from_typeddict(
             fields[field_name] = (field_type, Field(...))
         else:
             fields[field_name] = (field_type, Field(default=None))
-    model_name = typeddict_cls.__name__ + 'Model'
+    model_name = typeddict_cls.__name__
     model: Type[BaseModel] = create_model(model_name, **fields)
     return model
 
