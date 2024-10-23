@@ -726,6 +726,7 @@ def test_convert_to_openai_tools():
         'function': {
             'name': 'mytool',
             'description': 'Does a thing.',
+            'strict': True,
             'parameters': {
                 'type': 'object',
                 'properties': {
@@ -747,6 +748,7 @@ def test_convert_to_openai_tools():
         'function': {
             'name': 'my_other_tool',
             'description': 'Something else that does stuff.',
+            'strict': True,
             'parameters': {
                 'type': 'object',
                 'properties': {
@@ -765,6 +767,7 @@ def test_convert_to_openai_tools():
         'function': {
             'name': 'thing_with_optional_params',
             'description': 'This tool has optional params.',
+            'strict': True,
             'parameters': {
                 'type': 'object',
                 'properties': {
