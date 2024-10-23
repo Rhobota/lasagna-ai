@@ -21,4 +21,4 @@ __all__ = [
     'extract_last_message',
 ]
 
-__version__ = "0.8.2"
+__version__ = "0.8.3"
