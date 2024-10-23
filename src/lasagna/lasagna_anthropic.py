@@ -373,8 +373,9 @@ class LasagnaAnthropic(Model):
         messages: List[Message],
         tools_spec: Union[NotGiven, List[ToolParam]],
         force_tool: bool,
+        disable_parallel_tool_use: bool,
     ) -> List[Message]:
-        tool_choice: Union[ToolChoice, NotGiven]
+        tool_choice: ToolChoice
         if force_tool:
             if not tools_spec or len(tools_spec) == 0:
                 raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
@@ -382,13 +383,18 @@ class LasagnaAnthropic(Model):
                 tool_choice = {
                     "type": "tool",
                     "name": tools_spec[0]['name'],
+                    "disable_parallel_tool_use": disable_parallel_tool_use,
                 }
             else:
                 tool_choice = {
                     "type": "any",   # <-- model must use a tool, but is allowed to choose which one on its own
+                    "disable_parallel_tool_use": disable_parallel_tool_use,
                 }
         else:
-            tool_choice = NOT_GIVEN  # <-- if tools given, the model can choose to use them or not
+            tool_choice = {  # <-- if tools given, the model can choose to use them or not
+                "type": "auto",
+                "disable_parallel_tool_use": disable_parallel_tool_use,
+            }
 
         system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
 
@@ -435,6 +441,7 @@ class LasagnaAnthropic(Model):
         messages: List[Message],
         tools_spec: Union[NotGiven, List[ToolParam]],
         force_tool: bool,
+        disable_parallel_tool_use: bool,
     ) -> List[Message]:
         last_error: Union[Exception, None] = None
         assert self.n_retries + 1 > 0   # <-- we know this is true from the check in __init__
@@ -445,6 +452,7 @@ class LasagnaAnthropic(Model):
                     messages = messages,
                     tools_spec = tools_spec,
                     force_tool = force_tool,
+                    disable_parallel_tool_use = disable_parallel_tool_use,
                 )
             except AnthropicError as e:
                 # Some errors should be retried, some should not. Below
@@ -493,6 +501,7 @@ class LasagnaAnthropic(Model):
                 messages       = messages,
                 tools_spec     = tools_spec,
                 force_tool     = force_tool,
+                disable_parallel_tool_use = False,
             )
             tools_map = {tool.__name__: tool for tool in tools}
             new_messages.extend(new_messages_here)
