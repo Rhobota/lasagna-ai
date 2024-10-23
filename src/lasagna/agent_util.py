@@ -1,6 +1,6 @@
 import functools
 
-from typing import Union, Dict, Any, List, Callable, Protocol
+from typing import Union, Dict, Any, List, Callable, Protocol, Type
 
 from .types import (
     AgentSpec,
@@ -13,6 +13,7 @@ from .types import (
     EventPayload,
     Message,
     Model,
+    ExtractionType,
 )
 
 from .agent_runner import run
@@ -84,6 +85,21 @@ def build_most_simple_agent(
         return flat_messages(new_messages)
 
     return most_simple_agent
+
+
+def build_extraction_agent(
+    extraction_type: Type[ExtractionType],
+) -> AgentCallable:
+    async def extraction_agent(
+        model: Model,
+        event_callback: EventCallback,
+        prev_runs: List[AgentRun],
+    ) -> AgentRun:
+        messages = recursive_extract_messages(prev_runs)
+        new_message = await model.extract(event_callback, messages, extraction_type)
+        return flat_messages([new_message])
+
+    return extraction_agent
 
 
 async def noop_callback(event: EventPayload) -> None:
