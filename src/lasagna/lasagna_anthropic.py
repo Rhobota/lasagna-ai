@@ -16,7 +16,6 @@ from .types import (
     Model,
     Cost,
     ExtractionType,
-    MessageExtraction,
 )
 
 from .stream import (
@@ -525,7 +524,7 @@ class LasagnaAnthropic(Model):
         event_callback: EventCallback,
         messages: List[Message],
         extraction_type: Type[ExtractionType],
-    ) -> MessageExtraction[ExtractionType]:
+    ) -> Tuple[Message, ExtractionType]:
         tools_spec: List[ToolParam] = [
             {
                 'name': extraction_type.__name__,
@@ -551,12 +550,7 @@ class LasagnaAnthropic(Model):
             assert len(tools) == 1
             result = json.loads(tools[0]['function']['arguments'])
 
-            return {
-                'role': 'extraction',
-                'parsed': extraction_type(**result),
-                'cost': new_message.get('cost'),
-                'raw': new_message.get('raw'),
-            }
+            return new_message, result
 
         else:
             assert new_message['role'] == 'ai'

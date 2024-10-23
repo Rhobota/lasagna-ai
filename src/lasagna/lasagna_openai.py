@@ -15,7 +15,6 @@ from .types import (
     ToolCall,
     Cost,
     ExtractionType,
-    MessageExtraction,
 )
 
 from .stream import (
@@ -530,7 +529,7 @@ class LasagnaOpenAI(Model):
         event_callback: EventCallback,
         messages: List[Message],
         extraction_type: Type[ExtractionType],
-    ) -> MessageExtraction[ExtractionType]:
+    ) -> Tuple[Message, ExtractionType]:
         tools_spec = [pydantic_function_tool(ensure_pydantic_model(extraction_type))]
 
         new_messages = await self._retrying_run_once(
@@ -550,12 +549,7 @@ class LasagnaOpenAI(Model):
             assert len(tools) == 1
             result = json.loads(tools[0]['function']['arguments'])
 
-            return {
-                'role': 'extraction',
-                'parsed': extraction_type(**result),
-                'cost': new_message.get('cost'),
-                'raw': new_message.get('raw'),
-            }
+            return new_message, result
 
         else:
             assert new_message['role'] == 'ai'

@@ -125,15 +125,15 @@ async def test_model_extract():
             },
         ),
     ]
-    assert run['type'] == 'messages'
-    ms = run['messages']
-    assert len(ms) == 1
-    m = ms[0]
-    assert m['role'] == 'extraction'
-    p = m['parsed']
-    assert isinstance(p, MyTestType)
-    assert p.a == 'yes'
-    assert p.b == 6
+    assert run['type'] == 'extraction'
+    assert run['message'] == {
+        'role': 'ai',
+        'text': None,
+    }
+    result = run['result']
+    assert isinstance(result, MyTestType)
+    assert result.a == 'yes'
+    assert result.b == 6
 
 
 @pytest.mark.asyncio

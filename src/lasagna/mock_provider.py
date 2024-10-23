@@ -4,13 +4,12 @@ from lasagna.types import (
     Model,
     EventPayload,
     ExtractionType,
-    MessageExtraction,
     ToolCall,
 )
 
 from lasagna.util import recursive_hash
 
-from typing import List, Dict, Any, Callable, Type
+from typing import List, Dict, Tuple, Any, Callable, Type
 
 import json
 
@@ -61,7 +60,7 @@ class MockProvider(Model):
         event_callback: EventCallback,
         messages: List[Message],
         extraction_type: Type[ExtractionType],
-    ) -> MessageExtraction[ExtractionType]:
+    ) -> Tuple[Message, ExtractionType]:
         toolcall: ToolCall = {
             'call_id': 'id123',
             'call_type': 'function',
@@ -73,7 +72,11 @@ class MockProvider(Model):
         event: EventPayload = 'tool_call', 'tool_call_event', toolcall
         await event_callback(event)
 
-        return {
-            'role': 'extraction',
-            'parsed': extraction_type(**self.model_kwargs),
+        parsed = extraction_type(**self.model_kwargs)
+
+        message: Message = {
+            'role': 'ai',
+            'text': None,
         }
+
+        return message, parsed

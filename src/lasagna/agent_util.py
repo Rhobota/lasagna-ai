@@ -60,8 +60,12 @@ def recursive_extract_messages(agent_runs: List[AgentRun]) -> List[Message]:
     for run in agent_runs:
         if run['type'] == 'messages':
             messages.extend(run['messages'])
-        else:
+        elif run['type'] == 'chain' or run['type'] == 'parallel':
             messages.extend(recursive_extract_messages(run['runs']))
+        elif run['type'] == 'extraction':
+            messages.append(run['message'])
+        else:
+            raise RuntimeError('unreachable')
     return messages
 
 
@@ -96,8 +100,12 @@ def build_extraction_agent(
         prev_runs: List[AgentRun],
     ) -> AgentRun:
         messages = recursive_extract_messages(prev_runs)
-        new_message = await model.extract(event_callback, messages, extraction_type)
-        return flat_messages([new_message])
+        message, result = await model.extract(event_callback, messages, extraction_type)
+        return {
+            'type': 'extraction',
+            'message': message,
+            'result': result,
+        }
 
     return extraction_agent
 
