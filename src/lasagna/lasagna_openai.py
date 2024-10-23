@@ -534,6 +534,8 @@ class LasagnaOpenAI(Model):
             force_tool     = True,
             # TODO: parallel_tool_calls: false
             # TODO: handle `refusal`
+            # TODO: tests
+            # TODO: bump version (any breaking changes?)
         )
 
         assert len(new_messages) == 1

@@ -37,7 +37,7 @@ dependencies = [
   "aiohttp[speedups]",
   "python-dotenv",
   "colorama",
-  "pydantic >= 2.9, < 3",
+  "pydantic >= 2.7, < 3",
 ]
 
 [project.urls]
