@@ -4,6 +4,8 @@ from typing import Callable, List
 
 from lasagna.agent_util import (
     bind_model,
+    build_most_simple_agent,
+    extract_last_message,
     noop_callback,
     partial_bind_model,
     recursive_extract_messages,
@@ -14,8 +16,6 @@ from lasagna.agent_util import (
 from lasagna.types import (
     AgentCallable,
     BoundAgentCallable,
-    Model,
-    EventCallback,
     AgentRun,
     Message,
     EventPayload,
@@ -33,20 +33,6 @@ class MyTestType(BaseModel):
     b: int
 
 
-async def my_run_agent(
-    model: Model,
-    event_callback: EventCallback,
-    prev_runs: List[AgentRun],
-) -> AgentRun:
-    assert len(prev_runs) == 0
-    messages: List[Message] = []
-    new_messages = await model.run(event_callback, messages, [])
-    return {
-        'type': 'messages',
-        'messages': new_messages,
-    }
-
-
 async def _agent_common_test(
     binder: Callable[[AgentCallable], BoundAgentCallable],
     agent: AgentCallable,
@@ -57,7 +43,7 @@ async def _agent_common_test(
     prev_runs: List[AgentRun] = []
     new_run = await binder(agent)(event_callback, prev_runs)
     assert new_run == {
-        'agent': 'my_run_agent',
+        'agent': 'most_simple_agent',
         'provider': 'MockProvider',
         'model': 'some_model',
         'model_kwargs': {
@@ -94,13 +80,15 @@ async def _agent_common_test(
 @pytest.mark.asyncio
 async def test_bind_model():
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
-    await _agent_common_test(my_binder, my_run_agent)
+    my_agent = build_most_simple_agent()
+    await _agent_common_test(my_binder, my_agent)
 
 
 @pytest.mark.asyncio
 async def test_partial_bind_model():
     my_binder = partial_bind_model(MockProvider, 'some_model')({'a': 'yes', 'b': 6})
-    await _agent_common_test(my_binder, my_run_agent)
+    my_agent = build_most_simple_agent()
+    await _agent_common_test(my_binder, my_agent)
 
 
 @pytest.mark.asyncio
@@ -220,6 +208,10 @@ def test_recursive_extract_messages():
             'text': 'Summarize the previous AI conversations, please.',
         },
     ]
+    assert extract_last_message(agent_run) == {
+        'role': 'human',
+        'text': 'Summarize the previous AI conversations, please.',
+    }
 
 
 def test_flat_messages():
