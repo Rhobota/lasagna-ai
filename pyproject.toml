@@ -50,7 +50,7 @@ openai = [
   "openai>=1.52.0",
 ]
 anthropic = [
-  "anthropic>=0.28.1",
+  "anthropic>=0.37.1",
 ]
 dev = [
   "mypy>=1.10.0",

@@ -9,7 +9,7 @@
 
 - 🥞  **Layered agents!**
   - Agents for your agents!
-  - Tool-use and layering FTW 💪
+  - Tool-use, structured output ("extraction"), and layering FTW 💪
   - Ever wanted a _recursive_ agent? Now you can have one! 🤯
   - _Parallel_ tool-calling by default.
   - Fully asyncio.

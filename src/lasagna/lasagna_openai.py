@@ -539,9 +539,6 @@ class LasagnaOpenAI(Model):
             tools_spec     = tools_spec,
             force_tool     = True,
             parallel_tool_calls = False,
-            # TODO: other impls
-            # TODO: tests
-            # TODO: bump version (any breaking changes?)
         )
 
         assert len(new_messages) == 1

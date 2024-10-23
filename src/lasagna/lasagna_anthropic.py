@@ -14,8 +14,9 @@ from .types import (
     EventPayload,
     ToolCall,
     Model,
-    ModelRecord,
     Cost,
+    ExtractionType,
+    MessageExtraction,
 )
 
 from .stream import (
@@ -55,8 +56,9 @@ from anthropic.types.tool_use_block_param import ToolUseBlockParam
 from anthropic.types.tool_result_block_param import ToolResultBlockParam
 
 from typing import (
-    List, Callable, AsyncIterator, Any, cast,
+    List, Callable, AsyncIterator, Any, Type,
     Tuple, Dict, Union, Literal,
+    cast,
 )
 
 import asyncio
@@ -505,3 +507,17 @@ class LasagnaAnthropic(Model):
             new_messages.append(tool_response_message)
             messages.append(tool_response_message)
         return new_messages
+
+    async def extract(
+        self,
+        event_callback: EventCallback,
+        messages: List[Message],
+        extraction_type: Type[ExtractionType],
+    ) -> MessageExtraction[ExtractionType]:
+        # TODO
+        return {
+            'role': 'extraction',
+            'parsed': extraction_type(),
+            'cost': None,
+            'raw': None,
+        }
