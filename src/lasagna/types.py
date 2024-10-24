@@ -69,15 +69,62 @@ Message = Union[
 ]
 
 
+class AgentRunBase(TypedDict):
+    agent: NotRequired[str]
+    provider: NotRequired[str]
+    model: NotRequired[str]
+    model_kwargs: NotRequired[Dict[str, Any]]
+
+
+class AgentRunMessageList(AgentRunBase):
+    type: Literal['messages']
+    messages: List[Message]
+
+
+class AgentRunParallel(AgentRunBase):
+    type: Literal['parallel']
+    runs: List[AgentRun]
+
+
+class AgentRunChained(AgentRunBase):
+    type: Literal['chain']
+    runs: List[AgentRun]
+
+
+class AgentRunExtraction(AgentRunBase):
+    type: Literal['extraction']
+    message: Message
+    result: Any    # ideally, it's `ExtractionType`, and we'd inherit from Generic[ExtractionType], but that's not supported until python3.11
+
+
+AgentRun = Union[
+    AgentRunMessageList,
+    AgentRunParallel,
+    AgentRunChained,
+    AgentRunExtraction,
+]
+
+
 EventPayload = Union[
-    Tuple[Literal['human'],     Literal['echo_event'],      MessageContent],
-    Tuple[Literal['ai'],        Literal['text_event'],      str],
-    Tuple[Literal['tool_call'], Literal['text_event'],      str],
-    Tuple[Literal['tool_call'], Literal['tool_call_event'], ToolCall],
-    Tuple[Literal['tool_res'],  Literal['tool_res_event'],  ToolResult],
-    Tuple[Literal['progress'],  Literal['start'],           Tuple[str, str]],    # payload is `(key, details)`
-    Tuple[Literal['progress'],  Literal['update'],          Tuple[str, float]],  # payload is `(key, progress_0_to_1)`
-    Tuple[Literal['progress'],  Literal['end'],             str],                # payload is `key`
+    Tuple[Literal['human'],       Literal['echo_event'],      MessageContent],
+
+    Tuple[Literal['ai'],          Literal['text_event'],      str],
+
+    Tuple[Literal['tool_call'],   Literal['text_event'],      str],
+    Tuple[Literal['tool_call'],   Literal['tool_call_event'], ToolCall],
+
+    Tuple[Literal['tool_res'],    Literal['tool_res_event'],  ToolResult],
+
+    Tuple[Literal['progress'],    Literal['start'],           Tuple[str, str]],    # payload is `(key, details)`
+    Tuple[Literal['progress'],    Literal['update'],          Tuple[str, float]],  # payload is `(key, progress_0_to_1)`
+    Tuple[Literal['progress'],    Literal['end'],             str],                # payload is `key`
+
+    Tuple[Literal['transaction'], Literal['start'],           Tuple[str, str]],    # payload is `(provider, model)`
+    Tuple[Literal['transaction'], Literal['rollback'],        None],
+    Tuple[Literal['transaction'], Literal['commit'],          None],
+
+    Tuple[Literal['agent'],       Literal['start'],           str],                # payload is `agent_name`
+    Tuple[Literal['agent'],       Literal['end'],             AgentRun],
 ]
 
 
@@ -135,42 +182,6 @@ class Model(abc.ABC):
         to the next; e.g., we recommend you use `util.recursive_hash()`.
         """
         pass
-
-
-class AgentRunBase(TypedDict):
-    agent: NotRequired[str]
-    provider: NotRequired[str]
-    model: NotRequired[str]
-    model_kwargs: NotRequired[Dict[str, Any]]
-
-
-class AgentRunMessageList(AgentRunBase):
-    type: Literal['messages']
-    messages: List[Message]
-
-
-class AgentRunParallel(AgentRunBase):
-    type: Literal['parallel']
-    runs: List[AgentRun]
-
-
-class AgentRunChained(AgentRunBase):
-    type: Literal['chain']
-    runs: List[AgentRun]
-
-
-class AgentRunExtraction(AgentRunBase):
-    type: Literal['extraction']
-    message: Message
-    result: Any    # ideally, it's `ExtractionType`, and we'd inherit from Generic[ExtractionType], but that's not supported until python3.11
-
-
-AgentRun = Union[
-    AgentRunMessageList,
-    AgentRunParallel,
-    AgentRunChained,
-    AgentRunExtraction,
-]
 
 
 AgentCallable = Callable[[Model, EventCallback, List[AgentRun]], Awaitable[AgentRun]]

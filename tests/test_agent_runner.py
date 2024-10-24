@@ -88,7 +88,9 @@ async def test_run_with_registered_names():
         ],
     }
     assert events == [
+        ('agent', 'start', 'agent_1'),
         ('ai', 'text_event', 'Hi!'),
+        ('agent', 'end', new_run),
     ]
 
 
@@ -141,5 +143,7 @@ async def test_run_direct():
         ],
     }
     assert events == [
+        ('agent', 'start', 'agent_1'),
         ('ai', 'text_event', 'Hi!'),
+        ('agent', 'end', new_run),
     ]

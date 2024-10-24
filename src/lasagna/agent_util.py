@@ -106,10 +106,13 @@ def build_most_simple_agent(
 
         def __str__(self) -> str:
             if tools:
-                tool_names = ', '.join([tool.__name__ for tool in tools])
-                return f'simple agent with tools: {tool_names}'
+                tool_names = ', '.join([
+                    tool.__name__ if hasattr(tool, '__name__') else str(tool)
+                    for tool in tools
+                ])
+                return f'simple agent: {tool_names}'
             else:
-                return 'simple agent *no* tools'
+                return 'simple agent'
 
     return MostSimpleAgent()
 
@@ -133,7 +136,8 @@ def build_extraction_agent(
             }
 
         def __str__(self) -> str:
-            return f'extraction agent with type: {extraction_type}'
+            t = extraction_type.__name__ if hasattr(extraction_type, '__name__') else str(extraction_type)
+            return f'extraction agent: {t}'
 
     return ExtractionAgent()
 

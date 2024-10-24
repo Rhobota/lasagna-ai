@@ -48,6 +48,8 @@ async def run(
         model = model_factory(model=model_name, **model_kwargs)
         provider_str = model.__class__.__name__
 
+    await event_callback(('agent', 'start', agent_name))
+
     agent_run = await agent(
         model,
         event_callback,
@@ -62,5 +64,7 @@ async def run(
         agent_run['model'] = model_name
     if 'model_kwargs' not in agent_run and 'model_kwargs' in agent_spec:
         agent_run['model_kwargs'] = model_kwargs
+
+    await event_callback(('agent', 'end', agent_run))
 
     return agent_run

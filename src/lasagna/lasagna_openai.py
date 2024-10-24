@@ -458,13 +458,20 @@ class LasagnaOpenAI(Model):
         assert self.n_retries + 1 > 0   # <-- we know this is true from the check in __init__
         for delay_on_error in exponential_backoff_retry_delays(self.n_retries + 1):
             try:
-                return await self._run_once(
-                    event_callback = event_callback,
-                    messages = messages,
-                    tools_spec = tools_spec,
-                    force_tool = force_tool,
-                    parallel_tool_calls = parallel_tool_calls,
-                )
+                await event_callback(('transaction', 'start', ('openai', self.model)))
+                try:
+                    new_messages = await self._run_once(
+                        event_callback = event_callback,
+                        messages = messages,
+                        tools_spec = tools_spec,
+                        force_tool = force_tool,
+                        parallel_tool_calls = parallel_tool_calls,
+                    )
+                except:
+                    await event_callback(('transaction', 'rollback', None))
+                    raise
+                await event_callback(('transaction', 'commit', None))
+                return new_messages
             except APIError as e:
                 # Some errors should be retried, some should not. Below
                 # is the logic to decide when to retry vs when to not.

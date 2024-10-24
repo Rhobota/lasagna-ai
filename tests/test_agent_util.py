@@ -43,7 +43,7 @@ async def _agent_common_test(
     prev_runs: List[AgentRun] = []
     new_run = await binder(agent)(event_callback, prev_runs)
     assert new_run == {
-        'agent': 'simple agent *no* tools',
+        'agent': 'simple agent',
         'provider': 'MockProvider',
         'model': 'some_model',
         'model_kwargs': {
@@ -73,7 +73,9 @@ async def _agent_common_test(
         ],
     }
     assert events == [
+        ('agent', 'start', 'simple agent'),
         ('ai', 'text_event', 'Hi!'),
+        ('agent', 'end', new_run),
     ]
 
 
@@ -101,6 +103,11 @@ async def test_model_extract():
     run = await my_binder(build_extraction_agent(MyTestType))(event_callback, prev_runs)
     assert events == [
         (
+            'agent',
+            'start',
+            'extraction agent: MyTestType',
+        ),
+        (
             'tool_call',
             'tool_call_event',
             {
@@ -109,6 +116,25 @@ async def test_model_extract():
                 'function': {
                     'name': 'f',
                     'arguments': '{"a": "yes", "b": 6}',
+                },
+            },
+        ),
+        (
+            'agent',
+            'end',
+            {
+                'type': 'extraction',
+                'message': {
+                    'role': 'ai',
+                    'text': None,
+                },
+                'result': MyTestType(a='yes', b=6),
+                'provider': 'MockProvider',
+                'agent': 'extraction agent: MyTestType',
+                'model': 'some_model',
+                'model_kwargs': {
+                    'a': 'yes',
+                    'b': 6,
                 },
             },
         ),
