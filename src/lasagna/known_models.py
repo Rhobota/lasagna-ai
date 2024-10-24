@@ -73,6 +73,34 @@ NVIDIA_KNOWN_MODELS: List[ModelRecord] = [
         'display_name': 'meta/llama3-8b-instruct',
     },
     {
+        'formal_name': 'meta/llama-3.1-8b-instruct',
+        'display_name': 'meta/llama-3.1-8b-instruct',
+    },
+    {
+        'formal_name': 'meta/llama-3.1-70b-instruct',
+        'display_name': 'meta/llama-3.1-70b-instruct',
+    },
+    {
+        'formal_name': 'meta/llama-3.1-405b-instruct',
+        'display_name': 'meta/llama-3.1-405b-instruct',
+    },
+    {
+        'formal_name': 'meta/llama-3.2-1b-instruct',
+        'display_name': 'meta/llama-3.2-1b-instruct',
+    },
+    {
+        'formal_name': 'meta/llama-3.2-3b-instruct',
+        'display_name': 'meta/llama-3.2-3b-instruct',
+    },
+    {
+        'formal_name': 'meta/llama-3.2-11b-vision-instruct',
+        'display_name': 'meta/llama-3.2-11b-vision-instruct',
+    },
+    {
+        'formal_name': 'meta/llama-3.2-90b-vision-instruct',
+        'display_name': 'meta/llama-3.2-90b-vision-instruct',
+    },
+    {
         'formal_name': 'mistralai/mistral-large',
         'display_name': 'mistralai/mistral-large',
     },
@@ -106,13 +134,24 @@ NVIDIA_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
-BIND_NVIDIA_meta_llama3_70b_instruct           = partial_bind_model('NVIDIA', 'meta/llama3-70b-instruct')
-BIND_NVIDIA_meta_llama3_8b_instruct            = partial_bind_model('NVIDIA', 'meta/llama3-8b-instruct')
-BIND_NVIDIA_mistralai_mistral_large            = partial_bind_model('NVIDIA', 'mistralai/mistral-large')
-BIND_NVIDIA_mistralai_codestral_22b_instruct   = partial_bind_model('NVIDIA', 'mistralai/codestral-22b-instruct-v0.1')
-BIND_NVIDIA_mistralai_mixtral_8x22b_instruct   = partial_bind_model('NVIDIA', 'mistralai/mixtral-8x22b-instruct-v0.1')
-BIND_NVIDIA_mistralai_mixtral_8x7b_instruct    = partial_bind_model('NVIDIA', 'mistralai/mixtral-8x7b-instruct-v0.1')
-BIND_NVIDIA_google_gemma_7b                    = partial_bind_model('NVIDIA', 'google/gemma-7b')
-BIND_NVIDIA_google_recurrentgemma_2b           = partial_bind_model('NVIDIA', 'google/recurrentgemma-2b')
-BIND_NVIDIA_microsoft_phi_3_mini_128k_instruct = partial_bind_model('NVIDIA', 'microsoft/phi-3-mini-128k-instruct')
-BIND_NVIDIA_snowflake_arctic                   = partial_bind_model('NVIDIA', 'snowflake/arctic')
+BIND_NVIDIA_meta_llama3_70b_instruct           = partial_bind_model('nvidia', 'meta/llama3-70b-instruct')
+BIND_NVIDIA_meta_llama3_8b_instruct            = partial_bind_model('nvidia', 'meta/llama3-8b-instruct')
+BIND_NVIDIA_meta_llama3_1_8b_instruct          = partial_bind_model('nvidia', 'meta/llama-3.1-8b-instruct')
+BIND_NVIDIA_meta_llama3_1_70b_instruct         = partial_bind_model('nvidia', 'meta/llama-3.1-70b-instruct')
+BIND_NVIDIA_meta_llama3_1_405b_instruct        = partial_bind_model('nvidia', 'meta/llama-3.1-405b-instruct')
+BIND_NVIDIA_meta_llama3_2_1b_instruct          = partial_bind_model('nvidia', 'meta/llama-3.2-1b-instruct')
+BIND_NVIDIA_meta_llama3_2_3b_instruct          = partial_bind_model('nvidia', 'meta/llama-3.2-3b-instruct')
+BIND_NVIDIA_meta_llama3_2_11b_vision_instruct  = partial_bind_model('nvidia', 'meta/llama-3.2-11b-vision-instruct')
+BIND_NVIDIA_meta_llama3_2_90b_vision_instruct  = partial_bind_model('nvidia', 'meta/llama-3.2-90b-vision-instruct')
+
+BIND_NVIDIA_mistralai_mistral_large            = partial_bind_model('nvidia', 'mistralai/mistral-large')
+BIND_NVIDIA_mistralai_codestral_22b_instruct   = partial_bind_model('nvidia', 'mistralai/codestral-22b-instruct-v0.1')
+BIND_NVIDIA_mistralai_mixtral_8x22b_instruct   = partial_bind_model('nvidia', 'mistralai/mixtral-8x22b-instruct-v0.1')
+BIND_NVIDIA_mistralai_mixtral_8x7b_instruct    = partial_bind_model('nvidia', 'mistralai/mixtral-8x7b-instruct-v0.1')
+
+BIND_NVIDIA_google_gemma_7b                    = partial_bind_model('nvidia', 'google/gemma-7b')
+BIND_NVIDIA_google_recurrentgemma_2b           = partial_bind_model('nvidia', 'google/recurrentgemma-2b')
+
+BIND_NVIDIA_microsoft_phi_3_mini_128k_instruct = partial_bind_model('nvidia', 'microsoft/phi-3-mini-128k-instruct')
+
+BIND_NVIDIA_snowflake_arctic                   = partial_bind_model('nvidia', 'snowflake/arctic')
