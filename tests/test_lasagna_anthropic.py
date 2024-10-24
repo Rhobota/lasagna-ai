@@ -525,6 +525,7 @@ def test_convert_to_anthropic_tools():
                     'b': {'type': 'number', 'description': 'the second value'},
                 },
                 'required': ['a', 'b'],
+                'additionalProperties': False,
             },
         },
     ]

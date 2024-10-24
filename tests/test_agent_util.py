@@ -4,16 +4,18 @@ from typing import Callable, List
 
 from lasagna.agent_util import (
     bind_model,
+    build_most_simple_agent,
+    extract_last_message,
+    noop_callback,
     partial_bind_model,
     recursive_extract_messages,
     flat_messages,
+    build_extraction_agent,
 )
 
 from lasagna.types import (
     AgentCallable,
     BoundAgentCallable,
-    Model,
-    EventCallback,
     AgentRun,
     Message,
     EventPayload,
@@ -23,19 +25,12 @@ from lasagna.mock_provider import (
     MockProvider,
 )
 
+from pydantic import BaseModel, ValidationError
 
-async def my_agent(
-    model: Model,
-    event_callback: EventCallback,
-    prev_runs: List[AgentRun],
-) -> AgentRun:
-    assert len(prev_runs) == 0
-    messages: List[Message] = []
-    new_messages = await model.run(event_callback, messages, [])
-    return {
-        'type': 'messages',
-        'messages': new_messages,
-    }
+
+class MyTestType(BaseModel):
+    a: str
+    b: int
 
 
 async def _agent_common_test(
@@ -48,7 +43,7 @@ async def _agent_common_test(
     prev_runs: List[AgentRun] = []
     new_run = await binder(agent)(event_callback, prev_runs)
     assert new_run == {
-        'agent': 'my_agent',
+        'agent': 'simple agent *no* tools',
         'provider': 'MockProvider',
         'model': 'some_model',
         'model_kwargs': {
@@ -85,13 +80,56 @@ async def _agent_common_test(
 @pytest.mark.asyncio
 async def test_bind_model():
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_agent = build_most_simple_agent()
     await _agent_common_test(my_binder, my_agent)
 
 
 @pytest.mark.asyncio
 async def test_partial_bind_model():
     my_binder = partial_bind_model(MockProvider, 'some_model')({'a': 'yes', 'b': 6})
+    my_agent = build_most_simple_agent()
     await _agent_common_test(my_binder, my_agent)
+
+
+@pytest.mark.asyncio
+async def test_model_extract():
+    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    events = []
+    async def event_callback(event: EventPayload) -> None:
+        events.append(event)
+    prev_runs: List[AgentRun] = []
+    run = await my_binder(build_extraction_agent(MyTestType))(event_callback, prev_runs)
+    assert events == [
+        (
+            'tool_call',
+            'tool_call_event',
+            {
+                'call_id': 'id123',
+                'call_type': 'function',
+                'function': {
+                    'name': 'f',
+                    'arguments': '{"a": "yes", "b": 6}',
+                },
+            },
+        ),
+    ]
+    assert run['type'] == 'extraction'
+    assert run['message'] == {
+        'role': 'ai',
+        'text': None,
+    }
+    result = run['result']
+    assert isinstance(result, MyTestType)
+    assert result.a == 'yes'
+    assert result.b == 6
+
+
+@pytest.mark.asyncio
+async def test_model_extract_type_mismatch():
+    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 'BAD VALUE'})
+    prev_runs: List[AgentRun] = []
+    with pytest.raises(ValidationError):
+        await my_binder(build_extraction_agent(MyTestType))(noop_callback, prev_runs)
 
 
 def test_recursive_extract_messages():
@@ -170,6 +208,10 @@ def test_recursive_extract_messages():
             'text': 'Summarize the previous AI conversations, please.',
         },
     ]
+    assert extract_last_message(agent_run) == {
+        'role': 'human',
+        'text': 'Summarize the previous AI conversations, please.',
+    }
 
 
 def test_flat_messages():

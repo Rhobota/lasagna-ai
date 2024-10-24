@@ -4,6 +4,7 @@ import abc
 from typing import (
     TypedDict, Dict, List, Any, Optional, Literal,
     Callable, Tuple, Awaitable, Union, Protocol,
+    TypeVar, Type,
 )
 
 from typing_extensions import NotRequired
@@ -61,7 +62,11 @@ class MessageToolResult(MessageBase):
     tools: List[ToolResult]
 
 
-Message = Union[MessageContent, MessageToolCall, MessageToolResult]
+Message = Union[
+    MessageContent,
+    MessageToolCall,
+    MessageToolResult,
+]
 
 
 EventPayload = Union[
@@ -77,6 +82,9 @@ EventPayload = Union[
 
 
 EventCallback = Callable[[EventPayload], Awaitable[None]]
+
+
+ExtractionType = TypeVar('ExtractionType')  # <-- for generic programming
 
 
 class Model(abc.ABC):
@@ -102,6 +110,19 @@ class Model(abc.ABC):
         is generated when tools are used. This method will respond to tool-
         use requests until the AI generates a non-tool response (up to
         `max_tool_iters`, then it halts).
+        """
+        pass
+
+    @abc.abstractmethod
+    async def extract(
+        self,
+        event_callback: EventCallback,
+        messages: List[Message],
+        extraction_type: Type[ExtractionType],
+    ) -> Tuple[Message, ExtractionType]:
+        """
+        Use the AI to extract structured output from the `messages`. The
+        schema of the extracted data will follow `extraction_type`.
         """
         pass
 
@@ -138,7 +159,18 @@ class AgentRunChained(AgentRunBase):
     runs: List[AgentRun]
 
 
-AgentRun = Union[AgentRunMessageList, AgentRunParallel, AgentRunChained]
+class AgentRunExtraction(AgentRunBase):
+    type: Literal['extraction']
+    message: Message
+    result: Any    # ideally, it's `ExtractionType`, and we'd inherit from Generic[ExtractionType], but that's not supported until python3.11
+
+
+AgentRun = Union[
+    AgentRunMessageList,
+    AgentRunParallel,
+    AgentRunChained,
+    AgentRunExtraction,
+]
 
 
 AgentCallable = Callable[[Model, EventCallback, List[AgentRun]], Awaitable[AgentRun]]

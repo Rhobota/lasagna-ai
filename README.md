@@ -9,7 +9,7 @@
 
 - 🥞  **Layered agents!**
   - Agents for your agents!
-  - Tool-use and layering FTW 💪
+  - Tool-use, structured output ("extraction"), and layering FTW 💪
   - Ever wanted a _recursive_ agent? Now you can have one! 🤯
   - _Parallel_ tool-calling by default.
   - Fully asyncio.
@@ -74,7 +74,7 @@ Anyway, run it in your terminal and you can chat interactively with the model. �
 
 ```python
 from lasagna import (
-    bind_model,
+    known_models,
     build_most_simple_agent,
 )
 
@@ -89,7 +89,7 @@ import asyncio
 from dotenv import load_dotenv; load_dotenv()
 
 
-MODEL_BINDER = bind_model('openai', 'gpt-3.5-turbo-0125')
+MODEL_BINDER = known_models.BIND_OPENAI_gpt_4o_mini()
 
 
 async def main() -> None:

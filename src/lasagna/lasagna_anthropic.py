@@ -14,8 +14,8 @@ from .types import (
     EventPayload,
     ToolCall,
     Model,
-    ModelRecord,
     Cost,
+    ExtractionType,
 )
 
 from .stream import (
@@ -34,6 +34,8 @@ from .tools_util import (
     handle_tools,
     build_tool_response_message,
 )
+
+from .pydantic_util import ensure_pydantic_model, build_and_validate
 
 from .known_models import ANTHROPIC_KNOWN_MODELS
 
@@ -54,9 +56,12 @@ from anthropic.types.image_block_param import ImageBlockParam
 from anthropic.types.tool_use_block_param import ToolUseBlockParam
 from anthropic.types.tool_result_block_param import ToolResultBlockParam
 
+from openai.lib._pydantic import to_strict_json_schema
+
 from typing import (
-    List, Callable, AsyncIterator, Any, cast,
+    List, Callable, AsyncIterator, Any, Type,
     Tuple, Dict, Union, Literal,
+    cast,
 )
 
 import asyncio
@@ -369,26 +374,33 @@ class LasagnaAnthropic(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools: List[Callable],
+        tools_spec: Union[NotGiven, List[ToolParam]],
         force_tool: bool,
+        disable_parallel_tool_use: bool,
     ) -> List[Message]:
-        tool_choice: Union[ToolChoice, NotGiven]
+        tool_choice: Union[NotGiven, ToolChoice]
         if force_tool:
-            if len(tools) == 0:
+            if not tools_spec or len(tools_spec) == 0:
                 raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
-            elif len(tools) == 1:
+            elif len(tools_spec) == 1:
                 tool_choice = {
                     "type": "tool",
-                    "name": tools[0].__name__,
+                    "name": tools_spec[0]['name'],
+                    "disable_parallel_tool_use": disable_parallel_tool_use,
                 }
             else:
                 tool_choice = {
                     "type": "any",   # <-- model must use a tool, but is allowed to choose which one on its own
+                    "disable_parallel_tool_use": disable_parallel_tool_use,
                 }
         else:
-            tool_choice = NOT_GIVEN  # <-- if tools given, the model can choose to use them or not
-
-        tools_spec = _convert_to_anthropic_tools(tools)
+            if tools_spec and len(tools_spec) > 0:
+                tool_choice = {
+                    "type": "auto",  # <-- the model can choose to use them or not
+                    "disable_parallel_tool_use": disable_parallel_tool_use,
+                }
+            else:
+                tool_choice = NOT_GIVEN
 
         system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
 
@@ -433,8 +445,9 @@ class LasagnaAnthropic(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools: List[Callable],
+        tools_spec: Union[NotGiven, List[ToolParam]],
         force_tool: bool,
+        disable_parallel_tool_use: bool,
     ) -> List[Message]:
         last_error: Union[Exception, None] = None
         assert self.n_retries + 1 > 0   # <-- we know this is true from the check in __init__
@@ -443,8 +456,9 @@ class LasagnaAnthropic(Model):
                 return await self._run_once(
                     event_callback = event_callback,
                     messages = messages,
-                    tools = tools,
+                    tools_spec = tools_spec,
                     force_tool = force_tool,
+                    disable_parallel_tool_use = disable_parallel_tool_use,
                 )
             except AnthropicError as e:
                 # Some errors should be retried, some should not. Below
@@ -486,12 +500,14 @@ class LasagnaAnthropic(Model):
     ) -> List[Message]:
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
+        tools_spec = _convert_to_anthropic_tools(tools)
         for _ in range(max_tool_iters):
             new_messages_here = await self._retrying_run_once(
                 event_callback = event_callback,
                 messages       = messages,
-                tools          = tools,
+                tools_spec     = tools_spec,
                 force_tool     = force_tool,
+                disable_parallel_tool_use = False,
             )
             tools_map = {tool.__name__: tool for tool in tools}
             new_messages.extend(new_messages_here)
@@ -505,3 +521,45 @@ class LasagnaAnthropic(Model):
             new_messages.append(tool_response_message)
             messages.append(tool_response_message)
         return new_messages
+
+    async def extract(
+        self,
+        event_callback: EventCallback,
+        messages: List[Message],
+        extraction_type: Type[ExtractionType],
+    ) -> Tuple[Message, ExtractionType]:
+        tools_spec: List[ToolParam] = [
+            {
+                'name': extraction_type.__name__,
+                'input_schema': to_strict_json_schema(ensure_pydantic_model(extraction_type)),
+            },
+        ]
+
+        docstr = getattr(extraction_type, '__doc__', None)
+        if docstr:
+            tools_spec[0]['description'] = docstr
+
+        new_messages = await self._retrying_run_once(
+            event_callback = event_callback,
+            messages       = messages,
+            tools_spec     = tools_spec,
+            force_tool     = True,
+            disable_parallel_tool_use = True,
+        )
+
+        assert len(new_messages) == 1
+        new_message = new_messages[0]
+
+        if new_message['role'] == 'tool_call':
+            tools = new_message['tools']
+
+            assert len(tools) == 1
+            parsed = json.loads(tools[0]['function']['arguments'])
+            result = build_and_validate(extraction_type, parsed)
+
+            return new_message, result
+
+        else:
+            assert new_message['role'] == 'ai'
+            text = new_message['text']
+            raise RuntimeError(f"Model failed to generate structured output; instead, it output: {text}")

@@ -1,12 +1,11 @@
 from lasagna import (
-    bind_model,
+    known_models,
     flat_messages,
     build_most_simple_agent,
     extract_last_message,
     noop_callback,
+    Message,
 )
-
-from lasagna.types import Message
 
 from typing import List, Dict
 
@@ -19,26 +18,26 @@ THE_AGENT = build_most_simple_agent()
 
 
 COMMITTEE_SPEC = [
-    ('openai',    'gpt-4o-2024-05-13'),
-    ('openai',    'gpt-4-turbo-2024-04-09'),
-    ('openai',    'gpt-3.5-turbo-0125'),
-    ('anthropic', 'claude-3-5-sonnet-20240620'),
-    ('anthropic', 'claude-3-opus-20240229'),
-    ('anthropic', 'claude-3-sonnet-20240229'),
-    ('anthropic', 'claude-3-haiku-20240307'),
-    ('nvidia',    'meta/llama3-70b-instruct'),
-    ('nvidia',    'meta/llama3-8b-instruct'),
-    ('nvidia',    'mistralai/mistral-large'),
-    ('nvidia',    'mistralai/mixtral-8x7b-instruct-v0.1'),
-    ('nvidia',    'google/recurrentgemma-2b'),
-    ('nvidia',    'microsoft/phi-3-mini-128k-instruct'),
-    ('nvidia',    'snowflake/arctic'),
+    known_models.BIND_OPENAI_gpt_4o(),
+    known_models.BIND_OPENAI_gpt_4o_mini(),
+
+    known_models.BIND_ANTHROPIC_claude_35_sonnet(),
+    known_models.BIND_ANTHROPIC_claude_3_opus(),
+    known_models.BIND_ANTHROPIC_claude_3_haiku(),
+
+    known_models.BIND_NVIDIA_meta_llama3_8b_instruct(),
+    known_models.BIND_NVIDIA_meta_llama3_1_8b_instruct(),
+    known_models.BIND_NVIDIA_meta_llama3_2_3b_instruct(),
+    known_models.BIND_NVIDIA_mistralai_mistral_large(),
+    known_models.BIND_NVIDIA_mistralai_mixtral_8x7b_instruct(),
+    known_models.BIND_NVIDIA_google_recurrentgemma_2b(),
+    known_models.BIND_NVIDIA_microsoft_phi_3_mini_128k_instruct(),
 ]
 
 
 COMMITTEE_MODELS = [
-    bind_model(*model)(THE_AGENT)
-    for model in COMMITTEE_SPEC
+    binder(THE_AGENT)
+    for binder in COMMITTEE_SPEC
 ]
 
 

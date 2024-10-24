@@ -25,7 +25,7 @@ async def run(
         agent = AGENTS[agent_name]['runner']
     else:
         agent = agent_spec['agent']
-        agent_name = agent.__name__
+        agent_name = agent.__name__ if hasattr(agent, '__name__') else str(agent)
 
     model_name = agent_spec['model'] \
         if isinstance(agent_spec['model'], str) \

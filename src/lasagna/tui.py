@@ -23,6 +23,7 @@ async def tui_event_callback(event: EventPayload) -> None:
     elif event[0] == 'tool_res' and event[1] == 'tool_res_event':
         r = Fore.BLUE + f" -> {event[2]['result']}"
         print(r)
+    print(Style.RESET_ALL, end='', flush=True)
 
 
 async def tui_input_loop(

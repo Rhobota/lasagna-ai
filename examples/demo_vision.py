@@ -1,20 +1,22 @@
 from lasagna import (
-    bind_model,
+    known_models,
     build_most_simple_agent,
     flat_messages,
+    Message,
 )
 
 from lasagna.tui import (
     tui_event_callback,
 )
 
-from lasagna.types import Message
-
 from typing import List
 
 from dotenv import load_dotenv; load_dotenv()
 
 import asyncio
+
+
+MODEL_BINDER = known_models.BIND_ANTHROPIC_claude_35_sonnet()
 
 
 async def main() -> None:
@@ -30,7 +32,7 @@ async def main() -> None:
             ],
         },
     ]
-    bound_agent = bind_model('anthropic', 'claude-3-5-sonnet-20240620')(
+    bound_agent = MODEL_BINDER(
         build_most_simple_agent(),
     )
     await bound_agent(tui_event_callback, [flat_messages(messages)])

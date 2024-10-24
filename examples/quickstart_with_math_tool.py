@@ -1,5 +1,5 @@
 from lasagna import (
-    bind_model,
+    known_models,
     build_most_simple_agent,
 )
 
@@ -16,7 +16,7 @@ from dotenv import load_dotenv; load_dotenv()
 import sympy as sp    # type: ignore
 
 
-MODEL_BINDER = bind_model('openai', 'gpt-3.5-turbo-0125')
+MODEL_BINDER = known_models.BIND_OPENAI_gpt_4o_mini()
 
 
 def evaluate_math_expression(expression: str) -> float:
