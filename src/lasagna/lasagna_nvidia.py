@@ -183,6 +183,11 @@ def _convert_to_openai_tools(tools: List[Callable]) -> Union[NotGiven, List[Chat
     if len(tools) == 0:
         return NOT_GIVEN
     specs = [_convert_to_openai_tool(tool) for tool in tools]
+    for spec in specs:
+        if 'parameters' in spec['function']:
+            p = spec['function']['parameters']
+            if 'additionalProperties' in p:
+                del p['additionalProperties']
     return specs
 
 
