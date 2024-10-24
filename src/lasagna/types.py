@@ -119,11 +119,11 @@ EventPayload = Union[
     Tuple[Literal['progress'],    Literal['update'],          Tuple[str, float]],  # payload is `(key, progress_0_to_1)`
     Tuple[Literal['progress'],    Literal['end'],             str],                # payload is `key`
 
-    Tuple[Literal['transaction'], Literal['start'],           None],
+    Tuple[Literal['transaction'], Literal['start'],           Tuple[str, str]],    # payload is `(provider, model)`
     Tuple[Literal['transaction'], Literal['rollback'],        None],
     Tuple[Literal['transaction'], Literal['commit'],          None],
 
-    Tuple[Literal['agent'],       Literal['start'],           None],
+    Tuple[Literal['agent'],       Literal['start'],           str],                # payload is `agent_name`
     Tuple[Literal['agent'],       Literal['end'],             AgentRun],
 ]
 

@@ -453,7 +453,7 @@ class LasagnaAnthropic(Model):
         assert self.n_retries + 1 > 0   # <-- we know this is true from the check in __init__
         for delay_on_error in exponential_backoff_retry_delays(self.n_retries + 1):
             try:
-                await event_callback(('transaction', 'start', None))
+                await event_callback(('transaction', 'start', ('anthropic', self.model)))
                 try:
                     new_messages = await self._run_once(
                         event_callback = event_callback,
