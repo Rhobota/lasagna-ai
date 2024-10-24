@@ -1,5 +1,5 @@
 from lasagna import (
-    bind_model,
+    known_models,
     build_most_simple_agent,
 )
 
@@ -16,7 +16,7 @@ import aiohttp
 import os
 
 
-MODEL_BINDER = bind_model('openai', 'gpt-4o-2024-05-13')
+MODEL_BINDER = known_models.BIND_OPENAI_gpt_4o_mini()
 
 
 # LLMs can hallucinate phone numbers, so you should be very cautious
