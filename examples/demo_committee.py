@@ -32,7 +32,6 @@ COMMITTEE_SPEC = [
     ('nvidia',    'mistralai/mixtral-8x7b-instruct-v0.1'),
     ('nvidia',    'google/recurrentgemma-2b'),
     ('nvidia',    'microsoft/phi-3-mini-128k-instruct'),
-    ('nvidia',    'snowflake/arctic'),
 ]
 
 

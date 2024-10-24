@@ -128,10 +128,6 @@ NVIDIA_KNOWN_MODELS: List[ModelRecord] = [
         'formal_name': 'microsoft/phi-3-mini-128k-instruct',
         'display_name': 'microsoft/phi-3-mini-128k-instruct',
     },
-    {
-        'formal_name': 'snowflake/arctic',
-        'display_name': 'snowflake/arctic',
-    },
 ]
 
 BIND_NVIDIA_meta_llama3_70b_instruct           = partial_bind_model('nvidia', 'meta/llama3-70b-instruct')
@@ -153,5 +149,3 @@ BIND_NVIDIA_google_gemma_7b                    = partial_bind_model('nvidia', 'g
 BIND_NVIDIA_google_recurrentgemma_2b           = partial_bind_model('nvidia', 'google/recurrentgemma-2b')
 
 BIND_NVIDIA_microsoft_phi_3_mini_128k_instruct = partial_bind_model('nvidia', 'microsoft/phi-3-mini-128k-instruct')
-
-BIND_NVIDIA_snowflake_arctic                   = partial_bind_model('nvidia', 'snowflake/arctic')

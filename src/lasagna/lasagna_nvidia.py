@@ -495,7 +495,7 @@ class LasagnaNVIDIA(Model):
                 else:
                     pass  # <-- this must be one we don't know about yet, so ... recoverable, maybe?
                 if delay_on_error > 0.0:
-                    _LOG.warning(f"Got a maybe-recoverable error (will retry in {delay_on_error:.2f} seconds): {e}")
+                    _LOG.warning(f"Got a maybe-recoverable error (will retry in {delay_on_error:.2f} seconds) for model `{self.model}`: {e}")
                     await asyncio.sleep(delay_on_error)
         assert last_error is not None   # <-- we know this is true because `n_retries + 1 > 0`
         raise last_error
