@@ -740,6 +740,7 @@ def test_convert_to_openai_tools():
                     },
                 },
                 'required': ['a', 'b'],
+                'additionalProperties': False,
             },
         },
     }
@@ -759,6 +760,7 @@ def test_convert_to_openai_tools():
                     },
                 },
                 'required': ['how'],
+                'additionalProperties': False,
             },
         },
     }
@@ -785,6 +787,7 @@ def test_convert_to_openai_tools():
                     },
                 },
                 'required': ['first'],
+                'additionalProperties': False,
             },
         },
     }

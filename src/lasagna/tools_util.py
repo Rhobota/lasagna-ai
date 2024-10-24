@@ -42,6 +42,7 @@ def convert_to_json_schema(params: List[ToolParam]) -> Dict[str, object]:
             for p in params
             if not p['description'].startswith('(optional)')
         ],
+        "additionalProperties": False,
     }
 
 

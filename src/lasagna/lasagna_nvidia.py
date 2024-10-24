@@ -550,7 +550,8 @@ class LasagnaNVIDIA(Model):
             tools = new_message['tools']
 
             assert len(tools) == 1
-            result = json.loads(tools[0]['function']['arguments'])
+            parsed: Dict = json.loads(tools[0]['function']['arguments'])
+            result: ExtractionType = extraction_type(**parsed)
 
             return new_message, result
 

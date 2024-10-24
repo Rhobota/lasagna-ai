@@ -77,6 +77,7 @@ def test_convert_to_json_schema():
             },
         },
         'required': ['a', 'second', 'another', 'yet_another', 'an_enum'],
+        'additionalProperties': False,
     }
 
 

@@ -378,7 +378,7 @@ class LasagnaAnthropic(Model):
         force_tool: bool,
         disable_parallel_tool_use: bool,
     ) -> List[Message]:
-        tool_choice: ToolChoice
+        tool_choice: Union[NotGiven, ToolChoice]
         if force_tool:
             if not tools_spec or len(tools_spec) == 0:
                 raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
@@ -394,10 +394,13 @@ class LasagnaAnthropic(Model):
                     "disable_parallel_tool_use": disable_parallel_tool_use,
                 }
         else:
-            tool_choice = {  # <-- if tools given, the model can choose to use them or not
-                "type": "auto",
-                "disable_parallel_tool_use": disable_parallel_tool_use,
-            }
+            if tools_spec and len(tools_spec) > 0:
+                tool_choice = {
+                    "type": "auto",  # <-- the model can choose to use them or not
+                    "disable_parallel_tool_use": disable_parallel_tool_use,
+                }
+            else:
+                tool_choice = NOT_GIVEN
 
         system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
 
@@ -548,7 +551,8 @@ class LasagnaAnthropic(Model):
             tools = new_message['tools']
 
             assert len(tools) == 1
-            result = json.loads(tools[0]['function']['arguments'])
+            parsed: Dict = json.loads(tools[0]['function']['arguments'])
+            result: ExtractionType = extraction_type(**parsed)
 
             return new_message, result
 
