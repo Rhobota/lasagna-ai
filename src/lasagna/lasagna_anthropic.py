@@ -531,10 +531,13 @@ class LasagnaAnthropic(Model):
         tools_spec: List[ToolParam] = [
             {
                 'name': extraction_type.__name__,
-                'description': getattr(extraction_type, '__doc__', ''),
                 'input_schema': to_strict_json_schema(ensure_pydantic_model(extraction_type)),
             },
         ]
+
+        docstr = getattr(extraction_type, '__doc__', None)
+        if docstr:
+            tools_spec[0]['description'] = docstr
 
         new_messages = await self._retrying_run_once(
             event_callback = event_callback,
