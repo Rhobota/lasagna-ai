@@ -43,7 +43,7 @@ async def _agent_common_test(
     prev_runs: List[AgentRun] = []
     new_run = await binder(agent)(event_callback, prev_runs)
     assert new_run == {
-        'agent': 'most_simple_agent',
+        'agent': 'simple agent *no* tools',
         'provider': 'MockProvider',
         'model': 'some_model',
         'model_kwargs': {
