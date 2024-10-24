@@ -4,9 +4,8 @@ from lasagna import (
     build_most_simple_agent,
     extract_last_message,
     noop_callback,
+    Message,
 )
-
-from lasagna.types import Message
 
 from typing import List, Dict
 

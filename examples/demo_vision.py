@@ -2,13 +2,12 @@ from lasagna import (
     known_models,
     build_most_simple_agent,
     flat_messages,
+    Message,
 )
 
 from lasagna.tui import (
     tui_event_callback,
 )
-
-from lasagna.types import Message
 
 from typing import List
 
