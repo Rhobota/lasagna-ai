@@ -71,13 +71,21 @@ Message = Union[
 
 EventPayload = Union[
     Tuple[Literal['human'],     Literal['echo_event'],      MessageContent],
+
     Tuple[Literal['ai'],        Literal['text_event'],      str],
+
     Tuple[Literal['tool_call'], Literal['text_event'],      str],
     Tuple[Literal['tool_call'], Literal['tool_call_event'], ToolCall],
+
     Tuple[Literal['tool_res'],  Literal['tool_res_event'],  ToolResult],
+
     Tuple[Literal['progress'],  Literal['start'],           Tuple[str, str]],    # payload is `(key, details)`
     Tuple[Literal['progress'],  Literal['update'],          Tuple[str, float]],  # payload is `(key, progress_0_to_1)`
     Tuple[Literal['progress'],  Literal['end'],             str],                # payload is `key`
+
+    Tuple[Literal['transaction'], Literal['start'],         None],
+    Tuple[Literal['transaction'], Literal['rollback'],      None],
+    Tuple[Literal['transaction'], Literal['commit'],        None],
 ]
 
 
