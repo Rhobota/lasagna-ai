@@ -6,7 +6,7 @@ from typing_extensions import is_typeddict
 
 from typing import (
     Set, Dict, Any, Type,
-    get_type_hints,
+    get_type_hints, cast,
 )
 
 from pydantic import BaseModel, Field, create_model
@@ -35,5 +35,19 @@ def ensure_pydantic_model(
         return extraction_type
     elif is_typeddict(extraction_type):
         return create_pydantic_model_from_typeddict(extraction_type)
+    else:
+        raise ValueError(f'Cannot handle parsing data for type: {extraction_type}')
+
+
+def build_and_validate(
+    extraction_type: Type[ExtractionType],
+    data: Any,
+) -> ExtractionType:
+    if issubclass(extraction_type, BaseModel):
+        return cast(ExtractionType, extraction_type.model_validate(data))
+    elif is_typeddict(extraction_type):
+        model = create_pydantic_model_from_typeddict(extraction_type)
+        obj = model.model_validate(data)
+        return cast(ExtractionType, obj.model_dump())
     else:
         raise ValueError(f'Cannot handle parsing data for type: {extraction_type}')

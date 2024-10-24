@@ -39,7 +39,7 @@ from .tools_util import (
     build_tool_response_message,
 )
 
-from .pydantic_util import ensure_pydantic_model
+from .pydantic_util import ensure_pydantic_model, build_and_validate
 
 from .known_models import NVIDIA_KNOWN_MODELS
 
@@ -555,8 +555,8 @@ class LasagnaNVIDIA(Model):
             tools = new_message['tools']
 
             assert len(tools) == 1
-            parsed: Dict = json.loads(tools[0]['function']['arguments'])
-            result: ExtractionType = extraction_type(**parsed)
+            parsed = json.loads(tools[0]['function']['arguments'])
+            result = build_and_validate(extraction_type, parsed)
 
             return new_message, result
 

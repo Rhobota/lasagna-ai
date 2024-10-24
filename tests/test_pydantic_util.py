@@ -1,7 +1,10 @@
 import pytest
 
 from enum import Enum
-from lasagna.pydantic_util import ensure_pydantic_model
+from lasagna.pydantic_util import (
+    ensure_pydantic_model,
+    build_and_validate,
+)
 
 from pydantic import BaseModel, ValidationError
 
@@ -32,94 +35,23 @@ class MyDict(TypedDict):
     about_me: List[MySubDict]
 
 
-def test_model_is_already_pydantic():
+def test_ensure_pydantic_model_already_is_pydantic():
     assert issubclass(MyPydanticModel, BaseModel)
     m = ensure_pydantic_model(MyPydanticModel)
     assert m is MyPydanticModel
     assert issubclass(m, BaseModel)
 
 
-def test_model_unknown():
+def test_ensure_pydantic_model_unknown():
     with pytest.raises(ValueError):
         ensure_pydantic_model(int)
 
 
-def test_convert_to_pydantic():
+def test_ensure_pydantic_model_typeddict():
     assert is_typeddict(MyDict)
     m = ensure_pydantic_model(MyDict)
     assert not is_typeddict(m)
     assert issubclass(m, BaseModel)
-
-    r = m(**{
-        'name': 'ryan',
-        'age': 84,
-        'color': 'red',
-        'about_me': [
-            {
-                'question': 'Why?',
-                'answer': 'because',
-            },
-        ],
-    })
-    assert isinstance(r, m)
-    assert r.name == 'ryan'  # type: ignore
-    assert r.age == 84  # type: ignore
-    assert r.color == MyColorEnum.RED  # type: ignore
-    assert r.about_me[0]['question'] == 'Why?'  # type: ignore
-
-    with pytest.raises(ValidationError):
-        m(**{
-            'name': 'ryan',
-            'age': 'BAD VALUE!',
-            'color': 'red',
-            'about_me': [
-                {
-                    'question': 'Why?',
-                    'answer': 'because',
-                },
-            ],
-        })
-
-    with pytest.raises(ValidationError):
-        m(**{
-            'name': 'ryan',
-            'age': 84,
-            'color': 'yellow',    # <-- yellow is not in the enum
-            'about_me': [
-                {
-                    'question': 'Why?',
-                    'answer': 'because',
-                },
-            ],
-        })
-
-    with pytest.raises(ValidationError):
-        m(**{
-            'name': 'ryan',
-            'age': 84,
-            'color': 'red',
-            'about_me': [
-                {
-                    'question': 'Why?',
-                    #'answer': 'because',   # <-- MISSING FIELD!
-                },
-            ],
-        })
-
-    with pytest.raises(ValidationError):
-        m(**{
-            'name': 'ryan',
-            'age': 84,
-            'color': 'red',
-            'about_me': [
-                {
-                    'question': 'Why?',
-                    'answer': {
-                        'value': 'BAD SCHEMA!',
-                    },
-                },
-            ],
-        })
 
     schema = m.model_json_schema()
 
@@ -182,3 +114,142 @@ def test_convert_to_pydantic():
             }
         },
     }
+
+
+def test_build_and_validate_already_is_pydantic():
+    res = build_and_validate(
+        MyPydanticModel,
+        {
+            'a': 'test',
+            'b': 7,
+        },
+    )
+    assert res.a == 'test'
+    assert res.b == 7
+    assert isinstance(res, MyPydanticModel)
+
+    with pytest.raises(ValidationError):
+        build_and_validate(
+            MyPydanticModel,
+            {},   # <-- empty payload!
+        )
+
+    with pytest.raises(ValidationError):
+        build_and_validate(
+            MyPydanticModel,
+            {
+                'a': 'test',
+                #'b': 7,   # <-- missing field!
+            },
+        )
+
+    with pytest.raises(ValidationError):
+        build_and_validate(
+            MyPydanticModel,
+            {
+                'a': 'test',
+                'b': 'INVALID',   # <-- invalid value!
+            },
+        )
+
+
+def test_build_and_validate_typeddict():
+    res = build_and_validate(
+        MyDict,
+        {
+            'name': 'ryan',
+            'age': 84,
+            'color': 'green',
+            'about_me': [
+                {
+                    'question': 'Why?',
+                    'answer': 'because',
+                },
+                {
+                    'question': 'When?',
+                    'answer': 'now',
+                },
+            ],
+        },
+    )
+    assert res['name'] == 'ryan'
+    assert res['age'] == 84
+    assert res['color'] == MyColorEnum.GREEN
+    assert res['about_me'][0]['question'] == 'Why?'
+    assert res['about_me'][0]['answer'] == 'because'
+    assert res['about_me'][1]['question'] == 'When?'
+    assert res['about_me'][1]['answer'] == 'now'
+    assert isinstance(res, dict)
+
+    with pytest.raises(ValidationError):
+        build_and_validate(
+            MyDict,
+            {},   # <-- empty payload!
+        )
+
+    with pytest.raises(ValidationError):
+        build_and_validate(
+            MyDict,
+            {
+                'name': 'ryan',
+                'age': 84,
+                'color': 'green',
+                #'about_me': [],  # <-- missing field!
+            },
+        )
+
+    with pytest.raises(ValidationError):
+        build_and_validate(
+            MyDict,
+            {
+                'name': 'ryan',
+                'age': 84,
+                'color': 'yellow',  # <-- bad emum!
+                'about_me': [],
+            },
+        )
+
+    with pytest.raises(ValidationError):
+        build_and_validate(
+            MyDict,
+            {
+                'name': 'ryan',
+                'age': 'INVALID',   # <-- invalid value!
+                'color': 'green',
+                'about_me': [],
+            },
+        )
+
+    with pytest.raises(ValidationError):
+        build_and_validate(
+            MyDict,
+            {
+                'name': 'ryan',
+                'age': 84,
+                'color': 'green',
+                'about_me': [
+                    {
+                        'question': 'Why?',
+                        #'answer': 'because',  # <-- missing nested field!
+                    },
+                ],
+            },
+        )
+
+    with pytest.raises(ValidationError):
+        build_and_validate(
+            MyDict,
+            {
+                'name': 'ryan',
+                'age': 84,
+                'color': 'green',
+                'about_me': [
+                    {
+                        'question': 'Why?',
+                        'answer': {
+                            'value': 'BAD SCHEMA',   # <-- invalid schema!
+                        },
+                    },
+                ],
+            },
+        )
