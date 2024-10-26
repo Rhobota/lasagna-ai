@@ -1,5 +1,7 @@
 from .registrar import AGENTS, PROVIDERS
 
+from .tools_util import get_name
+
 from .types import (
     AgentSpec,
     AgentRun,
@@ -25,7 +27,7 @@ async def run(
         agent = AGENTS[agent_name]['runner']
     else:
         agent = agent_spec['agent']
-        agent_name = agent.__name__ if hasattr(agent, '__name__') else str(agent)
+        agent_name = get_name(agent)
 
     model_name = agent_spec['model'] \
         if isinstance(agent_spec['model'], str) \
@@ -46,7 +48,7 @@ async def run(
     else:
         model_factory = agent_spec['provider']
         model = model_factory(model=model_name, **model_kwargs)
-        provider_str = model.__class__.__name__
+        provider_str = get_name(model.__class__)
 
     await event_callback(('agent', 'start', agent_name))
 

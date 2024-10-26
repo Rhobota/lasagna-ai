@@ -2,6 +2,8 @@ import functools
 
 from typing import Union, Dict, Any, List, Callable, Protocol, Type
 
+from .tools_util import get_name
+
 from .types import (
     AgentSpec,
     AgentRun,
@@ -92,6 +94,7 @@ def flat_messages(messages: List[Message]) -> AgentRun:
 
 def build_most_simple_agent(
     tools: List[Callable] = [],
+    doc: Union[str, None] = None,
 ) -> AgentCallable:
     class MostSimpleAgent():
         async def __call__(
@@ -107,14 +110,57 @@ def build_most_simple_agent(
         def __str__(self) -> str:
             if tools:
                 tool_names = ', '.join([
-                    tool.__name__ if hasattr(tool, '__name__') else str(tool)
+                    get_name(tool)
                     for tool in tools
                 ])
                 return f'simple agent: {tool_names}'
             else:
                 return 'simple agent'
 
-    return MostSimpleAgent()
+    a = MostSimpleAgent()
+    if doc:
+        a.__doc__ = doc
+    return a
+
+
+def build_layered_agent(
+    tools: List[Callable] = [],
+    system_prompt: Union[str, None] = None,
+    doc: Union[str, None] = None,
+) -> AgentCallable:
+    class LayeredAgent():
+        async def __call__(
+            self,
+            model: Model,
+            event_callback: EventCallback,
+            prev_runs: List[AgentRun],
+        ) -> AgentRun:
+            messages = recursive_extract_messages(prev_runs)
+            if system_prompt:
+                messages = [
+                    {
+                        'role': 'system',
+                        'text': system_prompt,
+                    },
+                    *messages,
+                ]
+            new_messages = await model.run(event_callback, messages, tools)
+            return flat_messages(new_messages)
+
+        def __str__(self) -> str:
+            if tools:
+                tool_names = ', '.join([
+                    get_name(tool)
+                    for tool in tools
+                ])
+                return f'layered agent: {tool_names}'
+            else:
+                return 'layered agent'
+
+    a = LayeredAgent()
+    if doc:
+        a.__doc__ = doc
+    return a
 
 
 def build_extraction_agent(
@@ -136,7 +182,7 @@ def build_extraction_agent(
             }
 
         def __str__(self) -> str:
-            t = extraction_type.__name__ if hasattr(extraction_type, '__name__') else str(extraction_type)
+            t = get_name(extraction_type)
             return f'extraction agent: {t}'
 
     return ExtractionAgent()

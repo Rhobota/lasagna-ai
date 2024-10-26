@@ -31,6 +31,7 @@ from .util import (
 
 from .tools_util import (
     convert_to_json_schema,
+    get_name,
     handle_tools,
     build_tool_response_message,
 )
@@ -265,7 +266,7 @@ def _build_messages_from_anthropic_payload(
 def _convert_to_anthropic_tool(tool: Callable) -> ToolParam:
     description, params = parse_docstring(tool.__doc__ or '')
     return {
-        'name': tool.__name__,
+        'name': get_name(tool),
         'description': description,
         'input_schema': convert_to_json_schema(params),
     }
@@ -516,7 +517,7 @@ class LasagnaAnthropic(Model):
                 force_tool     = force_tool,
                 disable_parallel_tool_use = False,
             )
-            tools_map = {tool.__name__: tool for tool in tools}
+            tools_map = {get_name(tool): tool for tool in tools}
             new_messages.extend(new_messages_here)
             messages.extend(new_messages_here)
             tools_results = await handle_tools(new_messages_here, tools_map)
@@ -537,7 +538,7 @@ class LasagnaAnthropic(Model):
     ) -> Tuple[Message, ExtractionType]:
         tools_spec: List[ToolParam] = [
             {
-                'name': extraction_type.__name__,
+                'name': get_name(extraction_type),
                 'input_schema': to_strict_json_schema(ensure_pydantic_model(extraction_type)),
             },
         ]

@@ -35,6 +35,7 @@ from .util import (
 
 from .tools_util import (
     convert_to_json_schema,
+    get_name,
     handle_tools,
     build_tool_response_message,
 )
@@ -172,7 +173,7 @@ def _convert_to_openai_tool(tool: Callable) -> ChatCompletionToolParam:
     return {
         'type': 'function',
         'function': {
-            'name': tool.__name__,
+            'name': get_name(tool),
             'description': description,
             'parameters': convert_to_json_schema(params),
         },
@@ -526,7 +527,7 @@ class LasagnaNVIDIA(Model):
                 force_tool     = force_tool,
                 parallel_tool_calls = NOT_GIVEN,
             )
-            tools_map = {tool.__name__: tool for tool in tools}
+            tools_map = {get_name(tool): tool for tool in tools}
             new_messages.extend(new_messages_here)
             messages.extend(new_messages_here)
             tools_results = await handle_tools(new_messages_here, tools_map)

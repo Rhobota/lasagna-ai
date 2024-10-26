@@ -46,6 +46,11 @@ def convert_to_json_schema(params: List[ToolParam]) -> Dict[str, object]:
     }
 
 
+def get_name(obj: Any) -> str:
+    name = str(obj.__name__) if hasattr(obj, '__name__') else str(obj)
+    return name
+
+
 async def handle_tools(
     messages: List[Message],
     tools_map: Dict[str, Callable],
@@ -54,10 +59,13 @@ async def handle_tools(
     tool_messages = [message for message in messages if message['role'] == 'tool_call']
     if len(tool_messages) == 0:
         return None
+
     to_gather: List[asyncio.Task[ToolResult]] = []
+
     for message in tool_messages:
         for t in message['tools']:
             assert t['call_type'] == 'function'
+
             async def _go(t: ToolCall) -> ToolResult:
                 call_id = 'unknown'
                 try:
@@ -73,9 +81,11 @@ async def handle_tools(
                         res = await loop.run_in_executor(None, _wrapped_sync)
                     return {'call_id': call_id, 'result': res}
                 except Exception as e:
-                    error = f"{type(e).__name__}: {e}"
+                    error = f"{get_name(type(e))}: {e}"
                     return {'call_id': call_id, 'result': error, 'is_error': True}
+
             to_gather.append(asyncio.create_task(_go(t)))
+
     return await asyncio.gather(*to_gather)
 
 

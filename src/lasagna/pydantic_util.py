@@ -2,6 +2,8 @@ from .types import (
     ExtractionType,
 )
 
+from .tools_util import get_name
+
 from typing_extensions import is_typeddict
 
 from typing import (
@@ -23,7 +25,7 @@ def create_pydantic_model_from_typeddict(
             fields[field_name] = (field_type, Field(...))
         else:
             fields[field_name] = (field_type, Field(default=None))
-    model_name = typeddict_cls.__name__
+    model_name = get_name(typeddict_cls)
     model: Type[BaseModel] = create_model(model_name, **fields)
     return model
 
