@@ -36,6 +36,12 @@ class ToolResultLayeredAgent(ToolResultBase):
     result: AgentRun
 
 
+ToolResult = Union[
+    ToolResultAny,
+    ToolResultLayeredAgent,
+]
+
+
 class Cost(TypedDict):
     input_tokens: Optional[int]
     output_tokens: Optional[int]
@@ -68,7 +74,7 @@ class MessageToolCall(MessageBase):
 
 class MessageToolResult(MessageBase):
     role: Literal['tool_res']
-    tools: List[ToolResultBase]
+    tools: List[ToolResult]
 
 
 Message = Union[
@@ -122,7 +128,7 @@ EventPayload = Union[
     Tuple[Literal['tool_call'],   Literal['text_event'],      str],
     Tuple[Literal['tool_call'],   Literal['tool_call_event'], ToolCall],
 
-    Tuple[Literal['tool_res'],    Literal['tool_res_event'],  ToolResultBase],
+    Tuple[Literal['tool_res'],    Literal['tool_res_event'],  ToolResult],
 
     Tuple[Literal['progress'],    Literal['start'],           Tuple[str, str]],    # payload is `(key, details)`
     Tuple[Literal['progress'],    Literal['update'],          Tuple[str, float]],  # payload is `(key, progress_0_to_1)`
