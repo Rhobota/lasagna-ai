@@ -20,6 +20,9 @@ from .types import (
 )
 
 
+LAYERED_AGENT_TYPES = [AgentCallable, BoundAgentCallable]
+
+
 def convert_to_json_schema(params: List[ToolParam]) -> Dict[str, object]:
     def convert_type(t: str) -> Dict[str, object]:
         if t.startswith('enum '):
@@ -122,8 +125,7 @@ def is_callable_of_type(
 def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
     params: List[ToolParam]
     description, params = parse_docstring(tool.__doc__ or '')
-    layered_agent_types = [AgentCallable, BoundAgentCallable]
-    if any([is_callable_of_type(tool, t, no_throw=True) for t in layered_agent_types]):
+    if any([is_callable_of_type(tool, t, no_throw=True) for t in LAYERED_AGENT_TYPES]):
         if len(params) == 0:
             params = [
                 {
@@ -140,6 +142,44 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
     return description, params
 
 
+async def _run_single_tool(
+    tool_call: ToolCall,
+    tools_map: Dict[str, Callable],
+) -> ToolResult:
+    call_id = 'unknown'
+
+    try:
+        call_id = tool_call['call_id']
+        func = tools_map[tool_call['function']['name']]
+        args = tool_call['function']['arguments']
+
+        if any([is_callable_of_type(func, t, no_throw=True) for t in LAYERED_AGENT_TYPES]):
+            raise RuntimeError('not supported yet')
+
+        else:
+            if is_async_callable(func):
+                res = await func(**json.loads(args))
+            else:
+                def _wrapped_sync() -> Any:
+                    return func(**json.loads(args))
+                loop = asyncio.get_running_loop()
+                res = await loop.run_in_executor(None, _wrapped_sync)
+            return {
+                'type': 'any',
+                'call_id': call_id,
+                'result': res,
+            }
+
+    except Exception as e:
+        error = f"{get_name(type(e))}: {e}"
+        return {
+            'type': 'any',
+            'call_id': call_id,
+            'result': error,
+            'is_error': True,
+        }
+
+
 async def handle_tools(
     messages: List[Message],
     tools_map: Dict[str, Callable],
@@ -154,35 +194,9 @@ async def handle_tools(
     for message in tool_messages:
         for t in message['tools']:
             assert t['call_type'] == 'function'
-
-            async def _go(t: ToolCall) -> ToolResult:
-                call_id = 'unknown'
-                try:
-                    call_id = t['call_id']
-                    func = tools_map[t['function']['name']]
-                    args = t['function']['arguments']
-                    if is_async_callable(func):
-                        res = await func(**json.loads(args))
-                    else:
-                        def _wrapped_sync() -> Any:
-                            return func(**json.loads(args))
-                        loop = asyncio.get_running_loop()
-                        res = await loop.run_in_executor(None, _wrapped_sync)
-                    return {
-                        'type': 'any',
-                        'call_id': call_id,
-                        'result': res,
-                    }
-                except Exception as e:
-                    error = f"{get_name(type(e))}: {e}"
-                    return {
-                        'type': 'any',
-                        'call_id': call_id,
-                        'result': error,
-                        'is_error': True,
-                    }
-
-            to_gather.append(asyncio.create_task(_go(t)))
+            to_gather.append(asyncio.create_task(
+                _run_single_tool(t, tools_map),
+            ))
 
     return await asyncio.gather(*to_gather)
 
