@@ -23,7 +23,6 @@ from .stream import (
 )
 
 from .util import (
-    parse_docstring,
     convert_to_image_base64,
     exponential_backoff_retry_delays,
     recursive_hash,
@@ -32,6 +31,7 @@ from .util import (
 from .tools_util import (
     convert_to_json_schema,
     get_name,
+    get_tool_params,
     handle_tools,
     build_tool_response_message,
 )
@@ -264,7 +264,7 @@ def _build_messages_from_anthropic_payload(
 
 
 def _convert_to_anthropic_tool(tool: Callable) -> ToolParam:
-    description, params = parse_docstring(tool.__doc__ or '')
+    description, params = get_tool_params(tool)
     return {
         'name': get_name(tool),
         'description': description,

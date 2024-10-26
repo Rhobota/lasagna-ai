@@ -2,7 +2,9 @@ import asyncio
 import inspect
 import json
 
-from typing import List, Dict, Callable, Union, Any
+from typing import List, Dict, Tuple, Callable, Union, Any
+
+from .util import parse_docstring
 
 from .types import (
     Message,
@@ -49,6 +51,11 @@ def convert_to_json_schema(params: List[ToolParam]) -> Dict[str, object]:
 def get_name(obj: Any) -> str:
     name = str(obj.__name__) if hasattr(obj, '__name__') else str(obj)
     return name
+
+
+def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
+    description, params = parse_docstring(tool.__doc__ or '')
+    return description, params
 
 
 async def handle_tools(

@@ -26,7 +26,6 @@ from .stream import (
 )
 
 from .util import (
-    parse_docstring,
     combine_pairs,
     convert_to_image_url,
     exponential_backoff_retry_delays,
@@ -36,6 +35,7 @@ from .util import (
 from .tools_util import (
     convert_to_json_schema,
     get_name,
+    get_tool_params,
     handle_tools,
     build_tool_response_message,
 )
@@ -169,7 +169,7 @@ async def _extract_deltas(
 
 
 def _convert_to_openai_tool(tool: Callable) -> ChatCompletionToolParam:
-    description, params = parse_docstring(tool.__doc__ or '')
+    description, params = get_tool_params(tool)
     return {
         'type': 'function',
         'function': {
