@@ -1,5 +1,3 @@
-import functools
-
 from typing import Union, Dict, Any, List, Callable, Protocol, Type
 
 from .tools_util import get_name
