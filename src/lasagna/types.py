@@ -235,7 +235,8 @@ class AgentSpec(TypedDict):
 class ToolParam(TypedDict):
     name: str
     type: str
-    description: str
+    description: NotRequired[str]
+    optional: NotRequired[bool]  # default = False (i.e. "required")
 
 
 class CacheEventPayload(TypedDict):

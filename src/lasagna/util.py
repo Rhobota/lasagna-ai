@@ -50,7 +50,10 @@ def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
         if not p['type'].startswith('enum ') and p['type'] not in ['str', 'float', 'int', 'bool']:
             raise ValueError(f"invalid type found: {p['type']}")
         if not p['description']:
-            raise ValueError("no parameter name found")
+            del p['description']
+        else:
+            if p['description'].startswith('(optional)'):
+                p['optional'] = True
     return description, params
 
 

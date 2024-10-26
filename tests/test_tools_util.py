@@ -59,6 +59,7 @@ def test_convert_to_json_schema():
             'name': 'last_param',
             'type': 'bool',
             'description': '(optional) you can pass this if you want',
+            'optional': True,
         },
     ])
     assert j == {

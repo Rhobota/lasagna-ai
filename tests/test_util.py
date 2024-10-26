@@ -192,6 +192,7 @@ def test_parse_docstring():
             'name': 'thing',
             'type': 'float',
             'description': '(optional) the thing',
+            'optional': True,
         },
         {
             'name': 'another',

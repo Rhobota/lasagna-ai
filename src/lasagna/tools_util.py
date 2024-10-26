@@ -11,6 +11,8 @@ from typing import (
 from .util import parse_docstring
 
 from .types import (
+    AgentCallable,
+    BoundAgentCallable,
     Message,
     ToolCall,
     ToolResult,
@@ -39,14 +41,16 @@ def convert_to_json_schema(params: List[ToolParam]) -> Dict[str, object]:
         "properties": {
             p['name']: {
                 **convert_type(p['type']),
-                "description": p['description'],
+                **({
+                    "description": p['description'],
+                } if 'description' in p and p['description'] else {}),
             }
             for p in params
         },
         "required": [
             p['name']
             for p in params
-            if not p['description'].startswith('(optional)')
+            if not p.get('optional', False)
         ],
         "additionalProperties": False,
     }
@@ -116,7 +120,23 @@ def is_callable_of_type(
 
 
 def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
+    params: List[ToolParam]
     description, params = parse_docstring(tool.__doc__ or '')
+    layered_agent_types = [AgentCallable, BoundAgentCallable]
+    if any([is_callable_of_type(tool, t, no_throw=True) for t in layered_agent_types]):
+        if len(params) == 0:
+            params = [
+                {
+                    'name': 'prompt',
+                    'type': 'str',
+                },
+            ]
+        elif len(params) == 1:
+            p = params[0]
+            if p['name'] != 'prompt' or p['type'] != 'str':
+                raise ValueError('Layered agents must take a single string parameter named `prompt`.')
+        else:
+            raise ValueError('Layered agents must take a single string parameter named `prompt`.')
     return description, params
 
 
