@@ -48,7 +48,7 @@ from anthropic import (
     APIConnectionError,
     APIStatusError,
 )
-from anthropic.types import MessageParam, ToolParam
+from anthropic.types import MessageParam, ToolParam as AnthropicToolParam
 from anthropic.types.message import Message as AnthropicMessage
 from anthropic.types.message_create_params import ToolChoice
 from anthropic.lib.streaming._types import MessageStreamEvent
@@ -263,7 +263,7 @@ def _build_messages_from_anthropic_payload(
     return ms
 
 
-def _convert_to_anthropic_tool(tool: Callable) -> ToolParam:
+def _convert_to_anthropic_tool(tool: Callable) -> AnthropicToolParam:
     description, params = get_tool_params(tool)
     return {
         'name': get_name(tool),
@@ -272,7 +272,7 @@ def _convert_to_anthropic_tool(tool: Callable) -> ToolParam:
     }
 
 
-def _convert_to_anthropic_tools(tools: List[Callable]) -> Union[NotGiven, List[ToolParam]]:
+def _convert_to_anthropic_tools(tools: List[Callable]) -> Union[NotGiven, List[AnthropicToolParam]]:
     if len(tools) == 0:
         return NOT_GIVEN
     specs = [_convert_to_anthropic_tool(tool) for tool in tools]
@@ -375,7 +375,7 @@ class LasagnaAnthropic(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools_spec: Union[NotGiven, List[ToolParam]],
+        tools_spec: Union[NotGiven, List[AnthropicToolParam]],
         force_tool: bool,
         disable_parallel_tool_use: bool,
     ) -> List[Message]:
@@ -446,7 +446,7 @@ class LasagnaAnthropic(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools_spec: Union[NotGiven, List[ToolParam]],
+        tools_spec: Union[NotGiven, List[AnthropicToolParam]],
         force_tool: bool,
         disable_parallel_tool_use: bool,
     ) -> List[Message]:
@@ -536,7 +536,7 @@ class LasagnaAnthropic(Model):
         messages: List[Message],
         extraction_type: Type[ExtractionType],
     ) -> Tuple[Message, ExtractionType]:
-        tools_spec: List[ToolParam] = [
+        tools_spec: List[AnthropicToolParam] = [
             {
                 'name': get_name(extraction_type),
                 'input_schema': to_strict_json_schema(ensure_pydantic_model(extraction_type)),
