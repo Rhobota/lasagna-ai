@@ -1,6 +1,17 @@
 import pytest
 
+from lasagna.agent_util import (
+    bind_model,
+    build_most_simple_agent,
+)
+
+from lasagna.mock_provider import (
+    MockProvider,
+)
+
 from lasagna.types import (
+    AgentCallable,
+    BoundAgentCallable,
     Message,
     ToolResult,
 )
@@ -9,8 +20,10 @@ from typing import List, Dict, Callable, Awaitable
 
 from lasagna.tools_util import (
     convert_to_json_schema,
+    get_name,
     handle_tools,
     build_tool_response_message,
+    is_async_callable,
     is_callable_of_type,
 )
 
@@ -223,6 +236,24 @@ class not_async_class:
     def __call__(self, a: int, b: str) -> bool:
         return True
 
+class class_with_str_method:
+    def __str__(self) -> str:
+        return 'Hi!'
+
+
+def test_get_name():
+    assert get_name(correct_function) == 'correct_function'
+    assert get_name(class_with_str_method()) == 'Hi!'
+
+
+def test_is_async_callable():
+    assert is_async_callable(correct_function)
+    assert not is_async_callable(not_async)
+
+    assert is_async_callable(correct_class())
+    assert not is_async_callable(not_async_class())
+
+
 def test_is_callable_of_type():
     objects = [
         correct_function,
@@ -246,11 +277,23 @@ def test_is_callable_of_type():
     ]
 
     matching_objects = [
-        f
-        for f in objects
-        if is_callable_of_type(f, MyCallable, no_throw=True)
+        o
+        for o in objects
+        if is_callable_of_type(o, MyCallable, no_throw=True)
     ]
 
     assert len(matching_objects) == 2
     assert matching_objects[0] is correct_function
     assert isinstance(matching_objects[1], correct_class)
+
+
+def test_is_callable_of_type_agent_callables():
+    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_agent = build_most_simple_agent()
+    my_bound_agent = my_binder(my_agent)
+
+    assert is_callable_of_type(my_agent, AgentCallable)
+    assert is_callable_of_type(my_bound_agent, BoundAgentCallable)
+
+    assert not is_callable_of_type(my_agent, BoundAgentCallable)
+    assert not is_callable_of_type(my_bound_agent, AgentCallable)

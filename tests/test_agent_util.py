@@ -5,6 +5,7 @@ from typing import Callable, List
 from lasagna.agent_util import (
     bind_model,
     build_most_simple_agent,
+    build_layered_agent,
     extract_last_message,
     noop_callback,
     partial_bind_model,
@@ -91,6 +92,49 @@ async def test_partial_bind_model():
     my_binder = partial_bind_model(MockProvider, 'some_model')({'a': 'yes', 'b': 6})
     my_agent = build_most_simple_agent()
     await _agent_common_test(my_binder, my_agent)
+
+
+@pytest.mark.asyncio
+async def test_build_layered_agent():
+    my_binder = bind_model(MockProvider, 'a_model')
+    my_agent = build_layered_agent(
+        tools = [],
+        system_prompt = 'system test',
+        doc = 'doc test',
+    )
+    assert my_agent.__doc__ == 'doc test'
+    my_bound_agent = my_binder(my_agent)
+    assert my_bound_agent.__doc__ == 'doc test'
+    prev_runs: List[AgentRun] = [flat_messages([
+        {
+            'role': 'human',
+            'text': 'layered agent test',
+        },
+    ])]
+    new_run = await my_bound_agent(noop_callback, prev_runs)
+    assert new_run == {
+        'agent': 'layered agent',
+        'provider': 'MockProvider',
+        'model': 'a_model',
+        'model_kwargs': {},
+        'type': 'messages',
+        'messages': [
+            {
+                'role': 'system',
+                'text': 'system test',
+            },
+            {
+                'role': 'human',
+                'text': 'layered agent test',
+            },
+            {
+                'role': 'ai',
+                'text': f"model: a_model",
+                'cost': None,
+                'raw': None,
+            },
+        ],
+    }
 
 
 @pytest.mark.asyncio

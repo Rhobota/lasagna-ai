@@ -37,6 +37,7 @@ class MockProvider(Model):
         event: EventPayload = 'ai', 'text_event', 'Hi!'
         await event_callback(event)
         res: List[Message] = [
+            *messages,
             {
                 'role': 'ai',
                 'text': f"model: {self.model}",
