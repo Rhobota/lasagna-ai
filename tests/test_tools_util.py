@@ -5,12 +5,13 @@ from lasagna.types import (
     ToolResult,
 )
 
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, Awaitable
 
 from lasagna.tools_util import (
     convert_to_json_schema,
     handle_tools,
     build_tool_response_message,
+    is_callable_of_type,
 )
 
 
@@ -162,3 +163,94 @@ def test_build_tool_response_message():
         'role': 'tool_res',
         'tools': res,
     }
+
+
+MyCallable = Callable[[int, str], Awaitable[bool]]
+
+async def correct_function(a: int, b: str) -> bool:
+    return True
+
+async def bad_a_type(a: str, b: str) -> bool:
+    return True
+
+async def missing_parameter(a: int) -> bool:
+    return True
+
+async def extra_parameter(a: int, b: str, c: int) -> bool:
+    return True
+
+async def bad_return_type(a: int, b: str) -> int:
+    return True
+
+async def missing_return_type(a: int, b: str):
+    return True
+
+async def missing_a_type(a, b: str) -> bool:
+    return True
+
+def not_async(a: int, b: str) -> bool:
+    return True
+
+class correct_class:
+    async def __call__(self, a: int, b: str) -> bool:
+        return True
+
+class bad_a_type_class:
+    async def __call__(self, a: str, b: str) -> bool:
+        return True
+
+class missing_parameter_class:
+    async def __call__(self, a: int) -> bool:
+        return True
+
+class extra_parameter_class:
+    async def __call__(self, a: int, b: str, c: int) -> bool:
+        return True
+
+class bad_return_type_class:
+    async def __call__(self, a: int, b: str) -> int:
+        return True
+
+class missing_return_type_class:
+    async def __call__(self, a: int, b: str):
+        return True
+
+class missing_a_type_class:
+    async def __call__(self, a, b: str) -> bool:
+        return True
+
+class not_async_class:
+    def __call__(self, a: int, b: str) -> bool:
+        return True
+
+def test_is_callable_of_type():
+    objects = [
+        correct_function,
+        bad_a_type,
+        missing_parameter,
+        extra_parameter,
+        bad_return_type,
+        missing_return_type,
+        missing_a_type,
+        not_async,
+        42,
+        "not a function",
+        correct_class(),
+        bad_a_type_class(),
+        missing_parameter_class(),
+        extra_parameter_class(),
+        bad_return_type_class(),
+        missing_return_type_class(),
+        missing_a_type_class(),
+        not_async_class(),
+    ]
+
+    matching_objects = [
+        f
+        for f in objects
+        if is_callable_of_type(f, MyCallable, no_throw=True)
+    ]
+
+    assert len(matching_objects) == 2
+    assert matching_objects[0] is correct_function
+    assert isinstance(matching_objects[1], correct_class)

@@ -1,8 +1,12 @@
 import asyncio
 import inspect
 import json
+import collections.abc
 
-from typing import List, Dict, Tuple, Callable, Union, Any
+from typing import (
+    List, Dict, Tuple, Union, Any, Callable,
+    get_origin, get_args,
+)
 
 from .util import parse_docstring
 
@@ -53,6 +57,64 @@ def get_name(obj: Any) -> str:
     return name
 
 
+def is_async_callable(f: Any) -> bool:
+    if not inspect.isfunction(f) and hasattr(f, '__call__'):
+        f = f.__call__
+    return callable(f) and inspect.iscoroutinefunction(f)
+
+
+def is_callable_of_type(
+    concrete_callable: Any,
+    expected_callable_type: Any,
+    no_throw: bool = False,
+) -> bool:
+    if get_origin(expected_callable_type) is not collections.abc.Callable:
+        if no_throw:
+            return False
+        raise ValueError("`expected_callable_type` must be a Callable type")
+
+    expected_params, expected_return = get_args(expected_callable_type)
+
+    if not callable(concrete_callable):
+        if no_throw:
+            return False
+        raise ValueError("`concrete_callable` must be a callable object")
+
+    concrete_sig = inspect.signature(concrete_callable)
+    concrete_params = concrete_sig.parameters.values()
+
+    for concrete_param in concrete_params:
+        if concrete_param.annotation is inspect.Parameter.empty:
+            if no_throw:
+                return False
+            raise ValueError(f"`concrete_callable` must have fully-specified types: missing type for `{concrete_param.name}`")
+
+    if concrete_sig.return_annotation is inspect.Parameter.empty:
+        if no_throw:
+            return False
+        raise ValueError(f"`concrete_callable` must have fully-specified types: missing return type")
+
+    if len(concrete_params) != len(expected_params):
+        return False
+
+    for concrete_param, expected_param in zip(concrete_params, expected_params):
+        if concrete_param.annotation != expected_param:
+            return False
+
+    if is_async_callable(concrete_callable):
+        if get_origin(expected_return) is not collections.abc.Awaitable:
+            return False
+        eret = get_args(expected_return)[0]
+        if concrete_sig.return_annotation != eret:
+            return False
+
+    else:
+        if concrete_sig.return_annotation != expected_return:
+            return False
+
+    return True
+
+
 def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
     description, params = parse_docstring(tool.__doc__ or '')
     return description, params
@@ -79,7 +141,7 @@ async def handle_tools(
                     call_id = t['call_id']
                     func = tools_map[t['function']['name']]
                     args = t['function']['arguments']
-                    if inspect.iscoroutinefunction(func):
+                    if is_async_callable(func):
                         res = await func(**json.loads(args))
                     else:
                         def _wrapped_sync() -> Any:
