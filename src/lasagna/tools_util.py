@@ -133,7 +133,7 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
             ]
         elif len(params) == 1:
             p = params[0]
-            if p['name'] != 'prompt' or p['type'] != 'str':
+            if p['name'] != 'prompt' or p['type'] != 'str' or p.get('optional', False):
                 raise ValueError('Layered agents must take a single string parameter named `prompt`.')
         else:
             raise ValueError('Layered agents must take a single string parameter named `prompt`.')

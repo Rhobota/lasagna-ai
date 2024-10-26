@@ -2,6 +2,7 @@ import pytest
 
 from lasagna.agent_util import (
     bind_model,
+    build_layered_agent,
     build_most_simple_agent,
 )
 
@@ -21,6 +22,7 @@ from typing import List, Dict, Callable, Awaitable
 from lasagna.tools_util import (
     convert_to_json_schema,
     get_name,
+    get_tool_params,
     handle_tools,
     build_tool_response_message,
     is_async_callable,
@@ -298,3 +300,121 @@ def test_is_callable_of_type_agent_callables():
 
     assert not is_callable_of_type(my_agent, BoundAgentCallable)
     assert not is_callable_of_type(my_bound_agent, AgentCallable)
+
+
+def test_get_tool_params_function():
+    def sample_tool(a: int, b: int, c: float) -> str:
+        """
+        Use this for
+        anything you want.
+        :param: a: int: first param
+        :param: b: int: second param
+        :param: c: float: (optional) another param
+        """
+        return ''
+    description, params = get_tool_params(sample_tool)
+    assert description == 'Use this for anything you want.'
+    assert params == [
+        {
+            'name': 'a',
+            'type': 'int',
+            'description': 'first param',
+        },
+        {
+            'name': 'b',
+            'type': 'int',
+            'description': 'second param',
+        },
+        {
+            'name': 'c',
+            'type': 'float',
+            'description': '(optional) another param',
+            'optional': True,
+        },
+    ]
+
+
+def test_get_tool_params_layered_agents():
+    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_agent = build_layered_agent(
+        doc = 'Use this for everything.',
+    )
+    my_bound_agent = my_binder(my_agent)
+
+    description, params = get_tool_params(my_agent)
+    assert description == 'Use this for everything.'
+    assert params == [
+        {
+            'name': 'prompt',
+            'type': 'str',
+        },
+    ]
+
+    description, params = get_tool_params(my_bound_agent)
+    assert description == 'Use this for everything.'
+    assert params == [
+        {
+            'name': 'prompt',
+            'type': 'str',
+        },
+    ]
+
+    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_agent = build_layered_agent(
+        doc = """
+        Use this for everything.
+        :param: prompt: str: the prompt for the downstream AI
+        """
+    )
+    my_bound_agent = my_binder(my_agent)
+
+    description, params = get_tool_params(my_agent)
+    assert description == 'Use this for everything.'
+    assert params == [
+        {
+            'name': 'prompt',
+            'type': 'str',
+            'description': 'the prompt for the downstream AI',
+        },
+    ]
+
+    description, params = get_tool_params(my_bound_agent)
+    assert description == 'Use this for everything.'
+    assert params == [
+        {
+            'name': 'prompt',
+            'type': 'str',
+            'description': 'the prompt for the downstream AI',
+        },
+    ]
+
+    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_agent = build_layered_agent(
+        doc = """
+        Use this for everything.
+        :param: prompt: int: this is invalid btw
+        """
+    )
+    my_bound_agent = my_binder(my_agent)
+
+    with pytest.raises(ValueError):
+        get_tool_params(my_agent)
+
+    with pytest.raises(ValueError):
+        get_tool_params(my_bound_agent)
+
+    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_agent = build_layered_agent(
+        doc = """
+        Use this for everything.
+        :param: prompt: str: the prompt
+        :param: x: str: something else (this isn't allowed)
+        """
+    )
+    my_bound_agent = my_binder(my_agent)
+
+    with pytest.raises(ValueError):
+        get_tool_params(my_agent)
+
+    with pytest.raises(ValueError):
+        get_tool_params(my_bound_agent)
