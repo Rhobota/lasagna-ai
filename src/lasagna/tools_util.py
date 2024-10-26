@@ -148,10 +148,19 @@ async def handle_tools(
                             return func(**json.loads(args))
                         loop = asyncio.get_running_loop()
                         res = await loop.run_in_executor(None, _wrapped_sync)
-                    return {'call_id': call_id, 'result': res}
+                    return {
+                        'type': 'any',
+                        'call_id': call_id,
+                        'result': res,
+                    }
                 except Exception as e:
                     error = f"{get_name(type(e))}: {e}"
-                    return {'call_id': call_id, 'result': error, 'is_error': True}
+                    return {
+                        'type': 'any',
+                        'call_id': call_id,
+                        'result': error,
+                        'is_error': True,
+                    }
 
             to_gather.append(asyncio.create_task(_go(t)))
 

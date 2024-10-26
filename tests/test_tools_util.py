@@ -134,29 +134,29 @@ async def test_handle_tools():
     tool_results = await handle_tools([message], tool_map)
     assert tool_results is not None
     assert tool_results == [
-        {'call_id': '1001', 'result': 16 },
-        {'call_id': '1002', 'result': 10.8 },
-        {'call_id': '1003', 'result': "hihi" },
-        {'call_id': '1004', 'result': "TypeError: tool_b() missing 1 required positional argument: 'x'", 'is_error': True },
-        {'call_id': '1005', 'result': "TypeError: tool_b() got an unexpected keyword argument 'y'", 'is_error': True },
-        {'call_id': '1006', 'result': "TypeError: tool_b() got an unexpected keyword argument 'y'", 'is_error': True },
-        {'call_id': '1007', 'result': 17.5 },
-        {'call_id': '1008', 'result': 15.5 },
-        {'call_id': '1009', 'result': 111.5 },
-        {'call_id': '1010', 'result': "TypeError: tool_a() missing 2 required positional arguments: 'first' and 'second'", 'is_error': True },
-        {'call_id': '1011', 'result': "TypeError: tool_a() missing 1 required positional argument: 'second'", 'is_error': True },
-        {'call_id': '1012', 'result': 16 },
-        {'call_id': '1013', 'result': "KeyError: 'tool_d'", 'is_error': True },
-        {'call_id': '1014', 'result': -9 },
-        {'call_id': '1015', 'result': 20 },
-        {'call_id': '1016', 'result': "TypeError: tool_async_a() missing 1 required positional argument: 'x'", 'is_error': True },
+        {'type': 'any', 'call_id': '1001', 'result': 16 },
+        {'type': 'any', 'call_id': '1002', 'result': 10.8 },
+        {'type': 'any', 'call_id': '1003', 'result': "hihi" },
+        {'type': 'any', 'call_id': '1004', 'result': "TypeError: tool_b() missing 1 required positional argument: 'x'", 'is_error': True },
+        {'type': 'any', 'call_id': '1005', 'result': "TypeError: tool_b() got an unexpected keyword argument 'y'", 'is_error': True },
+        {'type': 'any', 'call_id': '1006', 'result': "TypeError: tool_b() got an unexpected keyword argument 'y'", 'is_error': True },
+        {'type': 'any', 'call_id': '1007', 'result': 17.5 },
+        {'type': 'any', 'call_id': '1008', 'result': 15.5 },
+        {'type': 'any', 'call_id': '1009', 'result': 111.5 },
+        {'type': 'any', 'call_id': '1010', 'result': "TypeError: tool_a() missing 2 required positional arguments: 'first' and 'second'", 'is_error': True },
+        {'type': 'any', 'call_id': '1011', 'result': "TypeError: tool_a() missing 1 required positional argument: 'second'", 'is_error': True },
+        {'type': 'any', 'call_id': '1012', 'result': 16 },
+        {'type': 'any', 'call_id': '1013', 'result': "KeyError: 'tool_d'", 'is_error': True },
+        {'type': 'any', 'call_id': '1014', 'result': -9 },
+        {'type': 'any', 'call_id': '1015', 'result': 20 },
+        {'type': 'any', 'call_id': '1016', 'result': "TypeError: tool_async_a() missing 1 required positional argument: 'x'", 'is_error': True },
     ]
 
 
 def test_build_tool_response_message():
     res: List[ToolResult] = [
-        {'call_id': '1002', 'result': 10.8 },
-        {'call_id': '1003', 'result': "hihi" },
+        {'type': 'any', 'call_id': '1002', 'result': 10.8 },
+        {'type': 'any', 'call_id': '1003', 'result': "hihi" },
     ]
     message = build_tool_response_message(res)
     assert message == {
