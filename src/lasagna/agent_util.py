@@ -34,9 +34,11 @@ def bind_model(
                 'model': model,
                 'model_kwargs': model_kwargs or {},
             }
-            @functools.wraps(agent, assigned=['__module__', '__name__', '__qualname__', '__doc__'])
             async def bound_agent(event_callback: EventCallback, prev_runs: List[AgentRun]) -> AgentRun:
                 return await run(spec, event_callback, prev_runs)
+            for attr in ['__module__', '__name__', '__qualname__', '__doc__']:
+                if hasattr(agent, attr):
+                    setattr(bound_agent, attr, getattr(agent, attr))
             return bound_agent
 
         def __str__(self) -> str:
