@@ -36,6 +36,7 @@ from .util import (
 
 from .tools_util import (
     convert_to_json_schema,
+    extract_tool_result_as_sting,
     get_tool_params,
     handle_tools,
     build_tool_response_message,
@@ -245,9 +246,10 @@ async def _convert_to_openai_messages(messages: List[Message]) -> List[ChatCompl
         elif m['role'] == 'tool_res':
             tool_results = m['tools']
             for tool_result in tool_results:
+                content = extract_tool_result_as_sting(tool_result)
                 ms.append({
                     'role': 'tool',
-                    'content': str(tool_result['result']),
+                    'content': content,
                     'tool_call_id': tool_result['call_id'],
                 })
         elif m['role'] == 'system':

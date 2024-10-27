@@ -32,6 +32,7 @@ from .util import (
 
 from .tools_util import (
     convert_to_json_schema,
+    extract_tool_result_as_sting,
     get_tool_params,
     handle_tools,
     build_tool_response_message,
@@ -124,18 +125,19 @@ async def _build_anthropic_tool_result(
     message: MessageToolResult,
 ) -> List[ToolResultBlockParam]:
     ret: List[ToolResultBlockParam] = []
-    for tool in message['tools']:
+    for tool_result in message['tools']:
+        content = extract_tool_result_as_sting(tool_result)
         obj: ToolResultBlockParam = {
             'type': 'tool_result',
-            'tool_use_id': tool['call_id'],
+            'tool_use_id': tool_result['call_id'],
             'content': [
                 {
                     'type': 'text',
-                    'text': str(tool['result']),
+                    'text': content,
                 },
             ],
         }
-        if 'is_error' in tool and tool['is_error']:
+        if 'is_error' in tool_result and tool_result['is_error']:
             obj['is_error'] = True
         ret.append(obj)
     if len(ret) == 0:

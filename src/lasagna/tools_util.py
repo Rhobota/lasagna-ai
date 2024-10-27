@@ -8,7 +8,7 @@ from typing import (
     get_origin, get_args, cast,
 )
 
-from .agent_util import bind_model, flat_messages
+from .agent_util import bind_model, flat_messages, extract_last_message
 
 from .util import parse_docstring, get_name
 
@@ -180,7 +180,7 @@ async def _run_single_tool(
             return {
                 'type': 'layered_agent',
                 'call_id': call_id,
-                'result': this_run,
+                'run': this_run,
             }
 
         else:
@@ -233,6 +233,29 @@ async def handle_tools(
             ))
 
     return await asyncio.gather(*to_gather)
+
+
+def extract_tool_result_as_sting(tool_result: ToolResult) -> str:
+    content: str
+    if tool_result['type'] == 'any':
+        content = str(tool_result['result'])
+    elif tool_result['type'] == 'layered_agent':
+        last_message = extract_last_message(tool_result['run'])
+        if last_message['role'] == 'ai':
+            content = last_message['text'] or ''
+        elif last_message['role'] == 'tool_call':
+            content = json.dumps([
+                {
+                    'name': c['function']['name'],
+                    'values': json.loads(c['function']['arguments']),
+                }
+                for c in last_message['tools']
+            ])
+        else:
+            raise RuntimeError('unreachable')
+    else:
+        raise RuntimeError('unreachable')
+    return content
 
 
 def build_tool_response_message(tool_results: List[ToolResult]) -> Message:

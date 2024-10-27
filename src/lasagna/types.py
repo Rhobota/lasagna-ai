@@ -33,7 +33,7 @@ class ToolResultAny(ToolResultBase):
 
 class ToolResultLayeredAgent(ToolResultBase):
     type: Literal['layered_agent']
-    result: AgentRun
+    run: AgentRun
 
 
 ToolResult = Union[
