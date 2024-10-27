@@ -26,12 +26,12 @@ from .stream import (
 from .util import (
     convert_to_image_base64,
     exponential_backoff_retry_delays,
+    get_name,
     recursive_hash,
 )
 
 from .tools_util import (
     convert_to_json_schema,
-    get_name,
     get_tool_params,
     handle_tools,
     build_tool_response_message,

@@ -1,6 +1,6 @@
 from typing import Union, Dict, Any, List, Callable, Protocol, Type
 
-from .tools_util import get_name
+from .util import get_name
 
 from .types import (
     AgentSpec,

@@ -159,6 +159,11 @@ def exponential_backoff_retry_delays(
     return [min(d, max_delay) for d in delay_list]
 
 
+def get_name(obj: Any) -> str:
+    name = str(obj.__name__) if hasattr(obj, '__name__') else str(obj)
+    return name
+
+
 class HashAlgorithm(Protocol):
     """
     All the hashlib algorithms conform to this, like:

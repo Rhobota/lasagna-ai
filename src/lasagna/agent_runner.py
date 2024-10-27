@@ -1,6 +1,6 @@
 from .registrar import AGENTS, PROVIDERS
 
-from .tools_util import get_name
+from .util import get_name
 
 from .types import (
     AgentSpec,

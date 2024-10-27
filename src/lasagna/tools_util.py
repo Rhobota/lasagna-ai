@@ -10,7 +10,7 @@ from typing import (
 
 from .agent_util import bind_model, flat_messages
 
-from .util import parse_docstring
+from .util import parse_docstring, get_name
 
 from .types import (
     AgentCallable,
@@ -62,11 +62,6 @@ def convert_to_json_schema(params: List[ToolParam]) -> Dict[str, object]:
         ],
         "additionalProperties": False,
     }
-
-
-def get_name(obj: Any) -> str:
-    name = str(obj.__name__) if hasattr(obj, '__name__') else str(obj)
-    return name
 
 
 def is_async_callable(f: Any) -> bool:

@@ -28,12 +28,12 @@ from .util import (
     combine_pairs,
     convert_to_image_url,
     exponential_backoff_retry_delays,
+    get_name,
     recursive_hash,
 )
 
 from .tools_util import (
     convert_to_json_schema,
-    get_name,
     get_tool_params,
     handle_tools,
     build_tool_response_message,

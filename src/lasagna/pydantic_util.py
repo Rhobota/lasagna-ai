@@ -2,7 +2,7 @@ from .types import (
     ExtractionType,
 )
 
-from .tools_util import get_name
+from .util import get_name
 
 from typing_extensions import is_typeddict
 

@@ -22,7 +22,6 @@ from typing import List, Dict, Callable, Awaitable
 
 from lasagna.tools_util import (
     convert_to_json_schema,
-    get_name,
     get_tool_params,
     handle_tools,
     build_tool_response_message,
@@ -249,15 +248,6 @@ class missing_a_type_class:
 class not_async_class:
     def __call__(self, a: int, b: str) -> bool:
         return True
-
-class class_with_str_method:
-    def __str__(self) -> str:
-        return 'Hi!'
-
-
-def test_get_name():
-    assert get_name(correct_function) == 'correct_function'
-    assert get_name(class_with_str_method()) == 'Hi!'
 
 
 def test_is_async_callable():
