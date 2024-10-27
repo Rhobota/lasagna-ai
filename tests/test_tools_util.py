@@ -4,6 +4,7 @@ from lasagna.agent_util import (
     bind_model,
     build_layered_agent,
     build_most_simple_agent,
+    noop_callback,
 )
 
 from lasagna.mock_provider import (
@@ -109,7 +110,7 @@ async def tool_async_a(x):
 
 
 @pytest.mark.asyncio
-async def test_handle_tools():
+async def test_handle_tools_standard_functions():
     x = 4
     def tool_c():
         return x * 4
@@ -147,7 +148,12 @@ async def test_handle_tools():
         'cost': None,
         'raw': None,
     }
-    tool_results = await handle_tools([message], tool_map)
+    tool_results = await handle_tools(
+        messages = [message],
+        tools_map = tool_map,
+        event_callback = noop_callback,
+        model_spec = None,
+    )
     assert tool_results is not None
     assert tool_results == [
         {'type': 'any', 'call_id': '1001', 'result': 16 },
@@ -167,6 +173,11 @@ async def test_handle_tools():
         {'type': 'any', 'call_id': '1015', 'result': 20 },
         {'type': 'any', 'call_id': '1016', 'result': "TypeError: tool_async_a() missing 1 required positional argument: 'x'", 'is_error': True },
     ]
+
+
+@pytest.mark.asyncio
+async def test_handle_tools_layered_agents():
+    assert False  # TODO
 
 
 def test_build_tool_response_message():

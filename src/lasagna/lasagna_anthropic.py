@@ -6,6 +6,7 @@ For more information about the Anthropic models this adapter is for, see:
 """
 
 from .types import (
+    ModelSpec,
     Message,
     MessageContent,
     MessageToolCall,
@@ -354,6 +355,11 @@ class LasagnaAnthropic(Model):
         self.n_retries: int = cast(int, self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
         if not isinstance(self.n_retries, int) or self.n_retries < 0:
             raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.model_kwargs['retries']})")
+        self.model_spec: ModelSpec = {
+            'provider': 'anthropic',
+            'model': self.model,
+            'model_kwargs': self.model_kwargs,
+        }
 
     def config_hash(self) -> str:
         return recursive_hash(None, {
@@ -520,7 +526,12 @@ class LasagnaAnthropic(Model):
             tools_map = {get_name(tool): tool for tool in tools}
             new_messages.extend(new_messages_here)
             messages.extend(new_messages_here)
-            tools_results = await handle_tools(new_messages_here, tools_map)
+            tools_results = await handle_tools(
+                new_messages_here,
+                tools_map,
+                event_callback,
+                self.model_spec,
+            )
             if tools_results is None:
                 break
             for tool_result in tools_results:

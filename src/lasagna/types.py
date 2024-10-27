@@ -225,11 +225,14 @@ class ProviderRecord(TypedDict):
     models: List[ModelRecord]
 
 
-class AgentSpec(TypedDict):
-    agent: Union[str, AgentCallable]
+class ModelSpec(TypedDict):
     provider: Union[str, ModelFactory]
     model: Union[str, ModelRecord]
     model_kwargs: NotRequired[Dict[str, Any]]
+
+
+class AgentSpec(ModelSpec):
+    agent: Union[str, AgentCallable]
 
 
 class ToolParam(TypedDict):

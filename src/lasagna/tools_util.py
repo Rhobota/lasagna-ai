@@ -5,15 +5,20 @@ import collections.abc
 
 from typing import (
     List, Dict, Tuple, Union, Any, Callable,
-    get_origin, get_args,
+    get_origin, get_args, cast,
 )
+
+from .agent_util import bind_model, flat_messages
 
 from .util import parse_docstring
 
 from .types import (
     AgentCallable,
+    AgentRun,
     BoundAgentCallable,
+    EventCallback,
     Message,
+    ModelSpec,
     ToolCall,
     ToolResult,
     ToolParam,
@@ -145,6 +150,8 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
 async def _run_single_tool(
     tool_call: ToolCall,
     tools_map: Dict[str, Callable],
+    event_callback: EventCallback,
+    model_spec: Union[ModelSpec, None],
 ) -> ToolResult:
     call_id = 'unknown'
 
@@ -153,8 +160,33 @@ async def _run_single_tool(
         func = tools_map[tool_call['function']['name']]
         args = tool_call['function']['arguments']
 
-        if any([is_callable_of_type(func, t, no_throw=True) for t in LAYERED_AGENT_TYPES]):
-            raise RuntimeError('not supported yet')
+        is_agent_callable = is_callable_of_type(func, AgentCallable, no_throw=True)
+        is_bound_agent_callable = is_callable_of_type(func, BoundAgentCallable, no_throw=True)
+
+        if model_spec and (is_agent_callable or is_bound_agent_callable):
+            parsed_args = json.loads(args)
+            assert len(parsed_args) == 1
+            assert parsed_args['prompt']
+            prev_runs: List[AgentRun] = [flat_messages([{
+                'role': 'human',
+                'text': parsed_args['prompt'],
+            }])]
+
+            if is_agent_callable:
+                agent = cast(AgentCallable, func)
+                bound_agent = bind_model(**model_spec)(agent)
+            elif is_bound_agent_callable:
+                bound_agent = cast(BoundAgentCallable, func)
+            else:
+                raise RuntimeError('unreachable')
+
+            this_run = await bound_agent(event_callback, prev_runs)
+
+            return {
+                'type': 'layered_agent',
+                'call_id': call_id,
+                'result': this_run,
+            }
 
         else:
             if is_async_callable(func):
@@ -183,6 +215,8 @@ async def _run_single_tool(
 async def handle_tools(
     messages: List[Message],
     tools_map: Dict[str, Callable],
+    event_callback: EventCallback,
+    model_spec: Union[ModelSpec, None],
 ) -> Union[List[ToolResult], None]:
     assert len(messages) > 0
     tool_messages = [message for message in messages if message['role'] == 'tool_call']
@@ -195,7 +229,12 @@ async def handle_tools(
         for t in message['tools']:
             assert t['call_type'] == 'function'
             to_gather.append(asyncio.create_task(
-                _run_single_tool(t, tools_map),
+                _run_single_tool(
+                    t,
+                    tools_map,
+                    event_callback,
+                    model_spec,
+                ),
             ))
 
     return await asyncio.gather(*to_gather)
