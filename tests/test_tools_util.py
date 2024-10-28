@@ -15,6 +15,7 @@ from lasagna.types import (
     AgentCallable,
     BoundAgentCallable,
     Message,
+    ModelSpec,
     ToolResult,
 )
 
@@ -176,7 +177,94 @@ async def test_handle_tools_standard_functions():
 
 @pytest.mark.asyncio
 async def test_handle_tools_layered_agents():
-    assert False  # TODO
+    outer_model_spec: ModelSpec = {
+        'provider': MockProvider,
+        'model': 'some_model',
+        'model_kwargs': {'outer': True},
+    }
+
+    inner_model_spec: ModelSpec = {
+        'provider': MockProvider,
+        'model': 'some_model',
+        'model_kwargs': {'outer': False},
+    }
+
+    agent_1 = build_layered_agent(name = 'agent_1')
+    my_binder = bind_model(**inner_model_spec)
+    bound_agent_2 = my_binder(build_layered_agent(name = 'bound_agent_2'))
+
+    tool_map: Dict[str, Callable] = {
+        'agent_1': agent_1,
+        'bound_agent_2': bound_agent_2,
+    }
+
+    message: Message = {
+        'role': 'tool_call',
+        'tools': [
+            {'call_id': '1001', 'function': {'arguments': '{"prompt": "Hi"}', 'name': 'agent_1'}, 'call_type': 'function'},
+            {'call_id': '1002', 'function': {'arguments': '{"prompt": "Hey"}', 'name': 'bound_agent_2'}, 'call_type': 'function'},
+        ],
+    }
+
+    tool_results = await handle_tools(
+        messages = [message],
+        tools_map = tool_map,
+        event_callback = noop_callback,
+        model_spec = outer_model_spec,
+    )
+    assert tool_results is not None
+    assert tool_results == [
+        {
+            'type': 'layered_agent',
+            'call_id': '1001',
+            'run': {
+                'type': 'messages',
+                'agent': 'agent_1',
+                'provider': 'MockProvider',
+                'model': 'some_model',
+                'model_kwargs': {'outer': True},
+                'messages': [
+                    {
+                        'role': 'human',
+                        'text': 'Hi',
+                    },
+                    {
+                        'role': 'ai',
+                        'text': 'model: some_model',
+                    },
+                    {
+                        'role': 'human',
+                        'text': 'model_kwarg: outer = True',
+                    }
+                ],
+            },
+        },
+        {
+            'type': 'layered_agent',
+            'call_id': '1002',
+            'run': {
+                'type': 'messages',
+                'agent': 'bound_agent_2',
+                'provider': 'MockProvider',
+                'model': 'some_model',
+                'model_kwargs': {'outer': False},
+                'messages': [
+                    {
+                        'role': 'human',
+                        'text': 'Hey',
+                    },
+                    {
+                        'role': 'ai',
+                        'text': 'model: some_model',
+                    },
+                    {
+                        'role': 'human',
+                        'text': 'model_kwarg: outer = False',
+                    }
+                ],
+            },
+        },
+    ]
 
 
 def test_build_tool_response_message():
@@ -338,6 +426,7 @@ def test_get_tool_params_function():
 def test_get_tool_params_layered_agents():
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
     my_agent = build_layered_agent(
+        name = 'my_layered_agent',
         doc = 'Use this for everything.',
     )
     my_bound_agent = my_binder(my_agent)
@@ -362,6 +451,7 @@ def test_get_tool_params_layered_agents():
 
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
     my_agent = build_layered_agent(
+        name = 'my_layered_agent',
         doc = """
         Use this for everything.
         :param: prompt: str: the prompt for the downstream AI
@@ -391,6 +481,7 @@ def test_get_tool_params_layered_agents():
 
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
     my_agent = build_layered_agent(
+        name = 'my_layered_agent',
         doc = """
         Use this for everything.
         :param: prompt: int: this is invalid btw
@@ -406,6 +497,7 @@ def test_get_tool_params_layered_agents():
 
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
     my_agent = build_layered_agent(
+        name = 'my_layered_agent',
         doc = """
         Use this for everything.
         :param: prompt: str: the prompt

@@ -41,8 +41,6 @@ class MockProvider(Model):
             {
                 'role': 'ai',
                 'text': f"model: {self.model}",
-                'cost': None,
-                'raw': None,
             },
         ]
         for key in sorted(self.model_kwargs.keys()):
@@ -50,8 +48,6 @@ class MockProvider(Model):
             m: Message = {
                 'role': 'human',
                 'text': f"model_kwarg: {key} = {val}",
-                'cost': None,
-                'raw': None,
             }
             res.append(m)
         return res

@@ -70,20 +70,14 @@ async def test_run_with_registered_names():
             {
                 'role': 'ai',
                 'text': f"model: some_model",
-                'cost': None,
-                'raw': None,
             },
             {
                 'role': 'human',
                 'text': f"model_kwarg: a = yes",
-                'cost': None,
-                'raw': None,
             },
             {
                 'role': 'human',
                 'text': f"model_kwarg: b = 6",
-                'cost': None,
-                'raw': None,
             },
         ],
     }
@@ -125,20 +119,14 @@ async def test_run_direct():
             {
                 'role': 'ai',
                 'text': f"model: some_model",
-                'cost': None,
-                'raw': None,
             },
             {
                 'role': 'human',
                 'text': f"model_kwarg: a = yes",
-                'cost': None,
-                'raw': None,
             },
             {
                 'role': 'human',
                 'text': f"model_kwarg: b = 6",
-                'cost': None,
-                'raw': None,
             },
         ],
     }

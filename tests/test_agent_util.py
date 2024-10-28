@@ -44,7 +44,7 @@ async def _agent_common_test(
     prev_runs: List[AgentRun] = []
     new_run = await binder(agent)(event_callback, prev_runs)
     assert new_run == {
-        'agent': 'simple agent',
+        'agent': 'simple_agent',
         'provider': 'MockProvider',
         'model': 'some_model',
         'model_kwargs': {
@@ -56,25 +56,19 @@ async def _agent_common_test(
             {
                 'role': 'ai',
                 'text': f"model: some_model",
-                'cost': None,
-                'raw': None,
             },
             {
                 'role': 'human',
                 'text': f"model_kwarg: a = yes",
-                'cost': None,
-                'raw': None,
             },
             {
                 'role': 'human',
                 'text': f"model_kwarg: b = 6",
-                'cost': None,
-                'raw': None,
             },
         ],
     }
     assert events == [
-        ('agent', 'start', 'simple agent'),
+        ('agent', 'start', 'simple_agent'),
         ('ai', 'text_event', 'Hi!'),
         ('agent', 'end', new_run),
     ]
@@ -98,6 +92,7 @@ async def test_partial_bind_model():
 async def test_build_layered_agent():
     my_binder = bind_model(MockProvider, 'a_model')
     my_agent = build_layered_agent(
+        name = 'a_layered_agent',
         tools = [],
         system_prompt = 'system test',
         doc = 'doc test',
@@ -113,7 +108,7 @@ async def test_build_layered_agent():
     ])]
     new_run = await my_bound_agent(noop_callback, prev_runs)
     assert new_run == {
-        'agent': 'layered agent',
+        'agent': 'a_layered_agent',
         'provider': 'MockProvider',
         'model': 'a_model',
         'model_kwargs': {},
@@ -130,8 +125,6 @@ async def test_build_layered_agent():
             {
                 'role': 'ai',
                 'text': f"model: a_model",
-                'cost': None,
-                'raw': None,
             },
         ],
     }
@@ -149,7 +142,7 @@ async def test_model_extract():
         (
             'agent',
             'start',
-            'extraction agent: MyTestType',
+            'extraction_agent',
         ),
         (
             'tool_call',
@@ -174,7 +167,7 @@ async def test_model_extract():
                 },
                 'result': MyTestType(a='yes', b=6),
                 'provider': 'MockProvider',
-                'agent': 'extraction agent: MyTestType',
+                'agent': 'extraction_agent',
                 'model': 'some_model',
                 'model_kwargs': {
                     'a': 'yes',

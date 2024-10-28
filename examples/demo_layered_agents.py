@@ -34,6 +34,7 @@ def evaluate_math_expression(expression: str) -> float:
 
 async def main() -> None:
     math_agent = build_layered_agent(
+        name = 'math_agent',
         tools = [
             evaluate_math_expression,
         ],
@@ -42,6 +43,7 @@ async def main() -> None:
     )
     health_agent = known_models.BIND_ANTHROPIC_claude_35_sonnet()(
         build_layered_agent(
+            name = 'health_agent',
             tools = [],
             system_prompt = "You are a health coach who motivates through fear.",
             doc = "Use this tool if the user asks a health question.",
