@@ -72,27 +72,6 @@ def partial_bind_model(
     return PartialModelBinder()
 
 
-def recursive_extract_messages(agent_runs: List[AgentRun]) -> List[Message]:
-    messages: List[Message] = []
-    for run in agent_runs:
-        if run['type'] == 'messages':
-            messages.extend(run['messages'])
-        elif run['type'] == 'chain' or run['type'] == 'parallel':
-            messages.extend(recursive_extract_messages(run['runs']))
-        elif run['type'] == 'extraction':
-            messages.append(run['message'])
-        else:
-            raise RuntimeError('unreachable')
-    return messages
-
-
-def flat_messages(messages: List[Message]) -> AgentRun:
-    return {
-        'type': 'messages',
-        'messages': messages,
-    }
-
-
 def build_most_simple_agent(
     tools: List[Callable] = [],
     name: Union[str, None] = None,
@@ -113,6 +92,35 @@ def build_most_simple_agent(
             return name or 'simple_agent'
 
     a = MostSimpleAgent()
+    if doc:
+        a.__doc__ = doc
+    return a
+
+
+def build_extraction_agent(
+    extraction_type: Type[ExtractionType],
+    name: Union[str, None] = None,
+    doc: Union[str, None] = None,
+) -> AgentCallable:
+    class ExtractionAgent():
+        async def __call__(
+            self,
+            model: Model,
+            event_callback: EventCallback,
+            prev_runs: List[AgentRun],
+        ) -> AgentRun:
+            messages = recursive_extract_messages(prev_runs)
+            message, result = await model.extract(event_callback, messages, extraction_type)
+            return {
+                'type': 'extraction',
+                'message': message,
+                'result': result,
+            }
+
+        def __str__(self) -> str:
+            return name or 'extraction_agent'
+
+    a = ExtractionAgent()
     if doc:
         a.__doc__ = doc
     return a
@@ -152,33 +160,25 @@ def build_layered_agent(
     return a
 
 
-def build_extraction_agent(
-    extraction_type: Type[ExtractionType],
-    name: Union[str, None] = None,
-    doc: Union[str, None] = None,
-) -> AgentCallable:
-    class ExtractionAgent():
-        async def __call__(
-            self,
-            model: Model,
-            event_callback: EventCallback,
-            prev_runs: List[AgentRun],
-        ) -> AgentRun:
-            messages = recursive_extract_messages(prev_runs)
-            message, result = await model.extract(event_callback, messages, extraction_type)
-            return {
-                'type': 'extraction',
-                'message': message,
-                'result': result,
-            }
+def recursive_extract_messages(agent_runs: List[AgentRun]) -> List[Message]:
+    messages: List[Message] = []
+    for run in agent_runs:
+        if run['type'] == 'messages':
+            messages.extend(run['messages'])
+        elif run['type'] == 'chain' or run['type'] == 'parallel':
+            messages.extend(recursive_extract_messages(run['runs']))
+        elif run['type'] == 'extraction':
+            messages.append(run['message'])
+        else:
+            raise RuntimeError('unreachable')
+    return messages
 
-        def __str__(self) -> str:
-            return name or 'extraction_agent'
 
-    a = ExtractionAgent()
-    if doc:
-        a.__doc__ = doc
-    return a
+def flat_messages(messages: List[Message]) -> AgentRun:
+    return {
+        'type': 'messages',
+        'messages': messages,
+    }
 
 
 async def noop_callback(event: EventPayload) -> None:
