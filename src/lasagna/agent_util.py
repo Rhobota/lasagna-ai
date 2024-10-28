@@ -34,14 +34,15 @@ def bind_model(
             }
             async def bound_agent(event_callback: EventCallback, prev_runs: List[AgentRun]) -> AgentRun:
                 return await run(spec, event_callback, prev_runs)
-            for attr in ['__module__', '__name__', '__qualname__', '__doc__']:
+            for attr in ['__module__', '__qualname__', '__doc__']:
                 if hasattr(agent, attr):
                     setattr(bound_agent, attr, getattr(agent, attr))
+            bound_agent.__name__ = get_name(agent)
             return bound_agent
 
         def __str__(self) -> str:
             info = (provider, model, model_kwargs) if model_kwargs else (provider, model)
-            return str(info)
+            return f'model binder: {info}'
 
     return ModelBinder()
 
@@ -66,7 +67,7 @@ def partial_bind_model(
 
         def __str__(self) -> str:
             info = (provider, model)
-            return str(info)
+            return f'partial model binder: {info}'
 
     return PartialModelBinder()
 
@@ -94,6 +95,7 @@ def flat_messages(messages: List[Message]) -> AgentRun:
 
 def build_most_simple_agent(
     tools: List[Callable] = [],
+    name: Union[str, None] = None,
     doc: Union[str, None] = None,
 ) -> AgentCallable:
     class MostSimpleAgent():
@@ -108,14 +110,7 @@ def build_most_simple_agent(
             return flat_messages(new_messages)
 
         def __str__(self) -> str:
-            if tools:
-                tool_names = ', '.join([
-                    get_name(tool)
-                    for tool in tools
-                ])
-                return f'simple agent: {tool_names}'
-            else:
-                return 'simple agent'
+            return name or 'simple_agent'
 
     a = MostSimpleAgent()
     if doc:
@@ -124,6 +119,7 @@ def build_most_simple_agent(
 
 
 def build_layered_agent(
+    name: str,
     tools: List[Callable] = [],
     system_prompt: Union[str, None] = None,
     doc: Union[str, None] = None,
@@ -148,14 +144,7 @@ def build_layered_agent(
             return flat_messages(new_messages)
 
         def __str__(self) -> str:
-            if tools:
-                tool_names = ', '.join([
-                    get_name(tool)
-                    for tool in tools
-                ])
-                return f'layered agent: {tool_names}'
-            else:
-                return 'layered agent'
+            return name
 
     a = LayeredAgent()
     if doc:
@@ -165,6 +154,8 @@ def build_layered_agent(
 
 def build_extraction_agent(
     extraction_type: Type[ExtractionType],
+    name: Union[str, None] = None,
+    doc: Union[str, None] = None,
 ) -> AgentCallable:
     class ExtractionAgent():
         async def __call__(
@@ -182,10 +173,12 @@ def build_extraction_agent(
             }
 
         def __str__(self) -> str:
-            t = get_name(extraction_type)
-            return f'extraction agent: {t}'
+            return name or 'extraction_agent'
 
-    return ExtractionAgent()
+    a = ExtractionAgent()
+    if doc:
+        a.__doc__ = doc
+    return a
 
 
 async def noop_callback(event: EventPayload) -> None:
