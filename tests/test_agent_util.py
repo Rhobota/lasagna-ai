@@ -26,6 +26,8 @@ from lasagna.mock_provider import (
     MockProvider,
 )
 
+from lasagna.util import get_name
+
 from pydantic import BaseModel, ValidationError
 
 
@@ -98,8 +100,12 @@ async def test_build_layered_agent():
         doc = 'doc test',
     )
     assert my_agent.__doc__ == 'doc test'
+    assert str(my_agent) == 'a_layered_agent'
+    assert get_name(my_agent) == 'a_layered_agent'
     my_bound_agent = my_binder(my_agent)
     assert my_bound_agent.__doc__ == 'doc test'
+    assert my_bound_agent.__name__ == 'a_layered_agent'
+    assert get_name(my_bound_agent) == 'a_layered_agent'
     prev_runs: List[AgentRun] = [flat_messages([
         {
             'role': 'human',

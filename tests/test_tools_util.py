@@ -28,6 +28,7 @@ from lasagna.tools_util import (
     build_tool_response_message,
     is_async_callable,
     is_callable_of_type,
+    extract_tool_result_as_sting,
 )
 
 
@@ -51,7 +52,6 @@ def test_convert_to_json_schema():
         {
             'name': 'yet_another',
             'type': 'bool',
-            'description': 'yet another param',
         },
         {
             'name': 'an_enum',
@@ -82,7 +82,6 @@ def test_convert_to_json_schema():
             },
             'yet_another': {
                 'type': 'boolean',
-                'description': 'yet another param',
             },
             'an_enum': {
                 'type': 'string',
@@ -511,3 +510,71 @@ def test_get_tool_params_layered_agents():
 
     with pytest.raises(ValueError):
         get_tool_params(my_bound_agent)
+
+
+def test_extract_tool_result_as_sting():
+    m1: ToolResult = {
+        'call_id': '1001',
+        'type': 'any',
+        'result': 'something',
+    }
+    assert extract_tool_result_as_sting(m1) == 'something'
+
+    m2: ToolResult = {
+        'call_id': '1001',
+        'type': 'layered_agent',
+        'run': {
+            'type': 'messages',
+            'messages': [
+                {
+                    'role': 'ai',
+                    'text': 'Hi',
+                },
+            ],
+        },
+    }
+    assert extract_tool_result_as_sting(m2) == 'Hi'
+
+    m3: ToolResult = {
+        'call_id': '1001',
+        'type': 'layered_agent',
+        'run': {
+            'type': 'messages',
+            'messages': [
+                {
+                    'role': 'tool_call',
+                    'tools': [
+                        {
+                            'call_id': '1002',
+                            'call_type': 'function',
+                            'function': {
+                                'name': 'foo',
+                                'arguments': '{"a": 7, "other": true}',
+                            },
+                        },
+                    ],
+                },
+            ],
+        },
+    }
+    assert extract_tool_result_as_sting(m3) == '[{"name": "foo", "values": {"a": 7, "other": true}}]'
+
+    m4: ToolResult = {
+        'call_id': '1001',
+        'type': 'layered_agent',
+        'run': {
+            'type': 'messages',
+            'messages': [
+                {
+                    'role': 'ai',
+                    'text': 'Hi',
+                },
+                {
+                    'role': 'ai',
+                    'text': 'Hi again',
+                },
+            ],
+        },
+    }
+    with pytest.raises(ValueError):
+        extract_tool_result_as_sting(m4)

@@ -8,7 +8,7 @@ from typing import (
     get_origin, get_args, cast,
 )
 
-from .agent_util import bind_model, flat_messages, extract_last_message
+from .agent_util import bind_model, flat_messages, recursive_extract_messages
 
 from .util import parse_docstring, get_name
 
@@ -240,16 +240,19 @@ def extract_tool_result_as_sting(tool_result: ToolResult) -> str:
     if tool_result['type'] == 'any':
         content = str(tool_result['result'])
     elif tool_result['type'] == 'layered_agent':
-        last_message = extract_last_message(tool_result['run'])
-        if last_message['role'] == 'ai':
-            content = last_message['text'] or ''
-        elif last_message['role'] == 'tool_call':
+        all_messages = recursive_extract_messages([tool_result['run']])
+        if len(all_messages) != 1:
+            raise ValueError("Layered agents should only produce *one* message!")
+        only_message = all_messages[0]
+        if only_message['role'] == 'ai':
+            content = only_message['text'] or ''
+        elif only_message['role'] == 'tool_call':
             content = json.dumps([
                 {
                     'name': c['function']['name'],
                     'values': json.loads(c['function']['arguments']),
                 }
-                for c in last_message['tools']
+                for c in only_message['tools']
             ])
         else:
             raise RuntimeError('unreachable')
