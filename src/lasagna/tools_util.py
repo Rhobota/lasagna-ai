@@ -127,6 +127,7 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
 
 async def _run_single_tool(
     tool_call: ToolCall,
+    prev_messages: List[Message],
     tools_map: Dict[str, Callable],
     event_callback: EventCallback,
     model_spec: Union[ModelSpec, None],
@@ -144,12 +145,13 @@ async def _run_single_tool(
         is_bound_agent_callable = is_callable_of_type(func, BoundAgentCallable, no_throw=True)
 
         if model_spec and (is_agent_callable or is_bound_agent_callable):
-            prev_runs: List[AgentRun] = []
+            messages: List[Message] = [*prev_messages]  # shallow copy
             if len(parsed_args) > 0:
-                prev_runs.append(flat_messages([{
+                messages.append({
                     'role': 'tool_call',
                     'tools': [tool_call],
-                }]))
+                })
+            prev_runs: List[AgentRun] = [flat_messages(messages)]
 
             if is_agent_callable:
                 agent = cast(AgentCallable, func)
@@ -192,13 +194,13 @@ async def _run_single_tool(
 
 
 async def handle_tools(
-    messages: List[Message],
+    prev_messages: List[Message],
+    new_messages: List[Message],
     tools_map: Dict[str, Callable],
     event_callback: EventCallback,
     model_spec: Union[ModelSpec, None],
 ) -> Union[List[ToolResult], None]:
-    assert len(messages) > 0
-    tool_messages = [message for message in messages if message['role'] == 'tool_call']
+    tool_messages = [message for message in new_messages if message['role'] == 'tool_call']
     if len(tool_messages) == 0:
         return None
 
@@ -210,6 +212,7 @@ async def handle_tools(
             to_gather.append(asyncio.create_task(
                 _run_single_tool(
                     t,
+                    prev_messages,
                     tools_map,
                     event_callback,
                     model_spec,

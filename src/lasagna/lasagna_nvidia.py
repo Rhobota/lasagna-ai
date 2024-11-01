@@ -527,6 +527,7 @@ class LasagnaNVIDIA(Model):
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
         tools_spec = _convert_to_openai_tools(tools)
+        tools_map = {get_name(tool): tool for tool in tools}
         for _ in range(max_tool_iters):
             new_messages_here = await self._retrying_run_once(
                 event_callback = event_callback,
@@ -535,15 +536,15 @@ class LasagnaNVIDIA(Model):
                 force_tool     = force_tool,
                 parallel_tool_calls = NOT_GIVEN,
             )
-            tools_map = {get_name(tool): tool for tool in tools}
+            tools_results = await handle_tools(
+                prev_messages = messages,
+                new_messages = new_messages_here,
+                tools_map = tools_map,
+                event_callback = event_callback,
+                model_spec = self.model_spec,
+            )
             new_messages.extend(new_messages_here)
             messages.extend(new_messages_here)
-            tools_results = await handle_tools(
-                new_messages_here,
-                tools_map,
-                event_callback,
-                self.model_spec,
-            )
             if tools_results is None:
                 break
             for tool_result in tools_results:

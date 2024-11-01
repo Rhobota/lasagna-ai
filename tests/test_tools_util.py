@@ -148,7 +148,8 @@ async def test_handle_tools_standard_functions():
         'raw': None,
     }
     tool_results = await handle_tools(
-        messages = [message],
+        prev_messages = [],
+        new_messages = [message],
         tools_map = tool_map,
         event_callback = noop_callback,
         model_spec = None,
@@ -207,12 +208,28 @@ async def test_handle_tools_layered_agents():
         ],
     }
 
+    prev_messages: List[Message] = [
+        {
+            'role': 'system',
+            'text': 'You are AI.',
+        },
+    ]
+
     tool_results = await handle_tools(
-        messages = [message],
+        prev_messages = prev_messages,
+        new_messages = [message],
         tools_map = tool_map,
         event_callback = noop_callback,
         model_spec = outer_model_spec,
     )
+
+    assert prev_messages == [  # test immutability of prev_messages
+        {
+            'role': 'system',
+            'text': 'You are AI.',
+        },
+    ]
+
     assert tool_results is not None
     assert tool_results == [
         {
@@ -225,6 +242,10 @@ async def test_handle_tools_layered_agents():
                 'model': 'some_model',
                 'model_kwargs': {'outer': True},
                 'messages': [
+                    {
+                        'role': 'system',
+                        'text': 'You are AI.',
+                    },
                     {
                         'role': 'ai',
                         'text': 'model: some_model',
@@ -247,6 +268,10 @@ async def test_handle_tools_layered_agents():
                 'model_kwargs': {'outer': False},
                 'messages': [
                     {
+                        'role': 'system',
+                        'text': 'You are AI.',
+                    },
+                    {
                         'role': 'ai',
                         'text': 'model: some_model',
                     },
@@ -267,6 +292,10 @@ async def test_handle_tools_layered_agents():
                 'model': 'some_model',
                 'model_kwargs': {'outer': True},
                 'messages': [
+                    {
+                        'role': 'system',
+                        'text': 'You are AI.',
+                    },
                     {
                         'role': 'tool_call',
                         'tools': [
@@ -301,6 +330,10 @@ async def test_handle_tools_layered_agents():
                 'model': 'some_model',
                 'model_kwargs': {'outer': False},
                 'messages': [
+                    {
+                        'role': 'system',
+                        'text': 'You are AI.',
+                    },
                     {
                         'role': 'tool_call',
                         'tools': [
