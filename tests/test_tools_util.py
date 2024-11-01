@@ -2,8 +2,7 @@ import pytest
 
 from lasagna.agent_util import (
     bind_model,
-    build_layered_agent,
-    build_most_simple_agent,
+    build_simple_agent,
     noop_callback,
 )
 
@@ -189,9 +188,9 @@ async def test_handle_tools_layered_agents():
         'model_kwargs': {'outer': False},
     }
 
-    agent_1 = build_layered_agent(name = 'agent_1')
+    agent_1 = build_simple_agent(name = 'agent_1')
     my_binder = bind_model(**inner_model_spec)
-    bound_agent_2 = my_binder(build_layered_agent(name = 'bound_agent_2'))
+    bound_agent_2 = my_binder(build_simple_agent(name = 'bound_agent_2'))
 
     tool_map: Dict[str, Callable] = {
         'agent_1': agent_1,
@@ -475,7 +474,7 @@ def test_is_callable_of_type():
 
 def test_is_callable_of_type_agent_callables():
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
-    my_agent = build_most_simple_agent()
+    my_agent = build_simple_agent(name = 'agent')
     my_bound_agent = my_binder(my_agent)
 
     assert is_callable_of_type(my_agent, AgentCallable)
@@ -519,7 +518,7 @@ def test_get_tool_params_function():
 
 def test_get_tool_params_layered_agents():
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
-    my_agent = build_layered_agent(
+    my_agent = build_simple_agent(
         name = 'my_layered_agent',
         doc = 'Use this for everything.',
     )
@@ -534,7 +533,7 @@ def test_get_tool_params_layered_agents():
     assert params == []
 
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
-    my_agent = build_layered_agent(
+    my_agent = build_simple_agent(
         name = 'my_layered_agent',
         doc = """
         Use this for everything.
@@ -564,7 +563,7 @@ def test_get_tool_params_layered_agents():
     ]
 
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
-    my_agent = build_layered_agent(
+    my_agent = build_simple_agent(
         name = 'my_layered_agent',
         doc = """
         Use this for everything.
@@ -594,7 +593,7 @@ def test_get_tool_params_layered_agents():
     ]
 
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
-    my_agent = build_layered_agent(
+    my_agent = build_simple_agent(
         name = 'my_layered_agent',
         doc = """
         Use this for everything.

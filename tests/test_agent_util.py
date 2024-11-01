@@ -4,14 +4,14 @@ from typing import Callable, List
 
 from lasagna.agent_util import (
     bind_model,
-    build_most_simple_agent,
-    build_layered_agent,
+    build_simple_agent,
     extract_last_message,
     noop_callback,
     partial_bind_model,
     recursive_extract_messages,
     flat_messages,
     build_extraction_agent,
+    override_system_prompt,
 )
 
 from lasagna.types import (
@@ -79,25 +79,25 @@ async def _agent_common_test(
 @pytest.mark.asyncio
 async def test_bind_model():
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
-    my_agent = build_most_simple_agent()
+    my_agent = build_simple_agent(name = 'simple_agent')
     await _agent_common_test(my_binder, my_agent)
 
 
 @pytest.mark.asyncio
 async def test_partial_bind_model():
     my_binder = partial_bind_model(MockProvider, 'some_model')({'a': 'yes', 'b': 6})
-    my_agent = build_most_simple_agent()
+    my_agent = build_simple_agent(name = 'simple_agent')
     await _agent_common_test(my_binder, my_agent)
 
 
 @pytest.mark.asyncio
 async def test_build_layered_agent():
     my_binder = bind_model(MockProvider, 'a_model')
-    my_agent = build_layered_agent(
+    my_agent = build_simple_agent(
         name = 'a_layered_agent',
         tools = [],
-        system_prompt = 'system test',
         doc = 'doc test',
+        system_prompt_override = 'system test',
     )
     assert my_agent.__doc__ == 'doc test'
     assert str(my_agent) == 'a_layered_agent'
@@ -307,3 +307,122 @@ def test_flat_messages():
             },
         ],
     }
+
+
+def test_override_system_prompt():
+    messages: List[Message] = []
+    assert override_system_prompt(messages, 'Bla') == [
+        {
+            'role': 'system',
+            'text': 'Bla',
+        },
+    ]
+    assert messages == []  # test immutability
+
+    messages: List[Message] = [
+        {
+            'role': 'system',
+            'text': 'You are a robot.',
+        },
+    ]
+    assert override_system_prompt(messages, 'You are Fred.') == [
+        {
+            'role': 'system',
+            'text': 'You are Fred.',
+        },
+    ]
+    assert messages == [   # test immutability
+        {
+            'role': 'system',
+            'text': 'You are a robot.',
+        },
+    ]
+
+    messages: List[Message] = [
+        {
+            'role': 'human',
+            'text': 'Hi!',
+        },
+    ]
+    assert override_system_prompt(messages, 'You are Fred.') == [
+        {
+            'role': 'system',
+            'text': 'You are Fred.',
+        },
+        {
+            'role': 'human',
+            'text': 'Hi!',
+        },
+    ]
+    assert messages == [   # test immutability
+        {
+            'role': 'human',
+            'text': 'Hi!',
+        },
+    ]
+
+    messages: List[Message] = [
+        {
+            'role': 'system',
+            'text': 'You are a robot.',
+        },
+        {
+            'role': 'human',
+            'text': 'Who are you?',
+        },
+    ]
+    assert override_system_prompt(messages, 'You are Fred.') == [
+        {
+            'role': 'system',
+            'text': 'You are Fred.',
+        },
+        {
+            'role': 'human',
+            'text': 'Who are you?',
+        },
+    ]
+    assert messages == [   # test immutability
+        {
+            'role': 'system',
+            'text': 'You are a robot.',
+        },
+        {
+            'role': 'human',
+            'text': 'Who are you?',
+        },
+    ]
+
+    messages: List[Message] = [
+        {
+            'role': 'ai',
+            'text': 'Beep.',
+        },
+        {
+            'role': 'human',
+            'text': 'Who are you?',
+        },
+    ]
+    assert override_system_prompt(messages, 'You are Fred.') == [
+        {
+            'role': 'system',
+            'text': 'You are Fred.',
+        },
+        {
+            'role': 'ai',
+            'text': 'Beep.',
+        },
+        {
+            'role': 'human',
+            'text': 'Who are you?',
+        },
+    ]
+    assert messages == [   # test immutability
+        {
+            'role': 'ai',
+            'text': 'Beep.',
+        },
+        {
+            'role': 'human',
+            'text': 'Who are you?',
+        },
+    ]

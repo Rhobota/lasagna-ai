@@ -72,12 +72,27 @@ def partial_bind_model(
     return PartialModelBinder()
 
 
-def build_most_simple_agent(
+def override_system_prompt(
+    messages: List[Message],
+    system_prompt: str,
+) -> List[Message]:
+    sp: Message = {
+        'role': 'system',
+        'text': system_prompt,
+    }
+    if messages and messages[0]['role'] == 'system':
+        return [sp, *messages[1:]]
+    else:
+        return [sp, *messages]
+
+
+def build_simple_agent(
+    name: str,
     tools: List[Callable] = [],
-    name: Union[str, None] = None,
     doc: Union[str, None] = None,
+    system_prompt_override: Union[str, None] = None,
 ) -> AgentCallable:
-    class MostSimpleAgent():
+    class SimpleAgent():
         async def __call__(
             self,
             model: Model,
@@ -85,13 +100,15 @@ def build_most_simple_agent(
             prev_runs: List[AgentRun],
         ) -> AgentRun:
             messages = recursive_extract_messages(prev_runs)
+            if system_prompt_override:
+                messages = override_system_prompt(messages, system_prompt_override)
             new_messages = await model.run(event_callback, messages, tools)
             return flat_messages(new_messages)
 
         def __str__(self) -> str:
-            return name or 'simple_agent'
+            return name
 
-    a = MostSimpleAgent()
+    a = SimpleAgent()
     if doc:
         a.__doc__ = doc
     return a
@@ -121,40 +138,6 @@ def build_extraction_agent(
             return name or 'extraction_agent'
 
     a = ExtractionAgent()
-    if doc:
-        a.__doc__ = doc
-    return a
-
-
-def build_layered_agent(
-    name: str,
-    tools: List[Callable] = [],
-    system_prompt: Union[str, None] = None,
-    doc: Union[str, None] = None,
-) -> AgentCallable:
-    class LayeredAgent():
-        async def __call__(
-            self,
-            model: Model,
-            event_callback: EventCallback,
-            prev_runs: List[AgentRun],
-        ) -> AgentRun:
-            messages = recursive_extract_messages(prev_runs)
-            if system_prompt:
-                messages = [
-                    {
-                        'role': 'system',
-                        'text': system_prompt,
-                    },
-                    *messages,
-                ]
-            new_messages = await model.run(event_callback, messages, tools)
-            return flat_messages(new_messages)
-
-        def __str__(self) -> str:
-            return name
-
-    a = LayeredAgent()
     if doc:
         a.__doc__ = doc
     return a

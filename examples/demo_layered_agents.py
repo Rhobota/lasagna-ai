@@ -1,7 +1,6 @@
 from lasagna import (
     known_models,
-    build_most_simple_agent,
-    build_layered_agent,
+    build_simple_agent,
 )
 
 from lasagna.tui import (
@@ -33,24 +32,25 @@ def evaluate_math_expression(expression: str) -> float:
 
 
 async def main() -> None:
-    math_agent = build_layered_agent(
+    math_agent = build_simple_agent(
         name = 'math_agent',
         tools = [
             evaluate_math_expression,
         ],
-        system_prompt = "You are a math assistant.",
         doc = "Use this tool if the user asks a math question.",
+        system_prompt_override = "You are a math assistant.",
     )
     health_agent = known_models.BIND_ANTHROPIC_claude_35_sonnet()(
-        build_layered_agent(
+        build_simple_agent(
             name = 'health_agent',
             tools = [],
-            system_prompt = "You are a health coach who motivates through fear.",
             doc = "Use this tool if the user asks a health question.",
+            system_prompt_override = "You are a health coach who motivates through fear.",
         ),
     )
     my_bound_agent = known_models.BIND_OPENAI_gpt_4o_mini()(
-        build_most_simple_agent(
+        build_simple_agent(
+            name = 'root_agent',
             tools = [
                 math_agent,
                 health_agent,

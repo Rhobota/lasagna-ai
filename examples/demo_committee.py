@@ -1,7 +1,7 @@
 from lasagna import (
     known_models,
     flat_messages,
-    build_most_simple_agent,
+    build_simple_agent,
     extract_last_message,
     noop_callback,
     Message,
@@ -14,7 +14,7 @@ import asyncio
 from dotenv import load_dotenv; load_dotenv()
 
 
-THE_AGENT = build_most_simple_agent()
+THE_AGENT = build_simple_agent(name='agent')
 
 
 COMMITTEE_SPEC = [
