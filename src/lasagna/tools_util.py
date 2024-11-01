@@ -25,9 +25,6 @@ from .types import (
 )
 
 
-LAYERED_AGENT_TYPES = [AgentCallable, BoundAgentCallable]
-
-
 def convert_to_json_schema(params: List[ToolParam]) -> Dict[str, object]:
     def convert_type(t: str) -> Dict[str, object]:
         if t.startswith('enum '):
@@ -125,20 +122,6 @@ def is_callable_of_type(
 def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
     params: List[ToolParam]
     description, params = parse_docstring(tool.__doc__ or '')
-    if any([is_callable_of_type(tool, t, no_throw=True) for t in LAYERED_AGENT_TYPES]):
-        if len(params) == 0:
-            params = [
-                {
-                    'name': 'prompt',
-                    'type': 'str',
-                },
-            ]
-        elif len(params) == 1:
-            p = params[0]
-            if p['name'] != 'prompt' or p['type'] != 'str' or p.get('optional', False):
-                raise ValueError('Layered agents must take a single string parameter named `prompt`.')
-        else:
-            raise ValueError('Layered agents must take a single string parameter named `prompt`.')
     return description, params
 
 
@@ -155,17 +138,18 @@ async def _run_single_tool(
         func = tools_map[tool_call['function']['name']]
         args = tool_call['function']['arguments']
 
+        parsed_args = json.loads(args)
+
         is_agent_callable = is_callable_of_type(func, AgentCallable, no_throw=True)
         is_bound_agent_callable = is_callable_of_type(func, BoundAgentCallable, no_throw=True)
 
         if model_spec and (is_agent_callable or is_bound_agent_callable):
-            parsed_args = json.loads(args)
-            assert len(parsed_args) == 1
-            assert parsed_args['prompt']
-            prev_runs: List[AgentRun] = [flat_messages([{
-                'role': 'human',
-                'text': parsed_args['prompt'],
-            }])]
+            prev_runs: List[AgentRun] = []
+            if len(parsed_args) > 0:
+                prev_runs.append(flat_messages([{
+                    'role': 'tool_call',
+                    'tools': [tool_call],
+                }]))
 
             if is_agent_callable:
                 agent = cast(AgentCallable, func)
@@ -185,10 +169,10 @@ async def _run_single_tool(
 
         else:
             if is_async_callable(func):
-                res = await func(**json.loads(args))
+                res = await func(**parsed_args)
             else:
                 def _wrapped_sync() -> Any:
-                    return func(**json.loads(args))
+                    return func(**parsed_args)
                 loop = asyncio.get_running_loop()
                 res = await loop.run_in_executor(None, _wrapped_sync)
             return {

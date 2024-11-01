@@ -200,8 +200,10 @@ async def test_handle_tools_layered_agents():
     message: Message = {
         'role': 'tool_call',
         'tools': [
-            {'call_id': '1001', 'function': {'arguments': '{"prompt": "Hi"}', 'name': 'agent_1'}, 'call_type': 'function'},
-            {'call_id': '1002', 'function': {'arguments': '{"prompt": "Hey"}', 'name': 'bound_agent_2'}, 'call_type': 'function'},
+            {'call_id': '1001', 'function': {'arguments': '{}', 'name': 'agent_1'}, 'call_type': 'function'},
+            {'call_id': '1002', 'function': {'arguments': '{}', 'name': 'bound_agent_2'}, 'call_type': 'function'},
+            {'call_id': '1003', 'function': {'arguments': '{"prompt": "Hi"}', 'name': 'agent_1'}, 'call_type': 'function'},
+            {'call_id': '1004', 'function': {'arguments': '{"prompt": "Hey"}', 'name': 'bound_agent_2'}, 'call_type': 'function'},
         ],
     }
 
@@ -224,17 +226,13 @@ async def test_handle_tools_layered_agents():
                 'model_kwargs': {'outer': True},
                 'messages': [
                     {
-                        'role': 'human',
-                        'text': 'Hi',
-                    },
-                    {
                         'role': 'ai',
                         'text': 'model: some_model',
                     },
                     {
                         'role': 'human',
                         'text': 'model_kwarg: outer = True',
-                    }
+                    },
                 ],
             },
         },
@@ -249,8 +247,72 @@ async def test_handle_tools_layered_agents():
                 'model_kwargs': {'outer': False},
                 'messages': [
                     {
+                        'role': 'ai',
+                        'text': 'model: some_model',
+                    },
+                    {
                         'role': 'human',
-                        'text': 'Hey',
+                        'text': 'model_kwarg: outer = False',
+                    },
+                ],
+            },
+        },
+        {
+            'type': 'layered_agent',
+            'call_id': '1003',
+            'run': {
+                'type': 'messages',
+                'agent': 'agent_1',
+                'provider': 'MockProvider',
+                'model': 'some_model',
+                'model_kwargs': {'outer': True},
+                'messages': [
+                    {
+                        'role': 'tool_call',
+                        'tools': [
+                            {
+                                'call_id': '1003',
+                                'call_type': 'function',
+                                'function': {
+                                    'arguments': '{"prompt": "Hi"}',
+                                    'name': 'agent_1',
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        'role': 'ai',
+                        'text': 'model: some_model',
+                    },
+                    {
+                        'role': 'human',
+                        'text': 'model_kwarg: outer = True',
+                    },
+                ],
+            },
+        },
+        {
+            'type': 'layered_agent',
+            'call_id': '1004',
+            'run': {
+                'type': 'messages',
+                'agent': 'bound_agent_2',
+                'provider': 'MockProvider',
+                'model': 'some_model',
+                'model_kwargs': {'outer': False},
+                'messages': [
+                    {
+                        'role': 'tool_call',
+                        'tools': [
+                            {
+                                'call_id': '1004',
+                                'call_type': 'function',
+                                'function': {
+                                    'arguments': '{"prompt": "Hey"}',
+                                    'name': 'bound_agent_2',
+                                },
+                            },
+                        ],
                     },
                     {
                         'role': 'ai',
@@ -259,7 +321,7 @@ async def test_handle_tools_layered_agents():
                     {
                         'role': 'human',
                         'text': 'model_kwarg: outer = False',
-                    }
+                    },
                 ],
             },
         },
@@ -432,21 +494,11 @@ def test_get_tool_params_layered_agents():
 
     description, params = get_tool_params(my_agent)
     assert description == 'Use this for everything.'
-    assert params == [
-        {
-            'name': 'prompt',
-            'type': 'str',
-        },
-    ]
+    assert params == []
 
     description, params = get_tool_params(my_bound_agent)
     assert description == 'Use this for everything.'
-    assert params == [
-        {
-            'name': 'prompt',
-            'type': 'str',
-        },
-    ]
+    assert params == []
 
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
     my_agent = build_layered_agent(
@@ -483,16 +535,30 @@ def test_get_tool_params_layered_agents():
         name = 'my_layered_agent',
         doc = """
         Use this for everything.
-        :param: prompt: int: this is invalid btw
+        :param: prompt: int: a prompt as an int, weird
         """
     )
     my_bound_agent = my_binder(my_agent)
 
-    with pytest.raises(ValueError):
-        get_tool_params(my_agent)
+    description, params = get_tool_params(my_agent)
+    assert description == 'Use this for everything.'
+    assert params == [
+        {
+            'name': 'prompt',
+            'type': 'int',
+            'description': 'a prompt as an int, weird',
+        },
+    ]
 
-    with pytest.raises(ValueError):
-        get_tool_params(my_bound_agent)
+    description, params = get_tool_params(my_bound_agent)
+    assert description == 'Use this for everything.'
+    assert params == [
+        {
+            'name': 'prompt',
+            'type': 'int',
+            'description': 'a prompt as an int, weird',
+        },
+    ]
 
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
     my_agent = build_layered_agent(
@@ -500,16 +566,40 @@ def test_get_tool_params_layered_agents():
         doc = """
         Use this for everything.
         :param: prompt: str: the prompt
-        :param: x: str: something else (this isn't allowed)
+        :param: x: str: something else
         """
     )
     my_bound_agent = my_binder(my_agent)
 
-    with pytest.raises(ValueError):
-        get_tool_params(my_agent)
+    description, params = get_tool_params(my_agent)
+    assert description == 'Use this for everything.'
+    assert params == [
+        {
+            'name': 'prompt',
+            'type': 'str',
+            'description': 'the prompt',
+        },
+        {
+            'name': 'x',
+            'type': 'str',
+            'description': 'something else',
+        },
+    ]
 
-    with pytest.raises(ValueError):
-        get_tool_params(my_bound_agent)
+    description, params = get_tool_params(my_bound_agent)
+    assert description == 'Use this for everything.'
+    assert params == [
+        {
+            'name': 'prompt',
+            'type': 'str',
+            'description': 'the prompt',
+        },
+        {
+            'name': 'x',
+            'type': 'str',
+            'description': 'something else',
+        },
+    ]
 
 
 def test_extract_tool_result_as_sting():
