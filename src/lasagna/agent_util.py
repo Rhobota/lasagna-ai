@@ -92,6 +92,8 @@ def build_simple_agent(
     tools: List[Callable] = [],
     doc: Union[str, None] = None,
     system_prompt_override: Union[str, None] = None,
+    force_tool: bool = False,
+    max_tool_iters: int = 5,
 ) -> AgentCallable:
     class SimpleAgent():
         async def __call__(
@@ -103,7 +105,13 @@ def build_simple_agent(
             messages = recursive_extract_messages(prev_runs)
             if system_prompt_override:
                 messages = override_system_prompt(messages, system_prompt_override)
-            new_messages = await model.run(event_callback, messages, tools)
+            new_messages = await model.run(
+                event_callback = event_callback,
+                messages = messages,
+                tools = tools,
+                force_tool = force_tool,
+                max_tool_iters = max_tool_iters,
+            )
             return flat_messages(new_messages)
 
         def __str__(self) -> str:
