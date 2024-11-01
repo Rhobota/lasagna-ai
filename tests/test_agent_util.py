@@ -232,9 +232,49 @@ def test_recursive_extract_messages():
                                 'role': 'human',
                                 'text': 'Here kitty kitty!',
                             },
+                            {
+                                'role': 'tool_res',
+                                'tools': [
+                                    {
+                                        'type': 'any',
+                                        'call_id': 'call000',
+                                        'result': 'Meow.',
+                                    },
+                                    {
+                                        'type': 'layered_agent',
+                                        'call_id': 'call001',
+                                        'run': {
+                                            'type': 'messages',
+                                            'messages': [
+                                                {
+                                                    'role': 'ai',
+                                                    'text': 'Beep.',
+                                                },
+                                            ],
+                                        },
+                                    },
+                                ],
+                            },
                         ],
                     },
                 ],
+            },
+            {
+                'type': 'extraction',
+                'message': {
+                    'role': 'tool_call',
+                    'tools': [
+                        {
+                            'call_id': 'call002',
+                            'call_type': 'function',
+                            'function': {
+                                'name': 'foo',
+                                'arguments': '{"value": 7}',
+                            },
+                        },
+                    ],
+                },
+                'result': {'value': 7},
             },
             {
                 'type': 'messages',
@@ -267,6 +307,46 @@ def test_recursive_extract_messages():
         {
             'role': 'human',
             'text': 'Here kitty kitty!',
+        },
+        {
+            'role': 'tool_res',
+            'tools': [
+                {
+                    'type': 'any',
+                    'call_id': 'call000',
+                    'result': 'Meow.',
+                },
+                {
+                    'type': 'layered_agent',
+                    'call_id': 'call001',
+                    'run': {
+                        'type': 'messages',
+                        'messages': [
+                            {
+                                'role': 'ai',
+                                'text': 'Beep.',
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        {
+            'role': 'ai',
+            'text': 'Beep.',
+        },
+        {
+            'role': 'tool_call',
+            'tools': [
+                {
+                    'call_id': 'call002',
+                    'call_type': 'function',
+                    'function': {
+                        'name': 'foo',
+                        'arguments': '{"value": 7}',
+                    },
+                },
+            ],
         },
         {
             'role': 'system',

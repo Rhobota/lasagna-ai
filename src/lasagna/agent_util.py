@@ -14,6 +14,7 @@ from .types import (
     Message,
     Model,
     ExtractionType,
+    ToolResult,
 )
 
 from .agent_runner import run
@@ -143,15 +144,45 @@ def build_extraction_agent(
     return a
 
 
-def recursive_extract_messages(agent_runs: List[AgentRun]) -> List[Message]:
+def _extract_messages_from_tool_result(
+    tool_result: ToolResult,
+) -> List[Message]:
+    if tool_result['type'] == 'layered_agent':
+        run = tool_result['run']
+        return recursive_extract_messages([run])
+    return []
+
+
+def _recursive_extract_messages_from_messages(
+    messages: List[Message],
+) -> List[Message]:
+    ms: List[Message] = []
+    for m in messages:
+        ms.append(m)
+        if m['role'] == 'tool_res':
+            for t in m['tools']:
+                ms.extend(_extract_messages_from_tool_result(t))
+    return ms
+
+
+def recursive_extract_messages(
+    agent_runs: List[AgentRun],
+) -> List[Message]:
+    """DFS retrieve all messages within a list of `AgentRuns`."""
     messages: List[Message] = []
     for run in agent_runs:
         if run['type'] == 'messages':
-            messages.extend(run['messages'])
+            messages.extend(
+                _recursive_extract_messages_from_messages(run['messages']),
+            )
         elif run['type'] == 'chain' or run['type'] == 'parallel':
-            messages.extend(recursive_extract_messages(run['runs']))
+            messages.extend(
+                recursive_extract_messages(run['runs']),
+            )
         elif run['type'] == 'extraction':
-            messages.append(run['message'])
+            messages.extend(
+                _recursive_extract_messages_from_messages([run['message']]),
+            )
         else:
             raise RuntimeError('unreachable')
     return messages
