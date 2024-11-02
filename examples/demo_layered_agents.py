@@ -39,6 +39,7 @@ async def main() -> None:
         ],
         doc = "Use this tool if the user asks a math question.",
         system_prompt_override = "You are a math assistant.",
+        strip_old_tool_use_messages = True,
     )
     health_agent = known_models.BIND_ANTHROPIC_claude_35_sonnet()(
         build_simple_agent(
@@ -46,6 +47,7 @@ async def main() -> None:
             tools = [],
             doc = "Use this tool if the user asks a health question.",
             system_prompt_override = "You are a health coach who motivates through fear.",
+            strip_old_tool_use_messages = True,
         ),
     )
     my_bound_agent = known_models.BIND_OPENAI_gpt_4o_mini()(

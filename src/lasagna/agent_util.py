@@ -87,11 +87,22 @@ def override_system_prompt(
         return [sp, *messages]
 
 
+def strip_tool_calls_and_results(
+    messages: List[Message],
+) -> List[Message]:
+    return [
+        m
+        for m in messages
+        if m['role'] != 'tool_call' and m['role'] != 'tool_res'
+    ]
+
+
 def build_simple_agent(
     name: str,
     tools: List[Callable] = [],
     doc: Union[str, None] = None,
     system_prompt_override: Union[str, None] = None,
+    strip_old_tool_use_messages: bool = False,
     force_tool: bool = False,
     max_tool_iters: int = 5,
 ) -> AgentCallable:
@@ -105,6 +116,8 @@ def build_simple_agent(
             messages = recursive_extract_messages(prev_runs, from_layered_agents=False)
             if system_prompt_override:
                 messages = override_system_prompt(messages, system_prompt_override)
+            if strip_old_tool_use_messages:
+                messages = strip_tool_calls_and_results(messages)
             new_messages = await model.run(
                 event_callback = event_callback,
                 messages = messages,
