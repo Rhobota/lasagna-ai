@@ -27,7 +27,7 @@ def evaluate_math_expression(expression: str) -> float:
     :param: expression: str: the math expression to evaluate
     """
     expr = sp.sympify(expression)
-    result = cast(float, expr.evalf())
+    result = float(expr.evalf())
     return result
 
 
