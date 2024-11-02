@@ -291,7 +291,7 @@ def test_recursive_extract_messages():
             },
         ],
     }
-    assert recursive_extract_messages([agent_run]) == [
+    assert recursive_extract_messages([agent_run], from_layered_agents=True) == [
         {
             'role': 'system',
             'text': 'You are a robot.',
@@ -357,7 +357,69 @@ def test_recursive_extract_messages():
             'text': 'Summarize the previous AI conversations, please.',
         },
     ]
-    assert extract_last_message(agent_run) == {
+    assert recursive_extract_messages([agent_run], from_layered_agents=False) == [
+        {
+            'role': 'system',
+            'text': 'You are a robot.',
+        },
+        {
+            'role': 'human',
+            'text': 'What are you?',
+        },
+        {
+            'role': 'system',
+            'text': 'You are a cat.',
+        },
+        {
+            'role': 'human',
+            'text': 'Here kitty kitty!',
+        },
+        {
+            'role': 'tool_res',
+            'tools': [
+                {
+                    'type': 'any',
+                    'call_id': 'call000',
+                    'result': 'Meow.',
+                },
+                {
+                    'type': 'layered_agent',
+                    'call_id': 'call001',
+                    'run': {
+                        'type': 'messages',
+                        'messages': [
+                            {
+                                'role': 'ai',
+                                'text': 'Beep.',
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        {
+            'role': 'tool_call',
+            'tools': [
+                {
+                    'call_id': 'call002',
+                    'call_type': 'function',
+                    'function': {
+                        'name': 'foo',
+                        'arguments': '{"value": 7}',
+                    },
+                },
+            ],
+        },
+        {
+            'role': 'system',
+            'text': 'You aggregate other AI systems.',
+        },
+        {
+            'role': 'human',
+            'text': 'Summarize the previous AI conversations, please.',
+        },
+    ]
+    assert extract_last_message(agent_run, from_layered_agents=True) == {
         'role': 'human',
         'text': 'Summarize the previous AI conversations, please.',
     }

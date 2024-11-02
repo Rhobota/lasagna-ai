@@ -698,5 +698,4 @@ def test_extract_tool_result_as_sting():
             ],
         },
     }
-    with pytest.raises(ValueError):
-        extract_tool_result_as_sting(m4)
+    assert extract_tool_result_as_sting(m4) == 'Hi again'
