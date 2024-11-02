@@ -485,7 +485,7 @@ def test_is_callable_of_type_agent_callables():
 
 
 def test_get_tool_params_function():
-    def sample_tool(a: int, b: int, c: float) -> str:
+    def sample_tool(a: int, b: int, c: float = 0.0) -> str:
         """
         Use this for
         anything you want.

@@ -151,6 +151,9 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
         for concrete_param, doc_param in zip(concrete_params, doc_params):
             if concrete_param.name != doc_param['name']:
                 raise ValueError(f"tool `{get_name(tool)}` has parameter name mismatch: tool name is `{concrete_param.name}`, docstring name is `{doc_param['name']}`")
+            if doc_param.get('optional', False):
+                if concrete_param.default is inspect.Parameter.empty:
+                    raise ValueError(f"tool `{get_name(tool)}` has an optional parameter without a default value: `{concrete_param.name}`")
             if concrete_param.annotation is inspect.Parameter.empty:
                 _LOG.warning(f'tool `{get_name(tool)}` is missing annotation for parameter `{concrete_param.name}`')
             else:
