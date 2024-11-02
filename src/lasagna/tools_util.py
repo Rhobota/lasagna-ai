@@ -166,9 +166,11 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
                     ])
                     doc_enum_vals = set(doc_param['type'].split()[1:])
                     if concrete_enum_vals != doc_enum_vals:
-                        raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` enum value mismatch: tool has enum values `{concrete_enum_vals}`, docstring has enum values `{doc_enum_vals}`")
-                elif concrete_param.annotation != type_map[doc_param['type']]:
-                    raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param['type']}`")
+                        raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` enum value mismatch: tool has enum values `{sorted(concrete_enum_vals)}`, docstring has enum values `{sorted(doc_enum_vals)}`")
+                else:
+                    doc_param_type = type_map.get(doc_param['type'], 'unknown')
+                    if concrete_param.annotation != doc_param_type:
+                        raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param_type}`")
 
     return description, doc_params
 

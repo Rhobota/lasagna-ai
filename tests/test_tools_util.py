@@ -20,6 +20,8 @@ from lasagna.types import (
 
 from typing import List, Dict, Callable, Awaitable
 
+from enum import Enum
+
 from lasagna.tools_util import (
     convert_to_json_schema,
     get_tool_params,
@@ -484,14 +486,28 @@ def test_is_callable_of_type_agent_callables():
     assert not is_callable_of_type(my_bound_agent, AgentCallable)
 
 
+class Color(Enum):
+    RED = 'red'
+    GREEN = 'green'
+    BLUE = 'blue'
+
+
 def test_get_tool_params_function():
-    def sample_tool(a: int, b: int, c: float = 0.0) -> str:
+    def sample_tool(
+        a: int,
+        b: str,
+        c: bool,
+        d: Color,
+        e: float = 0.0,
+    ) -> str:
         """
         Use this for
         anything you want.
         :param: a: int: first param
-        :param: b: int: second param
-        :param: c: float: (optional) another param
+        :param: b: str: second param
+        :param: c: bool: third param
+        :param: d: enum red blue green: forth param
+        :param: e: float: (optional) last param
         """
         return ''
     description, params = get_tool_params(sample_tool)
@@ -504,16 +520,106 @@ def test_get_tool_params_function():
         },
         {
             'name': 'b',
-            'type': 'int',
+            'type': 'str',
             'description': 'second param',
         },
         {
             'name': 'c',
+            'type': 'bool',
+            'description': 'third param',
+        },
+        {
+            'name': 'd',
+            'type': 'enum red blue green',
+            'description': 'forth param',
+        },
+        {
+            'name': 'e',
             'type': 'float',
-            'description': '(optional) another param',
+            'description': '(optional) last param',
             'optional': True,
         },
     ]
+
+    def param_count_mismatch(a: int, b: str) -> str:
+        """
+        A function
+        :param: a: int: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(param_count_mismatch)
+    assert str(e.value) == 'tool `param_count_mismatch` has parameter length mismatch: tool has 2, docstring has 1'
+
+    def name_mismatch(a: int) -> str:
+        """
+        A function
+        :param: b: int: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(name_mismatch)
+    assert str(e.value) == 'tool `name_mismatch` has parameter name mismatch: tool name is `a`, docstring name is `b`'
+
+    def no_default_on_optional(a: int) -> str:
+        """
+        A function
+        :param: a: int: (optional) first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(no_default_on_optional)
+    assert str(e.value) == 'tool `no_default_on_optional` has an optional parameter without a default value: `a`'
+
+    def enum_type_mismatch_1(a: Color) -> str:
+        """
+        A function
+        :param: a: int: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(enum_type_mismatch_1)
+    assert str(e.value) == "tool `enum_type_mismatch_1` has parameter `a` type mismatch: tool type is `<enum 'Color'>`, docstring type is `<class 'int'>`"
+
+    def enum_type_mismatch_2(a: int) -> str:
+        """
+        A function
+        :param: a: enum red green blue: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(enum_type_mismatch_2)
+    assert str(e.value) == "tool `enum_type_mismatch_2` has parameter `a` type mismatch: tool type is `<class 'int'>`, docstring type is `enum red green blue`"
+
+    def enum_type_mismatch_3(a: Color) -> str:
+        """
+        A function
+        :param: a: enum red GREEN blue: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(enum_type_mismatch_3)
+    assert str(e.value) == "tool `enum_type_mismatch_3` has parameter `a` enum value mismatch: tool has enum values `['blue', 'green', 'red']`, docstring has enum values `['GREEN', 'blue', 'red']`"
+
+    def type_mismatch(a: int) -> str:
+        """
+        A function
+        :param: a: float: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(type_mismatch)
+    assert str(e.value) == "tool `type_mismatch` has parameter `a` type mismatch: tool type is `<class 'int'>`, docstring type is `<class 'float'>`"
+
+    def unknown_type(a: Callable) -> str:
+        """
+        A function
+        :param: a: float: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(unknown_type)
+    assert str(e.value) == "tool `unknown_type` has parameter `a` type mismatch: tool type is `typing.Callable`, docstring type is `<class 'float'>`"
 
 
 def test_get_tool_params_layered_agents():
