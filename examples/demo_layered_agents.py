@@ -7,8 +7,6 @@ from lasagna.tui import (
     tui_input_loop,
 )
 
-from typing import cast
-
 import asyncio
 
 from dotenv import load_dotenv; load_dotenv()
