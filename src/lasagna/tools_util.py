@@ -11,7 +11,11 @@ from typing import (
 
 from .agent_util import bind_model, extract_last_message, flat_messages
 
-from .util import parse_docstring, get_name
+from .util import (
+    parse_docstring,
+    DOCSTRING_PARAM_SUPPORTED_TYPES,
+    get_name,
+)
 
 from .types import (
     AgentCallable,
@@ -138,13 +142,6 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
         concrete_sig = inspect.signature(tool)
         concrete_params = concrete_sig.parameters.values()
 
-        type_map = {
-            'str': str,
-            'float': float,
-            'int': int,
-            'bool': bool,
-        }
-
         if len(concrete_params) != len(doc_params):
             raise ValueError(f'tool `{get_name(tool)}` has parameter length mismatch: tool has {len(concrete_params)}, docstring has {len(doc_params)}')
 
@@ -168,7 +165,7 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
                     if concrete_enum_vals != doc_enum_vals:
                         raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` enum value mismatch: tool has enum values `{sorted(concrete_enum_vals)}`, docstring has enum values `{sorted(doc_enum_vals)}`")
                 else:
-                    doc_param_type = type_map.get(doc_param['type'], 'unknown')
+                    doc_param_type = DOCSTRING_PARAM_SUPPORTED_TYPES.get(doc_param['type'], 'unknown')
                     if concrete_param.annotation != doc_param_type:
                         raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param_type}`")
 

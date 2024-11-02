@@ -16,6 +16,14 @@ from .types import ToolParam, ImageMimeTypes
 T = TypeVar('T')
 
 
+DOCSTRING_PARAM_SUPPORTED_TYPES = {
+    'str': str,
+    'float': float,
+    'int': int,
+    'bool': bool,
+}
+
+
 def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
     lines = docstring.splitlines()
     indent_amounts = [(len(line) - len(line.lstrip())) for line in lines]
@@ -47,7 +55,7 @@ def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
     for p in params:
         if not p['name']:
             raise ValueError("no parameter name found")
-        if not p['type'].startswith('enum ') and p['type'] not in ['str', 'float', 'int', 'bool']:
+        if not p['type'].startswith('enum ') and p['type'] not in DOCSTRING_PARAM_SUPPORTED_TYPES:
             raise ValueError(f"invalid type found: {p['type']}")
         if not p['description']:
             del p['description']
