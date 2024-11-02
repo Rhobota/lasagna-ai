@@ -2,6 +2,7 @@ import asyncio
 import inspect
 import json
 import collections.abc
+from enum import Enum
 
 from typing import (
     List, Dict, Tuple, Union, Any, Callable,
@@ -23,6 +24,10 @@ from .types import (
     ToolResult,
     ToolParam,
 )
+
+import logging
+
+_LOG = logging.getLogger(__name__)
 
 
 def convert_to_json_schema(params: List[ToolParam]) -> Dict[str, object]:
@@ -120,9 +125,49 @@ def is_callable_of_type(
 
 
 def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
-    params: List[ToolParam]
-    description, params = parse_docstring(tool.__doc__ or '')
-    return description, params
+    doc_params: List[ToolParam]
+    description, doc_params = parse_docstring(tool.__doc__ or '')
+
+    is_agent_callable = is_callable_of_type(tool, AgentCallable, no_throw=True)
+    is_bound_agent_callable = is_callable_of_type(tool, BoundAgentCallable, no_throw=True)
+
+    if is_agent_callable or is_bound_agent_callable:
+        pass  # no validation on these
+
+    else:
+        concrete_sig = inspect.signature(tool)
+        concrete_params = concrete_sig.parameters.values()
+
+        type_map = {
+            'str': str,
+            'float': float,
+            'int': int,
+            'bool': bool,
+        }
+
+        if len(concrete_params) != len(doc_params):
+            raise ValueError(f'tool `{get_name(tool)}` has parameter length mismatch: tool has {len(concrete_params)}, docstring has {len(doc_params)}')
+
+        for concrete_param, doc_param in zip(concrete_params, doc_params):
+            if concrete_param.name != doc_param['name']:
+                raise ValueError(f"tool `{get_name(tool)}` has parameter name mismatch: tool name is `{concrete_param.name}`, docstring name is `{doc_param['name']}`")
+            if concrete_param.annotation is inspect.Parameter.empty:
+                _LOG.warning(f'tool `{get_name(tool)}` is missing annotation for parameter `{concrete_param.name}`')
+            else:
+                if doc_param['type'].startswith('enum '):
+                    if not inspect.isclass(concrete_param.annotation) or not issubclass(concrete_param.annotation, Enum):
+                        raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param['type']}`")
+                    concrete_enum_vals = set([
+                        e.value
+                        for e in concrete_param.annotation.__members__.values()
+                    ])
+                    doc_enum_vals = set(doc_param['type'].split()[1:])
+                    if concrete_enum_vals != doc_enum_vals:
+                        raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` enum value mismatch: tool has enum values `{concrete_enum_vals}`, docstring has enum values `{doc_enum_vals}`")
+                elif concrete_param.annotation != type_map[doc_param['type']]:
+                    raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param['type']}`")
+
+    return description, doc_params
 
 
 async def _run_single_tool(
