@@ -100,22 +100,45 @@ def test_convert_to_json_schema():
 
 
 def tool_a(first, second, third=5):
+    """
+    Tool a
+    :param: first: int: first param
+    :param: second: int: second param
+    :param: third: int: (optional) third param
+    """
     return first + second + third
 
 def tool_b(x):
+    """
+    Tool b
+    :param: x: float: the value
+    """
     return x * 2
 
 async def tool_async_a(x):
+    """
+    Async tool a
+    :param: x: float: the value
+    """
     return x * 3
+
+
+# TODO: test_validate_args
 
 
 @pytest.mark.asyncio
 async def test_handle_tools_standard_functions():
     x = 4
     def tool_c():
+        """
+        Tool c
+        """
         return x * 4
 
     async def tool_async_b():
+        """
+        Async tool b
+        """
         return x * 5
 
     tool_map: Dict[str, Callable] = {
@@ -157,22 +180,22 @@ async def test_handle_tools_standard_functions():
     )
     assert tool_results is not None
     assert tool_results == [
-        {'type': 'any', 'call_id': '1001', 'result': 16 },
+        {'type': 'any', 'call_id': '1001', 'result': 16.0 },
         {'type': 'any', 'call_id': '1002', 'result': 10.8 },
-        {'type': 'any', 'call_id': '1003', 'result': "hihi" },
-        {'type': 'any', 'call_id': '1004', 'result': "TypeError: tool_b() missing 1 required positional argument: 'x'", 'is_error': True },
-        {'type': 'any', 'call_id': '1005', 'result': "TypeError: tool_b() got an unexpected keyword argument 'y'", 'is_error': True },
-        {'type': 'any', 'call_id': '1006', 'result': "TypeError: tool_b() got an unexpected keyword argument 'y'", 'is_error': True },
-        {'type': 'any', 'call_id': '1007', 'result': 17.5 },
-        {'type': 'any', 'call_id': '1008', 'result': 15.5 },
-        {'type': 'any', 'call_id': '1009', 'result': 111.5 },
-        {'type': 'any', 'call_id': '1010', 'result': "TypeError: tool_a() missing 2 required positional arguments: 'first' and 'second'", 'is_error': True },
-        {'type': 'any', 'call_id': '1011', 'result': "TypeError: tool_a() missing 1 required positional argument: 'second'", 'is_error': True },
+        {'type': 'any', 'call_id': '1003', 'result': "ValueError: could not convert string to float: 'hi'", 'is_error': True, },
+        {'type': 'any', 'call_id': '1004', 'result': "TypeError: tool_b() missing 1 required argument: 'x'", 'is_error': True },
+        {'type': 'any', 'call_id': '1005', 'result': "TypeError: tool_b() got 1 unexpected argument: 'y'", 'is_error': True },
+        {'type': 'any', 'call_id': '1006', 'result': "TypeError: tool_b() got 1 unexpected argument: 'y'", 'is_error': True },
+        {'type': 'any', 'call_id': '1007', 'result': 17 },
+        {'type': 'any', 'call_id': '1008', 'result': 15 },
+        {'type': 'any', 'call_id': '1009', 'result': 111 },
+        {'type': 'any', 'call_id': '1010', 'result': "TypeError: tool_a() missing 2 required arguments: 'first', 'second'", 'is_error': True },
+        {'type': 'any', 'call_id': '1011', 'result': "TypeError: tool_a() missing 1 required argument: 'second'", 'is_error': True },
         {'type': 'any', 'call_id': '1012', 'result': 16 },
         {'type': 'any', 'call_id': '1013', 'result': "KeyError: 'tool_d'", 'is_error': True },
-        {'type': 'any', 'call_id': '1014', 'result': -9 },
+        {'type': 'any', 'call_id': '1014', 'result': -9.0 },
         {'type': 'any', 'call_id': '1015', 'result': 20 },
-        {'type': 'any', 'call_id': '1016', 'result': "TypeError: tool_async_a() missing 1 required positional argument: 'x'", 'is_error': True },
+        {'type': 'any', 'call_id': '1016', 'result': "TypeError: tool_async_a() missing 1 required argument: 'x'", 'is_error': True },
     ]
 
 
@@ -190,9 +213,22 @@ async def test_handle_tools_layered_agents():
         'model_kwargs': {'outer': False},
     }
 
-    agent_1 = build_simple_agent(name = 'agent_1')
+    doc = """
+    An agent.
+    :param: prompt: str: (optional) the prompt
+    """
+
+    agent_1 = build_simple_agent(
+        name = 'agent_1',
+        doc = doc,
+    )
     my_binder = bind_model(**inner_model_spec)
-    bound_agent_2 = my_binder(build_simple_agent(name = 'bound_agent_2'))
+    bound_agent_2 = my_binder(
+        build_simple_agent(
+            name = 'bound_agent_2',
+            doc = doc,
+        ),
+    )
 
     tool_map: Dict[str, Callable] = {
         'agent_1': agent_1,
@@ -206,6 +242,8 @@ async def test_handle_tools_layered_agents():
             {'call_id': '1002', 'function': {'arguments': '{}', 'name': 'bound_agent_2'}, 'call_type': 'function'},
             {'call_id': '1003', 'function': {'arguments': '{"prompt": "Hi"}', 'name': 'agent_1'}, 'call_type': 'function'},
             {'call_id': '1004', 'function': {'arguments': '{"prompt": "Hey"}', 'name': 'bound_agent_2'}, 'call_type': 'function'},
+            {'call_id': '1005', 'function': {'arguments': '{"bad_name": "Hi"}', 'name': 'agent_1'}, 'call_type': 'function'},
+            {'call_id': '1006', 'function': {'arguments': '{"bad_name": "Hey"}', 'name': 'bound_agent_2'}, 'call_type': 'function'},
         ],
     }
 
@@ -358,6 +396,18 @@ async def test_handle_tools_layered_agents():
                     },
                 ],
             },
+        },
+        {
+            'type': 'any',
+            'call_id': '1005',
+            'is_error': True,
+            'result': "TypeError: agent_1() got 1 unexpected argument: 'bad_name'",
+        },
+        {
+            'type': 'any',
+            'call_id': '1006',
+            'is_error': True,
+            'result': "TypeError: bound_agent_2() got 1 unexpected argument: 'bad_name'",
         },
     ]
 

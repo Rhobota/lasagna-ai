@@ -172,6 +172,53 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
     return description, doc_params
 
 
+def _validate_args(tool: Callable, parsed_args: Dict) -> Dict:
+    tool_name = get_name(tool)
+    _, doc_params = parse_docstring(tool.__doc__ or '')
+
+    # Check for unexpected parameters:
+    unexpected_params: List[str] = []
+    doc_param_names = set([doc_param['name'] for doc_param in doc_params])
+    for arg in sorted(parsed_args.keys()):
+        if arg not in doc_param_names:
+            unexpected_params.append(arg)
+    if unexpected_params:
+        n = len(unexpected_params)
+        s = ', '.join([repr(m) for m in unexpected_params])
+        if n == 1:
+            raise TypeError(f"{tool_name}() got 1 unexpected argument: {s}")
+        else:
+            raise TypeError(f"{tool_name}() got {n} unexpected arguments: {s}")
+
+    # Check for missing parameters:
+    missing_params: List[str] = []
+    for doc_param in doc_params:
+        name = doc_param['name']
+        optional = doc_param.get('optional', False)
+        if not optional and name not in parsed_args:
+            missing_params.append(name)
+    if missing_params:
+        n = len(missing_params)
+        s = ', '.join([repr(m) for m in missing_params])
+        if n == 1:
+            raise TypeError(f"{tool_name}() missing 1 required argument: {s}")
+        else:
+            raise TypeError(f"{tool_name}() missing {n} required arguments: {s}")
+
+    # Check types:
+    validated_args = {}
+    doc_param_type_lookup = {
+        doc_param['name']: doc_param['type']
+        for doc_param in doc_params
+    }
+    for arg, value in parsed_args.items():
+        assert arg in doc_param_type_lookup
+        type_str = doc_param_type_lookup[arg]
+        type_ = DOCSTRING_PARAM_SUPPORTED_TYPES[type_str]
+        validated_args[arg] = type_(value)  # <-- assume c'tor will throw as necessary
+    return validated_args
+
+
 async def _run_single_tool(
     tool_call: ToolCall,
     prev_messages: List[Message],
@@ -187,6 +234,9 @@ async def _run_single_tool(
         args = tool_call['function']['arguments']
 
         parsed_args = json.loads(args)
+        assert isinstance(parsed_args, dict)
+
+        parsed_args = _validate_args(func, parsed_args)
 
         is_agent_callable = is_callable_of_type(func, AgentCallable, no_throw=True)
         is_bound_agent_callable = is_callable_of_type(func, BoundAgentCallable, no_throw=True)
