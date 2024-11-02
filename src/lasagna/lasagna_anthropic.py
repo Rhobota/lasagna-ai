@@ -6,6 +6,7 @@ For more information about the Anthropic models this adapter is for, see:
 """
 
 from .types import (
+    ModelSpec,
     Message,
     MessageContent,
     MessageToolCall,
@@ -23,14 +24,16 @@ from .stream import (
 )
 
 from .util import (
-    parse_docstring,
     convert_to_image_base64,
     exponential_backoff_retry_delays,
+    get_name,
     recursive_hash,
 )
 
 from .tools_util import (
     convert_to_json_schema,
+    extract_tool_result_as_sting,
+    get_tool_params,
     handle_tools,
     build_tool_response_message,
 )
@@ -47,7 +50,7 @@ from anthropic import (
     APIConnectionError,
     APIStatusError,
 )
-from anthropic.types import MessageParam, ToolParam
+from anthropic.types import MessageParam, ToolParam as AnthropicToolParam
 from anthropic.types.message import Message as AnthropicMessage
 from anthropic.types.message_create_params import ToolChoice
 from anthropic.lib.streaming._types import MessageStreamEvent
@@ -122,18 +125,19 @@ async def _build_anthropic_tool_result(
     message: MessageToolResult,
 ) -> List[ToolResultBlockParam]:
     ret: List[ToolResultBlockParam] = []
-    for tool in message['tools']:
+    for tool_result in message['tools']:
+        content = extract_tool_result_as_sting(tool_result)
         obj: ToolResultBlockParam = {
             'type': 'tool_result',
-            'tool_use_id': tool['call_id'],
+            'tool_use_id': tool_result['call_id'],
             'content': [
                 {
                     'type': 'text',
-                    'text': str(tool['result']),
+                    'text': content,
                 },
             ],
         }
-        if 'is_error' in tool and tool['is_error']:
+        if 'is_error' in tool_result and tool_result['is_error']:
             obj['is_error'] = True
         ret.append(obj)
     if len(ret) == 0:
@@ -262,16 +266,16 @@ def _build_messages_from_anthropic_payload(
     return ms
 
 
-def _convert_to_anthropic_tool(tool: Callable) -> ToolParam:
-    description, params = parse_docstring(tool.__doc__ or '')
+def _convert_to_anthropic_tool(tool: Callable) -> AnthropicToolParam:
+    description, params = get_tool_params(tool)
     return {
-        'name': tool.__name__,
+        'name': get_name(tool),
         'description': description,
         'input_schema': convert_to_json_schema(params),
     }
 
 
-def _convert_to_anthropic_tools(tools: List[Callable]) -> Union[NotGiven, List[ToolParam]]:
+def _convert_to_anthropic_tools(tools: List[Callable]) -> Union[NotGiven, List[AnthropicToolParam]]:
     if len(tools) == 0:
         return NOT_GIVEN
     specs = [_convert_to_anthropic_tool(tool) for tool in tools]
@@ -353,6 +357,11 @@ class LasagnaAnthropic(Model):
         self.n_retries: int = cast(int, self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
         if not isinstance(self.n_retries, int) or self.n_retries < 0:
             raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.model_kwargs['retries']})")
+        self.model_spec: ModelSpec = {
+            'provider': 'anthropic',
+            'model': self.model,
+            'model_kwargs': self.model_kwargs,
+        }
 
     def config_hash(self) -> str:
         return recursive_hash(None, {
@@ -374,7 +383,7 @@ class LasagnaAnthropic(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools_spec: Union[NotGiven, List[ToolParam]],
+        tools_spec: Union[NotGiven, List[AnthropicToolParam]],
         force_tool: bool,
         disable_parallel_tool_use: bool,
     ) -> List[Message]:
@@ -445,7 +454,7 @@ class LasagnaAnthropic(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools_spec: Union[NotGiven, List[ToolParam]],
+        tools_spec: Union[NotGiven, List[AnthropicToolParam]],
         force_tool: bool,
         disable_parallel_tool_use: bool,
     ) -> List[Message]:
@@ -508,6 +517,7 @@ class LasagnaAnthropic(Model):
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
         tools_spec = _convert_to_anthropic_tools(tools)
+        tools_map = {get_name(tool): tool for tool in tools}
         for _ in range(max_tool_iters):
             new_messages_here = await self._retrying_run_once(
                 event_callback = event_callback,
@@ -516,10 +526,15 @@ class LasagnaAnthropic(Model):
                 force_tool     = force_tool,
                 disable_parallel_tool_use = False,
             )
-            tools_map = {tool.__name__: tool for tool in tools}
+            tools_results = await handle_tools(
+                prev_messages = messages,
+                new_messages = new_messages_here,
+                tools_map = tools_map,
+                event_callback = event_callback,
+                model_spec = self.model_spec,
+            )
             new_messages.extend(new_messages_here)
             messages.extend(new_messages_here)
-            tools_results = await handle_tools(new_messages_here, tools_map)
             if tools_results is None:
                 break
             for tool_result in tools_results:
@@ -535,9 +550,9 @@ class LasagnaAnthropic(Model):
         messages: List[Message],
         extraction_type: Type[ExtractionType],
     ) -> Tuple[Message, ExtractionType]:
-        tools_spec: List[ToolParam] = [
+        tools_spec: List[AnthropicToolParam] = [
             {
-                'name': extraction_type.__name__,
+                'name': get_name(extraction_type),
                 'input_schema': to_strict_json_schema(ensure_pydantic_model(extraction_type)),
             },
         ]

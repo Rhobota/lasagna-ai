@@ -50,7 +50,10 @@ def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
         if not p['type'].startswith('enum ') and p['type'] not in ['str', 'float', 'int', 'bool']:
             raise ValueError(f"invalid type found: {p['type']}")
         if not p['description']:
-            raise ValueError("no parameter name found")
+            del p['description']
+        else:
+            if p['description'].startswith('(optional)'):
+                p['optional'] = True
     return description, params
 
 
@@ -154,6 +157,11 @@ def exponential_backoff_retry_delays(
     delay_list = [(base ** exponent) for exponent in range(1, n_total_tries + 1)]
     delay_list[-1] = 0.0    # <-- after the *last* failure, you should not delay at all
     return [min(d, max_delay) for d in delay_list]
+
+
+def get_name(obj: Any) -> str:
+    name = str(obj.__name__) if hasattr(obj, '__name__') else str(obj)
+    return name
 
 
 class HashAlgorithm(Protocol):

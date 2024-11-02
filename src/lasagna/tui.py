@@ -1,4 +1,5 @@
 from .agent_util import flat_messages
+from .tools_util import extract_tool_result_as_sting
 
 from .types import (
     EventPayload,
@@ -21,7 +22,8 @@ async def tui_event_callback(event: EventPayload) -> None:
         s = Fore.RED + event[2]
         print(s, end='', flush=True)
     elif event[0] == 'tool_res' and event[1] == 'tool_res_event':
-        r = Fore.BLUE + f" -> {event[2]['result']}"
+        content = extract_tool_result_as_sting(event[2])
+        r = Fore.BLUE + f" -> {content}"
         print(r)
     print(Style.RESET_ALL, end='', flush=True)
 

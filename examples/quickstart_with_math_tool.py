@@ -1,6 +1,6 @@
 from lasagna import (
     known_models,
-    build_most_simple_agent,
+    build_simple_agent,
 )
 
 from lasagna.tui import (
@@ -30,7 +30,7 @@ def evaluate_math_expression(expression: str) -> float:
     :param: expression: str: the math expression to evaluate
     """
     expr = sp.sympify(expression)
-    result = cast(float, expr.evalf())
+    result = float(expr.evalf())
     return result
 
 
@@ -39,7 +39,7 @@ async def main() -> None:
     tools: List[Callable] = [
         evaluate_math_expression,
     ]
-    my_agent = build_most_simple_agent(tools)
+    my_agent = build_simple_agent(name = 'agent', tools = tools)
     my_bound_agent = MODEL_BINDER(my_agent)
     await tui_input_loop(my_bound_agent, system_prompt)
 

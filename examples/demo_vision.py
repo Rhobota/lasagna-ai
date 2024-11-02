@@ -1,6 +1,6 @@
 from lasagna import (
     known_models,
-    build_most_simple_agent,
+    build_simple_agent,
     flat_messages,
     Message,
 )
@@ -33,7 +33,7 @@ async def main() -> None:
         },
     ]
     bound_agent = MODEL_BINDER(
-        build_most_simple_agent(),
+        build_simple_agent(name='agent'),
     )
     await bound_agent(tui_event_callback, [flat_messages(messages)])
     print()

@@ -1,6 +1,6 @@
 from lasagna import (
     known_models,
-    build_most_simple_agent,
+    build_simple_agent,
 )
 
 from lasagna.tui import (
@@ -59,7 +59,7 @@ async def main() -> None:
     tools: List[Callable] = [
         await make_rag_tool(),
     ]
-    my_agent = build_most_simple_agent(tools)
+    my_agent = build_simple_agent(name = 'agent', tools = tools)
     my_bound_agent = MODEL_BINDER(my_agent)
     await tui_input_loop(my_bound_agent, SYSTEM_PROMPT)
 

@@ -8,6 +8,7 @@ For more information about the NVIDIA services this adapter is for, see:
 """
 
 from .types import (
+    ModelSpec,
     Message,
     MessageContent,
     MessageToolCall,
@@ -26,15 +27,17 @@ from .stream import (
 )
 
 from .util import (
-    parse_docstring,
     combine_pairs,
     convert_to_image_url,
     exponential_backoff_retry_delays,
+    get_name,
     recursive_hash,
 )
 
 from .tools_util import (
     convert_to_json_schema,
+    extract_tool_result_as_sting,
+    get_tool_params,
     handle_tools,
     build_tool_response_message,
 )
@@ -168,11 +171,11 @@ async def _extract_deltas(
 
 
 def _convert_to_openai_tool(tool: Callable) -> ChatCompletionToolParam:
-    description, params = parse_docstring(tool.__doc__ or '')
+    description, params = get_tool_params(tool)
     return {
         'type': 'function',
         'function': {
-            'name': tool.__name__,
+            'name': get_name(tool),
             'description': description,
             'parameters': convert_to_json_schema(params),
         },
@@ -243,9 +246,10 @@ async def _convert_to_openai_messages(messages: List[Message]) -> List[ChatCompl
         elif m['role'] == 'tool_res':
             tool_results = m['tools']
             for tool_result in tool_results:
+                content = extract_tool_result_as_sting(tool_result)
                 ms.append({
                     'role': 'tool',
-                    'content': str(tool_result['result']),
+                    'content': content,
                     'tool_call_id': tool_result['call_id'],
                 })
         elif m['role'] == 'system':
@@ -366,6 +370,11 @@ class LasagnaNVIDIA(Model):
         self.n_retries: int = cast(int, self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
         if not isinstance(self.n_retries, int) or self.n_retries < 0:
             raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.model_kwargs['retries']})")
+        self.model_spec: ModelSpec = {
+            'provider': 'nvidia',
+            'model': self.model,
+            'model_kwargs': self.model_kwargs,
+        }
 
     def config_hash(self) -> str:
         return recursive_hash(None, {
@@ -518,6 +527,7 @@ class LasagnaNVIDIA(Model):
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
         tools_spec = _convert_to_openai_tools(tools)
+        tools_map = {get_name(tool): tool for tool in tools}
         for _ in range(max_tool_iters):
             new_messages_here = await self._retrying_run_once(
                 event_callback = event_callback,
@@ -526,10 +536,15 @@ class LasagnaNVIDIA(Model):
                 force_tool     = force_tool,
                 parallel_tool_calls = NOT_GIVEN,
             )
-            tools_map = {tool.__name__: tool for tool in tools}
+            tools_results = await handle_tools(
+                prev_messages = messages,
+                new_messages = new_messages_here,
+                tools_map = tools_map,
+                event_callback = event_callback,
+                model_spec = self.model_spec,
+            )
             new_messages.extend(new_messages_here)
             messages.extend(new_messages_here)
-            tools_results = await handle_tools(new_messages_here, tools_map)
             if tools_results is None:
                 break
             for tool_result in tools_results:

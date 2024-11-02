@@ -143,10 +143,12 @@ async def test_convert_to_anthropic_messages():
             'role': 'tool_res',
             'tools': [
                 {
+                    'type': 'any',
                     'call_id': 'abcd',
                     'result': 'here is your stuff',
                 },
                 {
+                    'type': 'any',
                     'call_id': 'wxyz',
                     'result': 'Error: cat 404',
                     'is_error': True,

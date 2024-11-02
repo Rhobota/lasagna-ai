@@ -848,8 +848,8 @@ async def test_convert_to_openai_messages():
     messages: List[Message] = [{
         'role': 'tool_res',
         'tools': [
-            {'call_id': '1002', 'result': 10.8 },
-            {'call_id': '1003', 'result': "hihi" },
+            {'type': 'any', 'call_id': '1002', 'result': 10.8 },
+            {'type': 'any', 'call_id': '1003', 'result': "hihi" },
         ],
         'cost': None,
         'raw': None,

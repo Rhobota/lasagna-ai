@@ -15,7 +15,7 @@ from .types import (
     CacheEventPayload,
 )
 
-from .util import recursive_hash
+from .util import get_name, recursive_hash
 
 from . import __version__
 
@@ -41,7 +41,7 @@ def cached_agent(
     hash_function: Callable[[Model, List[AgentRun]], Awaitable[CacheKey]] = _hash_agent_runs,
 ) -> Callable[[AgentCallable], AgentCallable]:
     def decorator(agent: AgentCallable) -> AgentCallable:
-        @functools.wraps(agent, assigned=['__module__', '__name__', '__qualname__', '__doc__'])
+        @functools.wraps(agent, assigned=['__module__', '__qualname__', '__doc__'])
         async def new_agent(model: Model, event_callback: EventCallback, prev_runs: List[AgentRun]) -> AgentRun:
             hash = await hash_function(model, prev_runs)
             old_cached_record = await query_record(hash)
@@ -80,6 +80,8 @@ def cached_agent(
                 _LOG.info(f"Will *not* store in cache: {hash}")
 
             return run
+
+        new_agent.__name__ = get_name(agent)
 
         return new_agent
 

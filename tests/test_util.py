@@ -6,6 +6,7 @@ from lasagna.util import (
     convert_to_image_url,
     convert_to_image_base64,
     exponential_backoff_retry_delays,
+    get_name,
     recursive_hash,
 )
 
@@ -192,6 +193,7 @@ def test_parse_docstring():
             'name': 'thing',
             'type': 'float',
             'description': '(optional) the thing',
+            'optional': True,
         },
         {
             'name': 'another',
@@ -375,6 +377,22 @@ def test_exponential_backoff_retry_delays():
     assert exponential_backoff_retry_delays(4, 3.0, 1e10) == [3.0, 9.0, 27.0, 0.0]
     assert exponential_backoff_retry_delays(4, 5.0, 1e10) == [5.0, 25.0, 125.0, 0.0]
     assert exponential_backoff_retry_delays(4, 5.0, 30.0) == [5.0, 25.0, 30.0, 0.0]
+
+
+def regular_function():
+    pass
+
+def async_regular_function():
+    pass
+
+class class_with_str_method:
+    def __str__(self) -> str:
+        return 'Hi!'
+
+def test_get_name():
+    assert get_name(regular_function) == 'regular_function'
+    assert get_name(async_regular_function) == 'async_regular_function'
+    assert get_name(class_with_str_method()) == 'Hi!'
 
 
 def test_recursive_hash():

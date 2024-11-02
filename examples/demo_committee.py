@@ -1,7 +1,7 @@
 from lasagna import (
     known_models,
     flat_messages,
-    build_most_simple_agent,
+    build_simple_agent,
     extract_last_message,
     noop_callback,
     Message,
@@ -14,7 +14,7 @@ import asyncio
 from dotenv import load_dotenv; load_dotenv()
 
 
-THE_AGENT = build_most_simple_agent()
+THE_AGENT = build_simple_agent(name='agent')
 
 
 COMMITTEE_SPEC = [
@@ -59,7 +59,7 @@ async def vote_on_jokes(joke_a: str, joke_b: str) -> Dict[str, int]:
     outputs = await asyncio.gather(*tasks)
     counter: Dict[str, int] = {}
     for spec, out in zip(COMMITTEE_SPEC, outputs):
-        last_message = extract_last_message(out)
+        last_message = extract_last_message(out, from_layered_agents=False)
         assert last_message['role'] == 'ai'
         text = last_message['text']
         assert text

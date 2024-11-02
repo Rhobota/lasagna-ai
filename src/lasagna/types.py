@@ -21,10 +21,25 @@ class ToolCall(TypedDict):
     function: ToolCallFunction
 
 
-class ToolResult(TypedDict):
+class ToolResultBase(TypedDict):
     call_id: str
-    result: Any
     is_error: NotRequired[bool]
+
+
+class ToolResultAny(ToolResultBase):
+    type: Literal['any']
+    result: Any
+
+
+class ToolResultLayeredAgent(ToolResultBase):
+    type: Literal['layered_agent']
+    run: AgentRun
+
+
+ToolResult = Union[
+    ToolResultAny,
+    ToolResultLayeredAgent,
+]
 
 
 class Cost(TypedDict):
@@ -210,17 +225,21 @@ class ProviderRecord(TypedDict):
     models: List[ModelRecord]
 
 
-class AgentSpec(TypedDict):
-    agent: Union[str, AgentCallable]
+class ModelSpec(TypedDict):
     provider: Union[str, ModelFactory]
     model: Union[str, ModelRecord]
     model_kwargs: NotRequired[Dict[str, Any]]
 
 
+class AgentSpec(ModelSpec):
+    agent: Union[str, AgentCallable]
+
+
 class ToolParam(TypedDict):
     name: str
     type: str
-    description: str
+    description: NotRequired[str]
+    optional: NotRequired[bool]  # default = False (i.e. "required")
 
 
 class CacheEventPayload(TypedDict):

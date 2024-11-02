@@ -1,6 +1,6 @@
 from lasagna import (
     known_models,
-    build_most_simple_agent,
+    build_simple_agent,
 )
 
 from lasagna.tui import (
@@ -14,6 +14,7 @@ from dotenv import load_dotenv; load_dotenv()
 import asyncio
 import aiohttp
 import os
+from datetime import datetime
 
 
 MODEL_BINDER = known_models.BIND_OPENAI_gpt_4o_mini()
@@ -47,11 +48,12 @@ async def perform_research(query: str) -> str:
 
 
 async def main() -> None:
-    system_prompt = "You are a grumpy research agent."
+    today = datetime.now().strftime('%B %d, %Y')
+    system_prompt = f"You are a grumpy research agent. Today is {today}."
     tools: List[Callable] = [
         perform_research,
     ]
-    my_agent = build_most_simple_agent(tools)
+    my_agent = build_simple_agent(name = 'agent', tools = tools)
     my_bound_agent = MODEL_BINDER(my_agent)
     await tui_input_loop(my_bound_agent, system_prompt)
 
