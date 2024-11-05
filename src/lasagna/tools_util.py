@@ -172,7 +172,7 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
     return description, doc_params
 
 
-def _validate_args(tool: Callable, parsed_args: Dict) -> Dict:
+def validate_args(tool: Callable, parsed_args: Dict) -> Dict:
     tool_name = get_name(tool)
     _, doc_params = parse_docstring(tool.__doc__ or '')
 
@@ -215,7 +215,10 @@ def _validate_args(tool: Callable, parsed_args: Dict) -> Dict:
         assert arg in doc_param_type_lookup
         type_str = doc_param_type_lookup[arg]
         type_ = DOCSTRING_PARAM_SUPPORTED_TYPES[type_str]
-        validated_args[arg] = type_(value)  # <-- assume c'tor will throw as necessary
+        try:
+            validated_args[arg] = type_(value)  # <-- assume c'tor will throw as necessary
+        except Exception as e:
+            raise TypeError(f"{tool_name}() got invalid value for argument `{arg}`: {repr(value)} ({e})")
     return validated_args
 
 
@@ -234,9 +237,11 @@ async def _run_single_tool(
         args = tool_call['function']['arguments']
 
         parsed_args = json.loads(args)
-        assert isinstance(parsed_args, dict)
 
-        parsed_args = _validate_args(func, parsed_args)
+        if not isinstance(parsed_args, dict):
+            raise TypeError("tool output must be a JSON object")
+
+        parsed_args = validate_args(func, parsed_args)
 
         is_agent_callable = is_callable_of_type(func, AgentCallable, no_throw=True)
         is_bound_agent_callable = is_callable_of_type(func, BoundAgentCallable, no_throw=True)

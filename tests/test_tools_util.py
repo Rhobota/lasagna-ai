@@ -30,6 +30,7 @@ from lasagna.tools_util import (
     is_async_callable,
     is_callable_of_type,
     extract_tool_result_as_sting,
+    validate_args,
 )
 
 
@@ -123,7 +124,117 @@ async def tool_async_a(x):
     return x * 3
 
 
-# TODO: test_validate_args
+def test_validate_args():
+    # TODO handle emums
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {
+                'second': 4,
+                'first': 1,
+                'third': 2,
+                'other': 5,
+            },
+        )
+    assert str(e.value) == "tool_a() got 1 unexpected argument: 'other'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {
+                'second': 4,
+                'first': 1,
+                'third': 2,
+                'other_1': 5,
+                'other_2': 7,
+            },
+        )
+    assert str(e.value) == "tool_a() got 2 unexpected arguments: 'other_1', 'other_2'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {
+                'other_1': 5,
+                'other_2': 7,
+            },
+        )
+    assert str(e.value) == "tool_a() got 2 unexpected arguments: 'other_1', 'other_2'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {},
+        )
+    assert str(e.value) == "tool_a() missing 2 required arguments: 'first', 'second'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {'third': 6},
+        )
+    assert str(e.value) == "tool_a() missing 2 required arguments: 'first', 'second'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {'second': 5},
+        )
+    assert str(e.value) == "tool_a() missing 1 required argument: 'first'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {'first': 5},
+        )
+    assert str(e.value) == "tool_a() missing 1 required argument: 'second'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {
+                'second': 'hi',
+                'first': 1,
+            },
+        )
+    assert str(e.value) == "tool_a() got invalid value for argument `second`: 'hi' (invalid literal for int() with base 10: 'hi')"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {
+                'second': 1,
+                'first': 'hi',
+            },
+        )
+    assert str(e.value) == "tool_a() got invalid value for argument `first`: 'hi' (invalid literal for int() with base 10: 'hi')"
+
+    args = validate_args(
+        tool_a,
+        {
+            'second': 1.8,
+            'first': 2,
+        },
+    )
+    assert args == {
+        'second': 1,
+        'first': 2,
+    }
+
+    args = validate_args(
+        tool_a,
+        {
+            'second': 3.2,
+            'first': 2,
+            'third': True,
+        },
+    )
+    assert args == {
+        'second': 3,
+        'first': 2,
+        'third': 1,
+    }
 
 
 @pytest.mark.asyncio
@@ -167,6 +278,7 @@ async def test_handle_tools_standard_functions():
             {'call_id': '1014', 'function': {'arguments': '{"x": -3}', 'name': 'tool_async_a'}, 'call_type': 'function'},
             {'call_id': '1015', 'function': {'arguments': '{}', 'name': 'tool_async_b'}, 'call_type': 'function'},
             {'call_id': '1016', 'function': {'arguments': '{}', 'name': 'tool_async_a'}, 'call_type': 'function'},
+            {'call_id': '1017', 'function': {'arguments': '[1, 2, 3]', 'name': 'tool_a'}, 'call_type': 'function'},
         ],
         'cost': None,
         'raw': None,
@@ -182,7 +294,7 @@ async def test_handle_tools_standard_functions():
     assert tool_results == [
         {'type': 'any', 'call_id': '1001', 'result': 16.0 },
         {'type': 'any', 'call_id': '1002', 'result': 10.8 },
-        {'type': 'any', 'call_id': '1003', 'result': "ValueError: could not convert string to float: 'hi'", 'is_error': True, },
+        {'type': 'any', 'call_id': '1003', 'result': "TypeError: tool_b() got invalid value for argument `x`: 'hi' (could not convert string to float: 'hi')", 'is_error': True, },
         {'type': 'any', 'call_id': '1004', 'result': "TypeError: tool_b() missing 1 required argument: 'x'", 'is_error': True },
         {'type': 'any', 'call_id': '1005', 'result': "TypeError: tool_b() got 1 unexpected argument: 'y'", 'is_error': True },
         {'type': 'any', 'call_id': '1006', 'result': "TypeError: tool_b() got 1 unexpected argument: 'y'", 'is_error': True },
@@ -196,6 +308,7 @@ async def test_handle_tools_standard_functions():
         {'type': 'any', 'call_id': '1014', 'result': -9.0 },
         {'type': 'any', 'call_id': '1015', 'result': 20 },
         {'type': 'any', 'call_id': '1016', 'result': "TypeError: tool_async_a() missing 1 required argument: 'x'", 'is_error': True },
+        {'type': 'any', 'call_id': '1017', 'result': "TypeError: tool output must be a JSON object", 'is_error': True },
     ]
 
 
