@@ -25,6 +25,7 @@ DOCSTRING_PARAM_SUPPORTED_TYPES = {
 
 
 def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
+    # Detect docstring indention, and then dedent it.
     lines = docstring.splitlines()
     indent_amounts = [(len(line) - len(line.lstrip())) for line in lines]
     first_indent = max([
@@ -36,19 +37,17 @@ def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
         to_strip = min(ia, first_indent, len(l))
         lines_stripped.append(l[to_strip:].rstrip())
     dedented_docs = "\n".join(lines_stripped).strip()
-    if ':param:' not in dedented_docs:
-        # Special case where there are no parameters!
-        description = ' '.join(dedented_docs.strip().splitlines()).strip()
-        if not description:
-            raise ValueError("no description found")
-        return description, []
-    description_match = re.search(r"^(.*?)(?=:param:)", dedented_docs, re.DOTALL)
+
+    # Extract the description (i.e. text prior to any ":param:" section).
+    description_match = re.search(r"^(.*?)(?=:param:|$)", dedented_docs, re.DOTALL)
     if description_match is None:
         raise ValueError("no description found")
-    description = ' '.join(description_match[1].strip().splitlines()).strip()
+    description = description_match[1].strip()
     if not description:
         raise ValueError("no description found")
-    params_found = re.findall(r":param:\s+(\w+):\s+([\w ]+):\s+(.+)", dedented_docs)
+
+    # Extract that params (i.e. the ":param:" sections).
+    params_found = re.findall(r":param:\s+(\w+):\s+([\w ]+):\s+(.+?)(?=:param:|$)", dedented_docs, re.DOTALL)
     params: List[ToolParam] = [
         {
             'name': p[0].strip(),
@@ -67,6 +66,7 @@ def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
         else:
             if p['description'].startswith('(optional)'):
                 p['optional'] = True
+
     return description, params
 
 

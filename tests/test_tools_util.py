@@ -737,7 +737,7 @@ def test_get_tool_params_function():
         """
         return ''
     description, params = get_tool_params(sample_tool)
-    assert description == 'Use this for anything you want.'
+    assert description == 'Use this for\nanything you want.'
     assert params == [
         {
             'name': 'a',
