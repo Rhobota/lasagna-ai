@@ -155,7 +155,7 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
                 _LOG.warning(f'tool `{get_name(tool)}` is missing annotation for parameter `{concrete_param.name}`')
             else:
                 if doc_param['type'].startswith('enum '):
-                    if not inspect.isclass(concrete_param.annotation) or not issubclass(concrete_param.annotation, Enum):
+                    if not issubclass(concrete_param.annotation, Enum):
                         raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param['type']}`")
                     concrete_enum_vals = set([
                         e.value
@@ -175,6 +175,8 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
 def validate_args(tool: Callable, parsed_args: Dict) -> Dict:
     tool_name = get_name(tool)
     _, doc_params = parse_docstring(tool.__doc__ or '')
+    concrete_sig = inspect.signature(tool)
+    concrete_params = concrete_sig.parameters.values()
 
     # Check for unexpected parameters:
     unexpected_params: List[str] = []
@@ -206,19 +208,42 @@ def validate_args(tool: Callable, parsed_args: Dict) -> Dict:
             raise TypeError(f"{tool_name}() missing {n} required arguments: {s}")
 
     # Check types:
-    validated_args = {}
+    validated_args: Dict[str, Any] = {}
     doc_param_type_lookup = {
         doc_param['name']: doc_param['type']
         for doc_param in doc_params
     }
+    concrete_annotation_lookup = {
+        concrete_param.name: concrete_param.annotation
+        for concrete_param in concrete_params
+    }
     for arg, value in parsed_args.items():
         assert arg in doc_param_type_lookup
         type_str = doc_param_type_lookup[arg]
-        type_ = DOCSTRING_PARAM_SUPPORTED_TYPES[type_str]
-        try:
-            validated_args[arg] = type_(value)  # <-- assume c'tor will throw as necessary
-        except Exception as e:
-            raise TypeError(f"{tool_name}() got invalid value for argument `{arg}`: {repr(value)} ({e})")
+        if type_str.startswith('enum '):
+            value_str = str(value)
+            doc_enum_vals = set(type_str.split()[1:])
+            if value_str not in doc_enum_vals:
+                raise TypeError(f"{tool_name}() got invalid value for argument `{arg}`: {repr(value)} (valid values are {sorted(doc_enum_vals)})")
+            concrete_annotation = concrete_annotation_lookup[arg]
+            if concrete_annotation is inspect.Parameter.empty:
+                validated_args[arg] = value_str
+            elif issubclass(concrete_annotation, str):
+                validated_args[arg] = value_str
+            else:
+                assert issubclass(concrete_annotation, Enum)  # we know this from the tool passing `get_tool_params()`
+                concrete_enum_lookup = {
+                    e.value: e
+                    for e in concrete_annotation.__members__.values()
+                }
+                assert value_str in concrete_enum_lookup  # we know this from the tool passing `get_tool_params()`
+                validated_args[arg] = concrete_enum_lookup[value_str]
+        else:
+            type_ = DOCSTRING_PARAM_SUPPORTED_TYPES[type_str]
+            try:
+                validated_args[arg] = type_(value)  # <-- assume c'tor will throw as necessary
+            except Exception as e:
+                raise TypeError(f"{tool_name}() got invalid value for argument `{arg}`: {repr(value)} ({e})")
     return validated_args
 
 

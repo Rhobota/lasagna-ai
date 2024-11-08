@@ -100,6 +100,12 @@ def test_convert_to_json_schema():
     }
 
 
+class Color(Enum):
+    RED = 'red'
+    GREEN = 'green'
+    BLUE = 'blue'
+
+
 def tool_a(first, second, third=5):
     """
     Tool a
@@ -123,10 +129,29 @@ async def tool_async_a(x):
     """
     return x * 3
 
+def tool_with_enum(c: Color):
+    """
+    A tool that accepts an enum.
+    :param: c: enum red blue green: a param
+    """
+    return str(c)
+
+def tool_with_enum_str_annotation(c: str):
+    """
+    A tool that accepts an enum.
+    :param: c: enum red blue green: a param
+    """
+    return str(c)
+
+def tool_with_enum_missing_annotation(c):
+    """
+    A tool that accepts an enum.
+    :param: c: enum red blue green: a param
+    """
+    return str(c)
+
 
 def test_validate_args():
-    # TODO handle emums
-
     with pytest.raises(TypeError) as e:
         validate_args(
             tool_a,
@@ -235,6 +260,48 @@ def test_validate_args():
         'first': 2,
         'third': 1,
     }
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_with_enum,
+            {
+                'c': 1,
+            },
+        )
+    assert str(e.value) == "tool_with_enum() got invalid value for argument `c`: 1 (valid values are ['blue', 'green', 'red'])"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_with_enum,
+            {
+                'c': 'yellow',
+            },
+        )
+    assert str(e.value) == "tool_with_enum() got invalid value for argument `c`: 'yellow' (valid values are ['blue', 'green', 'red'])"
+
+    args = validate_args(
+        tool_with_enum,
+        {
+            'c': 'red',
+        },
+    )
+    assert args == {'c': Color.RED}
+
+    args = validate_args(
+        tool_with_enum_str_annotation,
+        {
+            'c': 'red',
+        },
+    )
+    assert args == {'c': 'red'}
+
+    args = validate_args(
+        tool_with_enum_missing_annotation,
+        {
+            'c': 'red',
+        },
+    )
+    assert args == {'c': 'red'}
 
 
 @pytest.mark.asyncio
@@ -647,12 +714,6 @@ def test_is_callable_of_type_agent_callables():
 
     assert not is_callable_of_type(my_agent, BoundAgentCallable)
     assert not is_callable_of_type(my_bound_agent, AgentCallable)
-
-
-class Color(Enum):
-    RED = 'red'
-    GREEN = 'green'
-    BLUE = 'blue'
 
 
 def test_get_tool_params_function():
