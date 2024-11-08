@@ -7,7 +7,7 @@ from lasagna.tui import (
     tui_input_loop,
 )
 
-from typing import List, Callable, cast
+from typing import List, Callable
 
 import asyncio
 

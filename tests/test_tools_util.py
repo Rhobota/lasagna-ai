@@ -20,6 +20,8 @@ from lasagna.types import (
 
 from typing import List, Dict, Callable, Awaitable
 
+from enum import Enum
+
 from lasagna.tools_util import (
     convert_to_json_schema,
     get_tool_params,
@@ -28,6 +30,7 @@ from lasagna.tools_util import (
     is_async_callable,
     is_callable_of_type,
     extract_tool_result_as_sting,
+    validate_args,
 )
 
 
@@ -97,23 +100,223 @@ def test_convert_to_json_schema():
     }
 
 
+class Color(Enum):
+    RED = 'red'
+    GREEN = 'green'
+    BLUE = 'blue'
+
+
 def tool_a(first, second, third=5):
+    """
+    Tool a
+    :param: first: int: first param
+    :param: second: int: second param
+    :param: third: int: (optional) third param
+    """
     return first + second + third
 
 def tool_b(x):
+    """
+    Tool b
+    :param: x: float: the value
+    """
     return x * 2
 
 async def tool_async_a(x):
+    """
+    Async tool a
+    :param: x: float: the value
+    """
     return x * 3
+
+def tool_with_enum(c: Color):
+    """
+    A tool that accepts an enum.
+    :param: c: enum red blue green: a param
+    """
+    return str(c)
+
+def tool_with_enum_str_annotation(c: str):
+    """
+    A tool that accepts an enum.
+    :param: c: enum red blue green: a param
+    """
+    return str(c)
+
+def tool_with_enum_missing_annotation(c):
+    """
+    A tool that accepts an enum.
+    :param: c: enum red blue green: a param
+    """
+    return str(c)
+
+
+def test_validate_args():
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {
+                'second': 4,
+                'first': 1,
+                'third': 2,
+                'other': 5,
+            },
+        )
+    assert str(e.value) == "tool_a() got 1 unexpected argument: 'other'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {
+                'second': 4,
+                'first': 1,
+                'third': 2,
+                'other_1': 5,
+                'other_2': 7,
+            },
+        )
+    assert str(e.value) == "tool_a() got 2 unexpected arguments: 'other_1', 'other_2'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {
+                'other_1': 5,
+                'other_2': 7,
+            },
+        )
+    assert str(e.value) == "tool_a() got 2 unexpected arguments: 'other_1', 'other_2'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {},
+        )
+    assert str(e.value) == "tool_a() missing 2 required arguments: 'first', 'second'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {'third': 6},
+        )
+    assert str(e.value) == "tool_a() missing 2 required arguments: 'first', 'second'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {'second': 5},
+        )
+    assert str(e.value) == "tool_a() missing 1 required argument: 'first'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {'first': 5},
+        )
+    assert str(e.value) == "tool_a() missing 1 required argument: 'second'"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {
+                'second': 'hi',
+                'first': 1,
+            },
+        )
+    assert str(e.value) == "tool_a() got invalid value for argument `second`: 'hi' (invalid literal for int() with base 10: 'hi')"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_a,
+            {
+                'second': 1,
+                'first': 'hi',
+            },
+        )
+    assert str(e.value) == "tool_a() got invalid value for argument `first`: 'hi' (invalid literal for int() with base 10: 'hi')"
+
+    args = validate_args(
+        tool_a,
+        {
+            'second': 1.8,
+            'first': 2,
+        },
+    )
+    assert args == {
+        'second': 1,
+        'first': 2,
+    }
+
+    args = validate_args(
+        tool_a,
+        {
+            'second': 3.2,
+            'first': 2,
+            'third': True,
+        },
+    )
+    assert args == {
+        'second': 3,
+        'first': 2,
+        'third': 1,
+    }
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_with_enum,
+            {
+                'c': 1,
+            },
+        )
+    assert str(e.value) == "tool_with_enum() got invalid value for argument `c`: 1 (valid values are ['blue', 'green', 'red'])"
+
+    with pytest.raises(TypeError) as e:
+        validate_args(
+            tool_with_enum,
+            {
+                'c': 'yellow',
+            },
+        )
+    assert str(e.value) == "tool_with_enum() got invalid value for argument `c`: 'yellow' (valid values are ['blue', 'green', 'red'])"
+
+    args = validate_args(
+        tool_with_enum,
+        {
+            'c': 'red',
+        },
+    )
+    assert args == {'c': Color.RED}
+
+    args = validate_args(
+        tool_with_enum_str_annotation,
+        {
+            'c': 'red',
+        },
+    )
+    assert args == {'c': 'red'}
+
+    args = validate_args(
+        tool_with_enum_missing_annotation,
+        {
+            'c': 'red',
+        },
+    )
+    assert args == {'c': 'red'}
 
 
 @pytest.mark.asyncio
 async def test_handle_tools_standard_functions():
     x = 4
     def tool_c():
+        """
+        Tool c
+        """
         return x * 4
 
     async def tool_async_b():
+        """
+        Async tool b
+        """
         return x * 5
 
     tool_map: Dict[str, Callable] = {
@@ -142,6 +345,7 @@ async def test_handle_tools_standard_functions():
             {'call_id': '1014', 'function': {'arguments': '{"x": -3}', 'name': 'tool_async_a'}, 'call_type': 'function'},
             {'call_id': '1015', 'function': {'arguments': '{}', 'name': 'tool_async_b'}, 'call_type': 'function'},
             {'call_id': '1016', 'function': {'arguments': '{}', 'name': 'tool_async_a'}, 'call_type': 'function'},
+            {'call_id': '1017', 'function': {'arguments': '[1, 2, 3]', 'name': 'tool_a'}, 'call_type': 'function'},
         ],
         'cost': None,
         'raw': None,
@@ -155,22 +359,23 @@ async def test_handle_tools_standard_functions():
     )
     assert tool_results is not None
     assert tool_results == [
-        {'type': 'any', 'call_id': '1001', 'result': 16 },
+        {'type': 'any', 'call_id': '1001', 'result': 16.0 },
         {'type': 'any', 'call_id': '1002', 'result': 10.8 },
-        {'type': 'any', 'call_id': '1003', 'result': "hihi" },
-        {'type': 'any', 'call_id': '1004', 'result': "TypeError: tool_b() missing 1 required positional argument: 'x'", 'is_error': True },
-        {'type': 'any', 'call_id': '1005', 'result': "TypeError: tool_b() got an unexpected keyword argument 'y'", 'is_error': True },
-        {'type': 'any', 'call_id': '1006', 'result': "TypeError: tool_b() got an unexpected keyword argument 'y'", 'is_error': True },
-        {'type': 'any', 'call_id': '1007', 'result': 17.5 },
-        {'type': 'any', 'call_id': '1008', 'result': 15.5 },
-        {'type': 'any', 'call_id': '1009', 'result': 111.5 },
-        {'type': 'any', 'call_id': '1010', 'result': "TypeError: tool_a() missing 2 required positional arguments: 'first' and 'second'", 'is_error': True },
-        {'type': 'any', 'call_id': '1011', 'result': "TypeError: tool_a() missing 1 required positional argument: 'second'", 'is_error': True },
+        {'type': 'any', 'call_id': '1003', 'result': "TypeError: tool_b() got invalid value for argument `x`: 'hi' (could not convert string to float: 'hi')", 'is_error': True, },
+        {'type': 'any', 'call_id': '1004', 'result': "TypeError: tool_b() missing 1 required argument: 'x'", 'is_error': True },
+        {'type': 'any', 'call_id': '1005', 'result': "TypeError: tool_b() got 1 unexpected argument: 'y'", 'is_error': True },
+        {'type': 'any', 'call_id': '1006', 'result': "TypeError: tool_b() got 1 unexpected argument: 'y'", 'is_error': True },
+        {'type': 'any', 'call_id': '1007', 'result': 17 },
+        {'type': 'any', 'call_id': '1008', 'result': 15 },
+        {'type': 'any', 'call_id': '1009', 'result': 111 },
+        {'type': 'any', 'call_id': '1010', 'result': "TypeError: tool_a() missing 2 required arguments: 'first', 'second'", 'is_error': True },
+        {'type': 'any', 'call_id': '1011', 'result': "TypeError: tool_a() missing 1 required argument: 'second'", 'is_error': True },
         {'type': 'any', 'call_id': '1012', 'result': 16 },
         {'type': 'any', 'call_id': '1013', 'result': "KeyError: 'tool_d'", 'is_error': True },
-        {'type': 'any', 'call_id': '1014', 'result': -9 },
+        {'type': 'any', 'call_id': '1014', 'result': -9.0 },
         {'type': 'any', 'call_id': '1015', 'result': 20 },
-        {'type': 'any', 'call_id': '1016', 'result': "TypeError: tool_async_a() missing 1 required positional argument: 'x'", 'is_error': True },
+        {'type': 'any', 'call_id': '1016', 'result': "TypeError: tool_async_a() missing 1 required argument: 'x'", 'is_error': True },
+        {'type': 'any', 'call_id': '1017', 'result': "TypeError: tool output must be a JSON object", 'is_error': True },
     ]
 
 
@@ -188,9 +393,22 @@ async def test_handle_tools_layered_agents():
         'model_kwargs': {'outer': False},
     }
 
-    agent_1 = build_simple_agent(name = 'agent_1')
+    doc = """
+    An agent.
+    :param: prompt: str: (optional) the prompt
+    """
+
+    agent_1 = build_simple_agent(
+        name = 'agent_1',
+        doc = doc,
+    )
     my_binder = bind_model(**inner_model_spec)
-    bound_agent_2 = my_binder(build_simple_agent(name = 'bound_agent_2'))
+    bound_agent_2 = my_binder(
+        build_simple_agent(
+            name = 'bound_agent_2',
+            doc = doc,
+        ),
+    )
 
     tool_map: Dict[str, Callable] = {
         'agent_1': agent_1,
@@ -204,6 +422,8 @@ async def test_handle_tools_layered_agents():
             {'call_id': '1002', 'function': {'arguments': '{}', 'name': 'bound_agent_2'}, 'call_type': 'function'},
             {'call_id': '1003', 'function': {'arguments': '{"prompt": "Hi"}', 'name': 'agent_1'}, 'call_type': 'function'},
             {'call_id': '1004', 'function': {'arguments': '{"prompt": "Hey"}', 'name': 'bound_agent_2'}, 'call_type': 'function'},
+            {'call_id': '1005', 'function': {'arguments': '{"bad_name": "Hi"}', 'name': 'agent_1'}, 'call_type': 'function'},
+            {'call_id': '1006', 'function': {'arguments': '{"bad_name": "Hey"}', 'name': 'bound_agent_2'}, 'call_type': 'function'},
         ],
     }
 
@@ -357,6 +577,18 @@ async def test_handle_tools_layered_agents():
                 ],
             },
         },
+        {
+            'type': 'any',
+            'call_id': '1005',
+            'is_error': True,
+            'result': "TypeError: agent_1() got 1 unexpected argument: 'bad_name'",
+        },
+        {
+            'type': 'any',
+            'call_id': '1006',
+            'is_error': True,
+            'result': "TypeError: bound_agent_2() got 1 unexpected argument: 'bad_name'",
+        },
     ]
 
 
@@ -485,17 +717,27 @@ def test_is_callable_of_type_agent_callables():
 
 
 def test_get_tool_params_function():
-    def sample_tool(a: int, b: int, c: float) -> str:
+    def sample_tool(
+        a: int,
+        b: str,
+        c: bool,
+        d: Color, # <-- we support enums as Enum
+        e: str,   # <-- we support enums as str
+        f: float = 0.0,
+    ) -> str:
         """
         Use this for
         anything you want.
         :param: a: int: first param
-        :param: b: int: second param
-        :param: c: float: (optional) another param
+        :param: b: str: second param
+        :param: c: bool: third param
+        :param: d: enum red blue green: forth param
+        :param: e: enum red blue green: fifth param
+        :param: f: float: (optional) last param
         """
         return ''
     description, params = get_tool_params(sample_tool)
-    assert description == 'Use this for anything you want.'
+    assert description == 'Use this for\nanything you want.'
     assert params == [
         {
             'name': 'a',
@@ -504,16 +746,111 @@ def test_get_tool_params_function():
         },
         {
             'name': 'b',
-            'type': 'int',
+            'type': 'str',
             'description': 'second param',
         },
         {
             'name': 'c',
+            'type': 'bool',
+            'description': 'third param',
+        },
+        {
+            'name': 'd',
+            'type': 'enum red blue green',
+            'description': 'forth param',
+        },
+        {
+            'name': 'e',
+            'type': 'enum red blue green',
+            'description': 'fifth param',
+        },
+        {
+            'name': 'f',
             'type': 'float',
-            'description': '(optional) another param',
+            'description': '(optional) last param',
             'optional': True,
         },
     ]
+
+    def param_count_mismatch(a: int, b: str) -> str:
+        """
+        A function
+        :param: a: int: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(param_count_mismatch)
+    assert str(e.value) == 'tool `param_count_mismatch` has parameter length mismatch: tool has 2, docstring has 1'
+
+    def name_mismatch(a: int) -> str:
+        """
+        A function
+        :param: b: int: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(name_mismatch)
+    assert str(e.value) == 'tool `name_mismatch` has parameter name mismatch: tool name is `a`, docstring name is `b`'
+
+    def no_default_on_optional(a: int) -> str:
+        """
+        A function
+        :param: a: int: (optional) first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(no_default_on_optional)
+    assert str(e.value) == 'tool `no_default_on_optional` has an optional parameter without a default value: `a`'
+
+    def enum_type_mismatch_1(a: Color) -> str:
+        """
+        A function
+        :param: a: int: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(enum_type_mismatch_1)
+    assert str(e.value) == "tool `enum_type_mismatch_1` has parameter `a` type mismatch: tool type is `<enum 'Color'>`, docstring type is `<class 'int'>`"
+
+    def enum_type_mismatch_2(a: int) -> str:
+        """
+        A function
+        :param: a: enum red green blue: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(enum_type_mismatch_2)
+    assert str(e.value) == "tool `enum_type_mismatch_2` has parameter `a` type mismatch: tool type is `<class 'int'>`, docstring type is `enum red green blue`"
+
+    def enum_type_mismatch_3(a: Color) -> str:
+        """
+        A function
+        :param: a: enum red GREEN blue: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(enum_type_mismatch_3)
+    assert str(e.value) == "tool `enum_type_mismatch_3` has parameter `a` enum value mismatch: tool has enum values `['blue', 'green', 'red']`, docstring has enum values `['GREEN', 'blue', 'red']`"
+
+    def type_mismatch(a: int) -> str:
+        """
+        A function
+        :param: a: float: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(type_mismatch)
+    assert str(e.value) == "tool `type_mismatch` has parameter `a` type mismatch: tool type is `<class 'int'>`, docstring type is `<class 'float'>`"
+
+    def unknown_type(a: Callable) -> str:
+        """
+        A function
+        :param: a: float: first param
+        """
+        return ''
+    with pytest.raises(ValueError) as e:
+        get_tool_params(unknown_type)
+    assert str(e.value) == "tool `unknown_type` has parameter `a` type mismatch: tool type is `typing.Callable`, docstring type is `<class 'float'>`"
 
 
 def test_get_tool_params_layered_agents():

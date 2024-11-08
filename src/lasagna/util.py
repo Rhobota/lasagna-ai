@@ -16,26 +16,38 @@ from .types import ToolParam, ImageMimeTypes
 T = TypeVar('T')
 
 
+DOCSTRING_PARAM_SUPPORTED_TYPES = {
+    'str': str,
+    'float': float,
+    'int': int,
+    'bool': bool,
+}
+
+
 def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
+    # Detect docstring indention, and then dedent it.
     lines = docstring.splitlines()
     indent_amounts = [(len(line) - len(line.lstrip())) for line in lines]
-    first_indent = max(ia for ia in indent_amounts[:2])
+    first_indent = max([
+        0,
+        *[ia for ia in indent_amounts[:2]],
+    ])
     lines_stripped = []
     for ia, l in zip(indent_amounts, lines):
         to_strip = min(ia, first_indent, len(l))
         lines_stripped.append(l[to_strip:].rstrip())
     dedented_docs = "\n".join(lines_stripped).strip()
-    if ':param:' not in dedented_docs:
-        # Special case where there are no parameters!
-        description = ' '.join(dedented_docs.strip().splitlines())
-        return description, []
-    description_match = re.search(r"^(.*?)(?=:param:)", dedented_docs, re.DOTALL)
+
+    # Extract the description (i.e. text prior to any ":param:" section).
+    description_match = re.search(r"^(.*?)(?=:param:|$)", dedented_docs, re.DOTALL)
     if description_match is None:
         raise ValueError("no description found")
-    description = ' '.join(description_match[1].strip().splitlines())
+    description = description_match[1].strip()
     if not description:
         raise ValueError("no description found")
-    params_found = re.findall(r":param:\s+(\w+):\s+([\w ]+):\s+(.+)", dedented_docs)
+
+    # Extract that params (i.e. the ":param:" sections).
+    params_found = re.findall(r":param:\s+(\w+):\s+([\w ]+):\s+(.+?)(?=:param:|$)", dedented_docs, re.DOTALL)
     params: List[ToolParam] = [
         {
             'name': p[0].strip(),
@@ -47,13 +59,14 @@ def parse_docstring(docstring: str) -> Tuple[str, List[ToolParam]]:
     for p in params:
         if not p['name']:
             raise ValueError("no parameter name found")
-        if not p['type'].startswith('enum ') and p['type'] not in ['str', 'float', 'int', 'bool']:
+        if not p['type'].startswith('enum ') and p['type'] not in DOCSTRING_PARAM_SUPPORTED_TYPES:
             raise ValueError(f"invalid type found: {p['type']}")
         if not p['description']:
             del p['description']
         else:
             if p['description'].startswith('(optional)'):
                 p['optional'] = True
+
     return description, params
 
 

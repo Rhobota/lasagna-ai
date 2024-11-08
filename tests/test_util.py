@@ -28,7 +28,7 @@ def test_parse_docstring():
 
         :param: another: int: another value
     """)
-    assert desc == "This is the description that continues here.   with indented stuff here back to normal."
+    assert desc == "This is the description\nthat continues here.\n  with indented stuff here\nback to normal."
     assert params == [
         {
             'name': 'x',
@@ -47,7 +47,7 @@ def test_parse_docstring():
         :param: x: str: the `x` value
         :param: another: int: another value
     """)
-    assert desc == "Hi this is the docs."
+    assert desc == "Hi\nthis is the docs."
     assert params == [
         {
             'name': 'x',
@@ -108,7 +108,7 @@ def test_parse_docstring():
         :param: x: str: the `x` value
         :param: another: int: another value
     """)
-    assert desc == "Hi this is the docs."
+    assert desc == "Hi this is the\ndocs."
     assert params == [
         {
             'name': 'x',
@@ -131,7 +131,7 @@ def test_parse_docstring():
 
         :param: another: int: another value
     """)
-    assert desc == "Hi this is the docs."
+    assert desc == "Hi this is the\ndocs."
     assert params == [
         {
             'name': 'x',
@@ -206,7 +206,7 @@ def test_parse_docstring():
         Hi this is the docs.
         And this is a second line.
     """)
-    assert desc == "Hi this is the docs. And this is a second line."
+    assert desc == "Hi this is the docs.\nAnd this is a second line."
     assert params == []
 
     with pytest.raises(ValueError):
@@ -232,6 +232,53 @@ def test_parse_docstring():
         """)
         print(desc)
         print(params)
+
+    desc, params = parse_docstring("""
+        Hi this is the docs.
+        :param: thing: float: (optional) the thing
+        and a second line for the first param
+        :param: another: enum a b other: another value
+        and a second line for the second param
+    """)
+    assert desc == "Hi this is the docs."
+    assert params == [
+        {
+            'name': 'thing',
+            'type': 'float',
+            'description': '(optional) the thing\nand a second line for the first param',
+            'optional': True,
+        },
+        {
+            'name': 'another',
+            'type': 'enum a b other',
+            'description': 'another value\nand a second line for the second param',
+        },
+    ]
+
+    desc, params = parse_docstring("""
+        Hi this is the
+        docs.
+
+        :param: thing: float: (optional) the thing
+        and a second line for the first param
+
+        :param: another: enum a b other: another value
+        and a second line for the second param
+    """)
+    assert desc == "Hi this is the\ndocs."
+    assert params == [
+        {
+            'name': 'thing',
+            'type': 'float',
+            'description': '(optional) the thing\nand a second line for the first param',
+            'optional': True,
+        },
+        {
+            'name': 'another',
+            'type': 'enum a b other',
+            'description': 'another value\nand a second line for the second param',
+        },
+    ]
 
 
 def test_combine_pairs():

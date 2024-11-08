@@ -748,7 +748,7 @@ def test_convert_to_openai_tools():
         'type': 'function',
         'function': {
             'name': 'my_other_tool',
-            'description': 'Something else that does stuff.',
+            'description': 'Something else\nthat does stuff.',
             'strict': True,
             'parameters': {
                 'type': 'object',

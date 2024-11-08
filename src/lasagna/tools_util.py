@@ -2,6 +2,7 @@ import asyncio
 import inspect
 import json
 import collections.abc
+from enum import Enum
 
 from typing import (
     List, Dict, Tuple, Union, Any, Callable,
@@ -10,7 +11,11 @@ from typing import (
 
 from .agent_util import bind_model, extract_last_message, flat_messages
 
-from .util import parse_docstring, get_name
+from .util import (
+    parse_docstring,
+    DOCSTRING_PARAM_SUPPORTED_TYPES,
+    get_name,
+)
 
 from .types import (
     AgentCallable,
@@ -23,6 +28,10 @@ from .types import (
     ToolResult,
     ToolParam,
 )
+
+import logging
+
+_LOG = logging.getLogger(__name__)
 
 
 def convert_to_json_schema(params: List[ToolParam]) -> Dict[str, object]:
@@ -120,9 +129,125 @@ def is_callable_of_type(
 
 
 def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
-    params: List[ToolParam]
-    description, params = parse_docstring(tool.__doc__ or '')
-    return description, params
+    doc_params: List[ToolParam]
+    description, doc_params = parse_docstring(tool.__doc__ or '')
+
+    is_agent_callable = is_callable_of_type(tool, AgentCallable, no_throw=True)
+    is_bound_agent_callable = is_callable_of_type(tool, BoundAgentCallable, no_throw=True)
+
+    if is_agent_callable or is_bound_agent_callable:
+        pass  # no validation on these
+
+    else:
+        concrete_sig = inspect.signature(tool)
+        concrete_params = concrete_sig.parameters.values()
+
+        if len(concrete_params) != len(doc_params):
+            raise ValueError(f'tool `{get_name(tool)}` has parameter length mismatch: tool has {len(concrete_params)}, docstring has {len(doc_params)}')
+
+        for concrete_param, doc_param in zip(concrete_params, doc_params):
+            if concrete_param.name != doc_param['name']:
+                raise ValueError(f"tool `{get_name(tool)}` has parameter name mismatch: tool name is `{concrete_param.name}`, docstring name is `{doc_param['name']}`")
+            if doc_param.get('optional', False):
+                if concrete_param.default is inspect.Parameter.empty:
+                    raise ValueError(f"tool `{get_name(tool)}` has an optional parameter without a default value: `{concrete_param.name}`")
+            if concrete_param.annotation is inspect.Parameter.empty:
+                _LOG.warning(f'tool `{get_name(tool)}` is missing annotation for parameter `{concrete_param.name}`')
+            else:
+                if doc_param['type'].startswith('enum '):
+                    if issubclass(concrete_param.annotation, str):
+                        pass  # a str can accept any value, so we're good
+                    elif issubclass(concrete_param.annotation, Enum):
+                        concrete_enum_vals = set([
+                            e.value
+                            for e in concrete_param.annotation.__members__.values()
+                        ])
+                        doc_enum_vals = set(doc_param['type'].split()[1:])
+                        if concrete_enum_vals != doc_enum_vals:
+                            raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` enum value mismatch: tool has enum values `{sorted(concrete_enum_vals)}`, docstring has enum values `{sorted(doc_enum_vals)}`")
+                    else:
+                        raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param['type']}`")
+                else:
+                    doc_param_type = DOCSTRING_PARAM_SUPPORTED_TYPES.get(doc_param['type'], 'unknown')
+                    if concrete_param.annotation != doc_param_type:
+                        raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param_type}`")
+
+    return description, doc_params
+
+
+def validate_args(tool: Callable, parsed_args: Dict) -> Dict:
+    tool_name = get_name(tool)
+    _, doc_params = parse_docstring(tool.__doc__ or '')
+    concrete_sig = inspect.signature(tool)
+    concrete_params = concrete_sig.parameters.values()
+
+    # Check for unexpected parameters:
+    unexpected_params: List[str] = []
+    doc_param_names = set([doc_param['name'] for doc_param in doc_params])
+    for arg in sorted(parsed_args.keys()):
+        if arg not in doc_param_names:
+            unexpected_params.append(arg)
+    if unexpected_params:
+        n = len(unexpected_params)
+        s = ', '.join([repr(m) for m in unexpected_params])
+        if n == 1:
+            raise TypeError(f"{tool_name}() got 1 unexpected argument: {s}")
+        else:
+            raise TypeError(f"{tool_name}() got {n} unexpected arguments: {s}")
+
+    # Check for missing parameters:
+    missing_params: List[str] = []
+    for doc_param in doc_params:
+        name = doc_param['name']
+        optional = doc_param.get('optional', False)
+        if not optional and name not in parsed_args:
+            missing_params.append(name)
+    if missing_params:
+        n = len(missing_params)
+        s = ', '.join([repr(m) for m in missing_params])
+        if n == 1:
+            raise TypeError(f"{tool_name}() missing 1 required argument: {s}")
+        else:
+            raise TypeError(f"{tool_name}() missing {n} required arguments: {s}")
+
+    # Check types:
+    validated_args: Dict[str, Any] = {}
+    doc_param_type_lookup = {
+        doc_param['name']: doc_param['type']
+        for doc_param in doc_params
+    }
+    concrete_annotation_lookup = {
+        concrete_param.name: concrete_param.annotation
+        for concrete_param in concrete_params
+    }
+    for arg, value in parsed_args.items():
+        assert arg in doc_param_type_lookup
+        type_str = doc_param_type_lookup[arg]
+        if type_str.startswith('enum '):
+            value_str = str(value)
+            doc_enum_vals = set(type_str.split()[1:])
+            if value_str not in doc_enum_vals:
+                raise TypeError(f"{tool_name}() got invalid value for argument `{arg}`: {repr(value)} (valid values are {sorted(doc_enum_vals)})")
+            concrete_annotation = concrete_annotation_lookup[arg]
+            if concrete_annotation is inspect.Parameter.empty:
+                validated_args[arg] = value_str
+            elif issubclass(concrete_annotation, str):
+                validated_args[arg] = value_str
+            else:
+                assert issubclass(concrete_annotation, Enum)  # we know this from the tool passing `get_tool_params()`
+                concrete_enum_lookup = {
+                    e.value: e
+                    for e in concrete_annotation.__members__.values()
+                }
+                assert value_str in concrete_enum_lookup  # we know this from the tool passing `get_tool_params()`
+                validated_args[arg] = concrete_enum_lookup[value_str]
+        else:
+            type_ = DOCSTRING_PARAM_SUPPORTED_TYPES[type_str]
+            try:
+                validated_args[arg] = type_(value)  # <-- assume c'tor will throw as necessary
+            except Exception as e:
+                raise TypeError(f"{tool_name}() got invalid value for argument `{arg}`: {repr(value)} ({e})")
+    return validated_args
 
 
 async def _run_single_tool(
@@ -140,6 +265,11 @@ async def _run_single_tool(
         args = tool_call['function']['arguments']
 
         parsed_args = json.loads(args)
+
+        if not isinstance(parsed_args, dict):
+            raise TypeError("tool output must be a JSON object")
+
+        parsed_args = validate_args(func, parsed_args)
 
         is_agent_callable = is_callable_of_type(func, AgentCallable, no_throw=True)
         is_bound_agent_callable = is_callable_of_type(func, BoundAgentCallable, no_throw=True)
