@@ -155,15 +155,18 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
                 _LOG.warning(f'tool `{get_name(tool)}` is missing annotation for parameter `{concrete_param.name}`')
             else:
                 if doc_param['type'].startswith('enum '):
-                    if not issubclass(concrete_param.annotation, Enum):
+                    if issubclass(concrete_param.annotation, str):
+                        pass  # a str can accept any value, so we're good
+                    elif issubclass(concrete_param.annotation, Enum):
+                        concrete_enum_vals = set([
+                            e.value
+                            for e in concrete_param.annotation.__members__.values()
+                        ])
+                        doc_enum_vals = set(doc_param['type'].split()[1:])
+                        if concrete_enum_vals != doc_enum_vals:
+                            raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` enum value mismatch: tool has enum values `{sorted(concrete_enum_vals)}`, docstring has enum values `{sorted(doc_enum_vals)}`")
+                    else:
                         raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param['type']}`")
-                    concrete_enum_vals = set([
-                        e.value
-                        for e in concrete_param.annotation.__members__.values()
-                    ])
-                    doc_enum_vals = set(doc_param['type'].split()[1:])
-                    if concrete_enum_vals != doc_enum_vals:
-                        raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` enum value mismatch: tool has enum values `{sorted(concrete_enum_vals)}`, docstring has enum values `{sorted(doc_enum_vals)}`")
                 else:
                     doc_param_type = DOCSTRING_PARAM_SUPPORTED_TYPES.get(doc_param['type'], 'unknown')
                     if concrete_param.annotation != doc_param_type:

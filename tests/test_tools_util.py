@@ -721,8 +721,9 @@ def test_get_tool_params_function():
         a: int,
         b: str,
         c: bool,
-        d: Color,
-        e: float = 0.0,
+        d: Color, # <-- we support enums as Enum
+        e: str,   # <-- we support enums as str
+        f: float = 0.0,
     ) -> str:
         """
         Use this for
@@ -731,7 +732,8 @@ def test_get_tool_params_function():
         :param: b: str: second param
         :param: c: bool: third param
         :param: d: enum red blue green: forth param
-        :param: e: float: (optional) last param
+        :param: e: enum red blue green: fifth param
+        :param: f: float: (optional) last param
         """
         return ''
     description, params = get_tool_params(sample_tool)
@@ -759,6 +761,11 @@ def test_get_tool_params_function():
         },
         {
             'name': 'e',
+            'type': 'enum red blue green',
+            'description': 'fifth param',
+        },
+        {
+            'name': 'f',
             'type': 'float',
             'description': '(optional) last param',
             'optional': True,
