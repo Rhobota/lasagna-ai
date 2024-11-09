@@ -4,23 +4,39 @@ from .agent_runner import run
 
 from .agent_util import (
     bind_model,
+    partial_bind_model,
     recursive_extract_messages,
+    extract_last_message,
     flat_messages,
+    override_system_prompt,
+    strip_tool_calls_and_results,
+    noop_callback,
+    MessageExtractor,
+    build_standard_message_extractor,
+    default_message_extractor,
     build_simple_agent,
     build_extraction_agent,
-    noop_callback,
-    extract_last_message,
+    build_agent_chainer,
+    build_agent_router,
 )
 
 __all__ = [
     'run',
     'bind_model',
+    'partial_bind_model',
     'recursive_extract_messages',
+    'extract_last_message',
     'flat_messages',
+    'override_system_prompt',
+    'strip_tool_calls_and_results',
+    'noop_callback',
+    'MessageExtractor',
+    'build_standard_message_extractor',
+    'default_message_extractor',
     'build_simple_agent',
     'build_extraction_agent',
-    'noop_callback',
-    'extract_last_message',
+    'build_agent_chainer',
+    'build_agent_router',
 ]
 
-__version__ = "0.9.1"
+__version__ = "0.10.0"
