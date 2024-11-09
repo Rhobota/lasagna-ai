@@ -53,7 +53,7 @@ async def vote_on_jokes(joke_a: str, joke_b: str) -> Dict[str, int]:
         },
     ]
     tasks = [
-        model(noop_callback, [flat_messages(messages)])
+        model(noop_callback, [flat_messages('input', messages)])
         for model in COMMITTEE_MODELS
     ]
     outputs = await asyncio.gather(*tasks)
