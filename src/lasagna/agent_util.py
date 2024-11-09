@@ -261,3 +261,38 @@ def build_extraction_agent(
     if doc:
         a.__doc__ = doc
     return a
+
+
+def build_agent_chainer(
+    name: str,
+    agents: List[BoundAgentCallable],
+    message_extractor: Union[MessageExtractor, None] = None,
+    doc: Union[str, None] = None,
+) -> BoundAgentCallable:
+    class ChainedAgents():
+        async def __call__(
+            self,
+            event_callback: EventCallback,
+            prev_runs: List[AgentRun],
+        ) -> AgentRun:
+            if message_extractor is not None:
+                prev_runs = [flat_messages(message_extractor(prev_runs))]
+            else:
+                prev_runs = [*prev_runs]  # shallow copy
+            new_runs: List[AgentRun] = []
+            for agent in agents:
+                this_run = await agent(event_callback, prev_runs)
+                prev_runs.append(this_run)
+                new_runs.append(this_run)
+            return {
+                'type': 'chain',
+                'runs': new_runs,
+            }
+
+        def __str__(self) -> str:
+            return name
+
+    a = ChainedAgents()
+    if doc:
+        a.__doc__ = doc
+    return a
