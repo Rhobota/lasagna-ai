@@ -983,6 +983,7 @@ def test_extract_tool_result_as_sting():
         'call_id': '1001',
         'type': 'layered_agent',
         'run': {
+            'agent': 'some_downstream_agent',
             'type': 'messages',
             'messages': [
                 {
@@ -998,6 +999,7 @@ def test_extract_tool_result_as_sting():
         'call_id': '1001',
         'type': 'layered_agent',
         'run': {
+            'agent': 'some_downstream_agent',
             'type': 'messages',
             'messages': [
                 {
@@ -1022,6 +1024,7 @@ def test_extract_tool_result_as_sting():
         'call_id': '1001',
         'type': 'layered_agent',
         'run': {
+            'agent': 'some_downstream_agent',
             'type': 'messages',
             'messages': [
                 {

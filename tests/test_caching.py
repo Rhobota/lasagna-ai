@@ -21,6 +21,7 @@ from lasagna.mock_provider import (
 
 _PREV_RUNS: List[AgentRun] = [
     {
+        'agent': 'some_agent',
         'type': 'messages',
         'messages': [
             {
@@ -45,6 +46,7 @@ def _make_agent():
         messages: List[Message] = []
         new_messages = await model.run(event_callback, messages, [])
         return {
+            'agent': 'my_agent',
             'type': 'messages',
             'messages': [
                 *new_messages,
@@ -118,6 +120,10 @@ async def test_hash_agent_runs():
         __open_list__
             __open_dict__
                 __open_list__
+                    __open_list__
+                        __str__agent
+                        __str__some_agent
+                    __close_list__
                     __open_list__
                         __str__messages
                         __open_list__
