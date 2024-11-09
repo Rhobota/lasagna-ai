@@ -296,3 +296,43 @@ def build_agent_chainer(
     if doc:
         a.__doc__ = doc
     return a
+
+
+def build_agent_router(
+    name: str,
+    extraction_type: Type[ExtractionType],
+    pick_agent_func: Callable[[ExtractionType], BoundAgentCallable],
+    message_extractor: MessageExtractor = default_message_extractor,
+    doc: Union[str, None] = None,
+) -> AgentCallable:
+    class AgentRouter():
+        async def __call__(
+            self,
+            model: Model,
+            event_callback: EventCallback,
+            prev_runs: List[AgentRun],
+        ) -> AgentRun:
+            messages = message_extractor(prev_runs)
+            message, result = await model.extract(event_callback, messages, extraction_type)
+            extraction: AgentRun = {
+                'type': 'extraction',
+                'message': message,
+                'result': result,
+            }
+            agent = pick_agent_func(result)
+            run = await agent(event_callback, prev_runs)
+            return {
+                'type': 'chain',
+                'runs': [
+                    extraction,
+                    run,
+                ],
+            }
+
+        def __str__(self) -> str:
+            return name
+
+    a = AgentRouter()
+    if doc:
+        a.__doc__ = doc
+    return a
