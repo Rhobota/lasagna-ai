@@ -178,14 +178,34 @@ async def noop_callback(event: EventPayload) -> None:
     assert event
 
 
+MessageExtractor = Callable[[List[AgentRun]], List[Message]]
+
+
+def build_standard_message_extractor(
+    system_prompt_override: Union[str, None] = None,
+    strip_old_tool_use_messages: bool = False,
+) -> MessageExtractor:
+    def extractor(prev_runs: List[AgentRun]) -> List[Message]:
+        messages = recursive_extract_messages(prev_runs, from_layered_agents=False)
+        if system_prompt_override:
+            messages = override_system_prompt(messages, system_prompt_override)
+        if strip_old_tool_use_messages:
+            messages = strip_tool_calls_and_results(messages)
+        return messages
+
+    return extractor
+
+
+default_message_extractor = build_standard_message_extractor()
+
+
 def build_simple_agent(
     name: str,
     tools: List[Callable] = [],
-    doc: Union[str, None] = None,
-    system_prompt_override: Union[str, None] = None,
-    strip_old_tool_use_messages: bool = False,
     force_tool: bool = False,
     max_tool_iters: int = 5,
+    message_extractor: MessageExtractor = default_message_extractor,
+    doc: Union[str, None] = None,
 ) -> AgentCallable:
     class SimpleAgent():
         async def __call__(
@@ -194,11 +214,7 @@ def build_simple_agent(
             event_callback: EventCallback,
             prev_runs: List[AgentRun],
         ) -> AgentRun:
-            messages = recursive_extract_messages(prev_runs, from_layered_agents=False)
-            if system_prompt_override:
-                messages = override_system_prompt(messages, system_prompt_override)
-            if strip_old_tool_use_messages:
-                messages = strip_tool_calls_and_results(messages)
+            messages = message_extractor(prev_runs)
             new_messages = await model.run(
                 event_callback = event_callback,
                 messages = messages,
@@ -218,8 +234,9 @@ def build_simple_agent(
 
 
 def build_extraction_agent(
+    name: str,
     extraction_type: Type[ExtractionType],
-    name: Union[str, None] = None,
+    message_extractor: MessageExtractor = default_message_extractor,
     doc: Union[str, None] = None,
 ) -> AgentCallable:
     class ExtractionAgent():
@@ -229,7 +246,7 @@ def build_extraction_agent(
             event_callback: EventCallback,
             prev_runs: List[AgentRun],
         ) -> AgentRun:
-            messages = recursive_extract_messages(prev_runs, from_layered_agents=False)
+            messages = message_extractor(prev_runs)
             message, result = await model.extract(event_callback, messages, extraction_type)
             return {
                 'type': 'extraction',
@@ -238,7 +255,7 @@ def build_extraction_agent(
             }
 
         def __str__(self) -> str:
-            return name or 'extraction_agent'
+            return name
 
     a = ExtractionAgent()
     if doc:
