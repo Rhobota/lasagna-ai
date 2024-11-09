@@ -5,6 +5,7 @@ from typing import Callable, List
 from lasagna.agent_util import (
     bind_model,
     build_simple_agent,
+    build_standard_message_extractor,
     extract_last_message,
     noop_callback,
     partial_bind_model,
@@ -96,8 +97,10 @@ async def test_build_layered_agent():
     my_agent = build_simple_agent(
         name = 'a_layered_agent',
         tools = [],
+        message_extractor = build_standard_message_extractor(
+            system_prompt_override = 'system test',
+        ),
         doc = 'doc test',
-        system_prompt_override = 'system test',
     )
     assert my_agent.__doc__ == 'doc test'
     assert str(my_agent) == 'a_layered_agent'
@@ -106,12 +109,17 @@ async def test_build_layered_agent():
     assert my_bound_agent.__doc__ == 'doc test'
     assert my_bound_agent.__name__ == 'a_layered_agent'
     assert get_name(my_bound_agent) == 'a_layered_agent'
-    prev_runs: List[AgentRun] = [flat_messages([
-        {
-            'role': 'human',
-            'text': 'layered agent test',
-        },
-    ])]
+    prev_runs: List[AgentRun] = [
+        flat_messages(
+            'some_agent',
+            [
+                {
+                    'role': 'human',
+                    'text': 'layered agent test',
+                },
+            ],
+        ),
+    ]
     new_run = await my_bound_agent(noop_callback, prev_runs)
     assert new_run == {
         'agent': 'a_layered_agent',
@@ -143,12 +151,17 @@ async def test_model_extract():
     async def event_callback(event: EventPayload) -> None:
         events.append(event)
     prev_runs: List[AgentRun] = []
-    run = await my_binder(build_extraction_agent(MyTestType))(event_callback, prev_runs)
+    run = await my_binder(
+        build_extraction_agent(
+            name = 'my_extraction_agent',
+            extraction_type = MyTestType,
+        ),
+    )(event_callback, prev_runs)
     assert events == [
         (
             'agent',
             'start',
-            'extraction_agent',
+            'my_extraction_agent',
         ),
         (
             'tool_call',
@@ -173,7 +186,7 @@ async def test_model_extract():
                 },
                 'result': MyTestType(a='yes', b=6),
                 'provider': 'MockProvider',
-                'agent': 'extraction_agent',
+                'agent': 'my_extraction_agent',
                 'model': 'some_model',
                 'model_kwargs': {
                     'a': 'yes',
@@ -198,17 +211,25 @@ async def test_model_extract_type_mismatch():
     my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 'BAD VALUE'})
     prev_runs: List[AgentRun] = []
     with pytest.raises(ValidationError):
-        await my_binder(build_extraction_agent(MyTestType))(noop_callback, prev_runs)
+        await my_binder(
+            build_extraction_agent(
+                name = 'my_extraction_agent',
+                extraction_type = MyTestType,
+            ),
+        )(noop_callback, prev_runs)
 
 
 def test_recursive_extract_messages():
     agent_run: AgentRun = {
+        'agent': 'outer_agent',
         'type': 'chain',
         'runs': [
             {
+                'agent': 'inner_agent_1',
                 'type': 'parallel',
                 'runs': [
                     {
+                        'agent': 'inner_agent_2',
                         'type': 'messages',
                         'messages': [
                             {
@@ -222,6 +243,7 @@ def test_recursive_extract_messages():
                         ],
                     },
                     {
+                        'agent': 'inner_agent_3',
                         'type': 'messages',
                         'messages': [
                             {
@@ -244,6 +266,7 @@ def test_recursive_extract_messages():
                                         'type': 'layered_agent',
                                         'call_id': 'call001',
                                         'run': {
+                                            'agent': 'inner_agent_4',
                                             'type': 'messages',
                                             'messages': [
                                                 {
@@ -260,6 +283,7 @@ def test_recursive_extract_messages():
                 ],
             },
             {
+                'agent': 'inner_agent_5',
                 'type': 'extraction',
                 'message': {
                     'role': 'tool_call',
@@ -277,6 +301,7 @@ def test_recursive_extract_messages():
                 'result': {'value': 7},
             },
             {
+                'agent': 'inner_agent_6',
                 'type': 'messages',
                 'messages': [
                     {
@@ -320,6 +345,7 @@ def test_recursive_extract_messages():
                     'type': 'layered_agent',
                     'call_id': 'call001',
                     'run': {
+                        'agent': 'inner_agent_4',
                         'type': 'messages',
                         'messages': [
                             {
@@ -386,6 +412,7 @@ def test_recursive_extract_messages():
                     'type': 'layered_agent',
                     'call_id': 'call001',
                     'run': {
+                        'agent': 'inner_agent_4',
                         'type': 'messages',
                         'messages': [
                             {
@@ -436,7 +463,8 @@ def test_flat_messages():
             'text': 'Here kitty kitty!',
         },
     ]
-    assert flat_messages(messages) == {
+    assert flat_messages('an_agent', messages) == {
+        'agent': 'an_agent',
         'type': 'messages',
         'messages': [
             {

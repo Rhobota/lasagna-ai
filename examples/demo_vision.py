@@ -2,6 +2,7 @@ from lasagna import (
     known_models,
     build_simple_agent,
     flat_messages,
+    AgentRun,
     Message,
 )
 
@@ -35,7 +36,13 @@ async def main() -> None:
     bound_agent = MODEL_BINDER(
         build_simple_agent(name='agent'),
     )
-    await bound_agent(tui_event_callback, [flat_messages(messages)])
+    prev_runs: List[AgentRun] = [
+        flat_messages(
+            'input',
+            messages,
+        ),
+    ]
+    await bound_agent(tui_event_callback, prev_runs)
     print()
 
 

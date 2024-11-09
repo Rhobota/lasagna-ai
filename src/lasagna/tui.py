@@ -35,18 +35,28 @@ async def tui_input_loop(
     just_fix_windows_console()
     prev_runs: List[AgentRun] = []
     if system_prompt is not None:
-        prev_runs.append(flat_messages([{
-            'role': 'system',
-            'text': system_prompt,
-        }]))
+        prev_runs.append(flat_messages(
+            'tui_input_loop',
+            [
+                {
+                    'role': 'system',
+                    'text': system_prompt,
+                },
+            ],
+        ))
     try:
         while True:
             human_input = input(Fore.GREEN + Style.BRIGHT + '> ')
             print(Style.RESET_ALL, end='', flush=True)
-            prev_runs.append(flat_messages([{
-                'role': 'human',
-                'text': human_input,
-            }]))
+            prev_runs.append(flat_messages(
+                'tui_input_loop',
+                [
+                    {
+                        'role': 'human',
+                        'text': human_input,
+                    },
+                ],
+            ))
             this_run = await bound_agent(tui_event_callback, prev_runs)
             prev_runs.append(this_run)
             print(Style.RESET_ALL)

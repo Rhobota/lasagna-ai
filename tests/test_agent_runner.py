@@ -32,6 +32,7 @@ async def agent_1(
     messages: List[Message] = []
     new_messages = await model.run(event_callback, messages, [])
     return {
+        'agent': 'agent_1',
         'type': 'messages',
         'messages': new_messages,
     }

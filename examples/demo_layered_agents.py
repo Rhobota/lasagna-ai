@@ -1,6 +1,7 @@
 from lasagna import (
     known_models,
     build_simple_agent,
+    build_standard_message_extractor,
 )
 
 from lasagna.tui import (
@@ -35,17 +36,21 @@ async def main() -> None:
         tools = [
             evaluate_math_expression,
         ],
+        message_extractor = build_standard_message_extractor(
+            strip_tool_messages = True,
+            system_prompt_override = "You are a math assistant.",
+        ),
         doc = "Use this tool if the user asks a math question.",
-        system_prompt_override = "You are a math assistant.",
-        strip_old_tool_use_messages = True,
     )
     health_agent = known_models.BIND_ANTHROPIC_claude_35_sonnet()(
         build_simple_agent(
             name = 'health_agent',
             tools = [],
+            message_extractor = build_standard_message_extractor(
+                strip_tool_messages = True,
+                system_prompt_override = "You are a health coach who motivates through fear.",
+            ),
             doc = "Use this tool if the user asks a health question.",
-            system_prompt_override = "You are a health coach who motivates through fear.",
-            strip_old_tool_use_messages = True,
         ),
     )
     my_bound_agent = known_models.BIND_OPENAI_gpt_4o_mini()(

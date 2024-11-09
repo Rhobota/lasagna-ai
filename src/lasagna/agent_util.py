@@ -1,4 +1,4 @@
-from typing import Union, Dict, Any, List, Callable, Protocol, Type
+from .agent_runner import run
 
 from .util import get_name
 
@@ -17,7 +17,10 @@ from .types import (
     ToolResult,
 )
 
-from .agent_runner import run
+from typing import (
+    Union, Dict, List, Any, Type,
+    Callable, Protocol,
+)
 
 
 def bind_model(
@@ -73,98 +76,6 @@ def partial_bind_model(
     return PartialModelBinder()
 
 
-def override_system_prompt(
-    messages: List[Message],
-    system_prompt: str,
-) -> List[Message]:
-    sp: Message = {
-        'role': 'system',
-        'text': system_prompt,
-    }
-    if messages and messages[0]['role'] == 'system':
-        return [sp, *messages[1:]]
-    else:
-        return [sp, *messages]
-
-
-def strip_tool_calls_and_results(
-    messages: List[Message],
-) -> List[Message]:
-    return [
-        m
-        for m in messages
-        if m['role'] != 'tool_call' and m['role'] != 'tool_res'
-    ]
-
-
-def build_simple_agent(
-    name: str,
-    tools: List[Callable] = [],
-    doc: Union[str, None] = None,
-    system_prompt_override: Union[str, None] = None,
-    strip_old_tool_use_messages: bool = False,
-    force_tool: bool = False,
-    max_tool_iters: int = 5,
-) -> AgentCallable:
-    class SimpleAgent():
-        async def __call__(
-            self,
-            model: Model,
-            event_callback: EventCallback,
-            prev_runs: List[AgentRun],
-        ) -> AgentRun:
-            messages = recursive_extract_messages(prev_runs, from_layered_agents=False)
-            if system_prompt_override:
-                messages = override_system_prompt(messages, system_prompt_override)
-            if strip_old_tool_use_messages:
-                messages = strip_tool_calls_and_results(messages)
-            new_messages = await model.run(
-                event_callback = event_callback,
-                messages = messages,
-                tools = tools,
-                force_tool = force_tool,
-                max_tool_iters = max_tool_iters,
-            )
-            return flat_messages(new_messages)
-
-        def __str__(self) -> str:
-            return name
-
-    a = SimpleAgent()
-    if doc:
-        a.__doc__ = doc
-    return a
-
-
-def build_extraction_agent(
-    extraction_type: Type[ExtractionType],
-    name: Union[str, None] = None,
-    doc: Union[str, None] = None,
-) -> AgentCallable:
-    class ExtractionAgent():
-        async def __call__(
-            self,
-            model: Model,
-            event_callback: EventCallback,
-            prev_runs: List[AgentRun],
-        ) -> AgentRun:
-            messages = recursive_extract_messages(prev_runs, from_layered_agents=False)
-            message, result = await model.extract(event_callback, messages, extraction_type)
-            return {
-                'type': 'extraction',
-                'message': message,
-                'result': result,
-            }
-
-        def __str__(self) -> str:
-            return name or 'extraction_agent'
-
-    a = ExtractionAgent()
-    if doc:
-        a.__doc__ = doc
-    return a
-
-
 def _extract_messages_from_tool_result(
     tool_result: ToolResult,
 ) -> List[Message]:
@@ -218,18 +129,6 @@ def recursive_extract_messages(
     return messages
 
 
-def flat_messages(messages: List[Message]) -> AgentRun:
-    return {
-        'type': 'messages',
-        'messages': messages,
-    }
-
-
-async def noop_callback(event: EventPayload) -> None:
-    # "noop" mean "no operation" means DON'T DO ANYTHING!
-    pass
-
-
 def extract_last_message(
     agent_run_or_runs: Union[AgentRun, List[AgentRun]],
     from_layered_agents: bool,
@@ -241,3 +140,228 @@ def extract_last_message(
     if len(messages) == 0:
         raise ValueError('no messages found')
     return messages[-1]
+
+
+def flat_messages(
+    agent_name: str,
+    messages: List[Message],
+) -> AgentRun:
+    return {
+        'agent': agent_name,
+        'type': 'messages',
+        'messages': messages,
+    }
+
+
+def override_system_prompt(
+    messages: List[Message],
+    system_prompt: str,
+) -> List[Message]:
+    sp: Message = {
+        'role': 'system',
+        'text': system_prompt,
+    }
+    if messages and messages[0]['role'] == 'system':
+        return [sp, *messages[1:]]
+    else:
+        return [sp, *messages]
+
+
+def strip_tool_calls_and_results(
+    messages: List[Message],
+) -> List[Message]:
+    return [
+        m
+        for m in messages
+        if m['role'] != 'tool_call' and m['role'] != 'tool_res'
+    ]
+
+
+def strip_all_but_last_human_message(
+    messages: List[Message],
+) -> List[Message]:
+    for m in reversed(messages):
+        if m['role'] == 'human':
+            return [m]
+    return []
+
+
+async def noop_callback(event: EventPayload) -> None:
+    # "noop" mean "no operation" means DON'T DO ANYTHING!
+    assert event
+
+
+MessageExtractor = Callable[[List[AgentRun]], List[Message]]
+
+
+def build_standard_message_extractor(
+    extract_from_layered_agents: bool = False,
+    keep_only_last_human_message: bool = False,
+    strip_tool_messages: bool = False,
+    system_prompt_override: Union[str, None] = None,
+) -> MessageExtractor:
+    def extractor(prev_runs: List[AgentRun]) -> List[Message]:
+        messages = recursive_extract_messages(
+            agent_runs = prev_runs,
+            from_layered_agents = extract_from_layered_agents,
+        )
+        if keep_only_last_human_message:
+            messages = strip_all_but_last_human_message(messages)
+        if strip_tool_messages:
+            messages = strip_tool_calls_and_results(messages)
+        if system_prompt_override:
+            messages = override_system_prompt(messages, system_prompt_override)
+        return messages
+
+    return extractor
+
+
+default_message_extractor = build_standard_message_extractor()
+
+
+def build_simple_agent(
+    name: str,
+    tools: List[Callable] = [],
+    force_tool: bool = False,
+    max_tool_iters: int = 5,
+    message_extractor: MessageExtractor = default_message_extractor,
+    doc: Union[str, None] = None,
+) -> AgentCallable:
+    class SimpleAgent():
+        async def __call__(
+            self,
+            model: Model,
+            event_callback: EventCallback,
+            prev_runs: List[AgentRun],
+        ) -> AgentRun:
+            messages = message_extractor(prev_runs)
+            new_messages = await model.run(
+                event_callback = event_callback,
+                messages = messages,
+                tools = tools,
+                force_tool = force_tool,
+                max_tool_iters = max_tool_iters,
+            )
+            return flat_messages(name, new_messages)
+
+        def __str__(self) -> str:
+            return name
+
+    a = SimpleAgent()
+    if doc:
+        a.__doc__ = doc
+    return a
+
+
+def build_extraction_agent(
+    name: str,
+    extraction_type: Type[ExtractionType],
+    message_extractor: MessageExtractor = default_message_extractor,
+    doc: Union[str, None] = None,
+) -> AgentCallable:
+    class ExtractionAgent():
+        async def __call__(
+            self,
+            model: Model,
+            event_callback: EventCallback,
+            prev_runs: List[AgentRun],
+        ) -> AgentRun:
+            messages = message_extractor(prev_runs)
+            message, result = await model.extract(event_callback, messages, extraction_type)
+            return {
+                'agent': name,
+                'type': 'extraction',
+                'message': message,
+                'result': result,
+            }
+
+        def __str__(self) -> str:
+            return name
+
+    a = ExtractionAgent()
+    if doc:
+        a.__doc__ = doc
+    return a
+
+
+def build_agent_chainer(
+    name: str,
+    agents: List[BoundAgentCallable],
+    message_extractor: Union[MessageExtractor, None] = None,
+    doc: Union[str, None] = None,
+) -> BoundAgentCallable:
+    class ChainedAgents():
+        async def __call__(
+            self,
+            event_callback: EventCallback,
+            prev_runs: List[AgentRun],
+        ) -> AgentRun:
+            if message_extractor is not None:
+                prev_runs = [
+                    flat_messages(
+                        agent_name = name,
+                        messages = message_extractor(prev_runs),
+                    ),
+                ]
+            else:
+                prev_runs = [*prev_runs]  # shallow copy
+            new_runs: List[AgentRun] = []
+            for agent in agents:
+                this_run = await agent(event_callback, prev_runs)
+                prev_runs.append(this_run)
+                new_runs.append(this_run)
+            return {
+                'agent': name,
+                'type': 'chain',
+                'runs': new_runs,
+            }
+
+        def __str__(self) -> str:
+            return name
+
+    a = ChainedAgents()
+    if doc:
+        a.__doc__ = doc
+    return a
+
+
+def build_agent_router(
+    name: str,
+    extraction_type: Type[ExtractionType],
+    pick_agent_func: Callable[[ExtractionType], BoundAgentCallable],
+    message_extractor: MessageExtractor = default_message_extractor,
+    doc: Union[str, None] = None,
+) -> AgentCallable:
+    class AgentRouter():
+        async def __call__(
+            self,
+            model: Model,
+            event_callback: EventCallback,
+            prev_runs: List[AgentRun],
+        ) -> AgentRun:
+            messages = message_extractor(prev_runs)
+            message, result = await model.extract(event_callback, messages, extraction_type)
+            extraction: AgentRun = {
+                'agent': name,
+                'type': 'extraction',
+                'message': message,
+                'result': result,
+            }
+            agent = pick_agent_func(result)
+            run = await agent(event_callback, prev_runs)
+            return {
+                'agent': name,
+                'type': 'chain',
+                'runs': [
+                    extraction,
+                    run,
+                ],
+            }
+
+        def __str__(self) -> str:
+            return name
+
+    a = AgentRouter()
+    if doc:
+        a.__doc__ = doc
+    return a

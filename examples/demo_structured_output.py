@@ -41,14 +41,22 @@ class ExtractionModel(BaseModel):
 
 async def main() -> None:
     my_bound_agent = MODEL_BINDER(
-        build_extraction_agent(ExtractionModel),
+        build_extraction_agent(
+            name = 'extraction_agent',
+            extraction_type = ExtractionModel,
+        ),
     )
-    prev_runs = [flat_messages([
-        {
-            'role': 'human',
-            'text': PROMPT,
-        },
-    ])]
+    prev_runs = [
+        flat_messages(
+            'input',
+            [
+                {
+                    'role': 'human',
+                    'text': PROMPT,
+                },
+            ],
+        ),
+    ]
 
     agent_run = await my_bound_agent(tui_event_callback, prev_runs)
     print('DONE!')

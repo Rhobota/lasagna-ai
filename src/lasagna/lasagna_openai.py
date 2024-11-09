@@ -272,14 +272,18 @@ async def _convert_to_openai_messages(messages: List[Message]) -> List[ChatCompl
             # This is the case where the model started with text and switched
             # to tool-calling part-way-through. We need to combine these
             # messages.
-            assert ('content' in m1 and m1['content']) and ('tool_calls' not in m1 or not m1['tool_calls'])
-            assert ('content' not in m2 or not m2['content']) and ('tool_calls' in m2 and m2['tool_calls'])
-            m_combined: ChatCompletionMessageParam = {
-                'role': 'assistant',
-                'content': m1['content'],
-                'tool_calls': m2['tool_calls'],
-            }
-            return True, m_combined
+            is_first_just_content = ('content' in m1 and m1['content']) and ('tool_calls' not in m1 or not m1['tool_calls'])
+            is_second_just_tools = ('content' not in m2 or not m2['content']) and ('tool_calls' in m2 and m2['tool_calls'])
+            if is_first_just_content and is_second_just_tools:
+                assert 'content' in m1 and 'tool_calls' in m2
+                m_combined: ChatCompletionMessageParam = {
+                    'role': 'assistant',
+                    'content': m1['content'],
+                    'tool_calls': m2['tool_calls'],
+                }
+                return True, m_combined
+            else:
+                return False
         return False
     return combine_pairs(ms, should_combine)
 

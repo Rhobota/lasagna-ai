@@ -58,8 +58,6 @@ async def run(
         prev_runs,
     )
 
-    if 'agent' not in agent_run:
-        agent_run['agent'] = agent_name
     if 'provider' not in agent_run:
         agent_run['provider'] = provider_str
     if 'model' not in agent_run:
