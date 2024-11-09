@@ -85,7 +85,7 @@ Message = Union[
 
 
 class AgentRunBase(TypedDict):
-    agent: NotRequired[str]
+    agent: str
     provider: NotRequired[str]
     model: NotRequired[str]
     model_kwargs: NotRequired[Dict[str, Any]]

@@ -142,8 +142,12 @@ def extract_last_message(
     return messages[-1]
 
 
-def flat_messages(messages: List[Message]) -> AgentRun:
+def flat_messages(
+    agent_name: str,
+    messages: List[Message],
+) -> AgentRun:
     return {
+        'agent': agent_name,
         'type': 'messages',
         'messages': messages,
     }
@@ -222,7 +226,7 @@ def build_simple_agent(
                 force_tool = force_tool,
                 max_tool_iters = max_tool_iters,
             )
-            return flat_messages(new_messages)
+            return flat_messages(name, new_messages)
 
         def __str__(self) -> str:
             return name
@@ -249,6 +253,7 @@ def build_extraction_agent(
             messages = message_extractor(prev_runs)
             message, result = await model.extract(event_callback, messages, extraction_type)
             return {
+                'agent': name,
                 'type': 'extraction',
                 'message': message,
                 'result': result,
@@ -276,7 +281,12 @@ def build_agent_chainer(
             prev_runs: List[AgentRun],
         ) -> AgentRun:
             if message_extractor is not None:
-                prev_runs = [flat_messages(message_extractor(prev_runs))]
+                prev_runs = [
+                    flat_messages(
+                        agent_name = name,
+                        messages = message_extractor(prev_runs),
+                    ),
+                ]
             else:
                 prev_runs = [*prev_runs]  # shallow copy
             new_runs: List[AgentRun] = []
@@ -285,6 +295,7 @@ def build_agent_chainer(
                 prev_runs.append(this_run)
                 new_runs.append(this_run)
             return {
+                'agent': name,
                 'type': 'chain',
                 'runs': new_runs,
             }
@@ -315,6 +326,7 @@ def build_agent_router(
             messages = message_extractor(prev_runs)
             message, result = await model.extract(event_callback, messages, extraction_type)
             extraction: AgentRun = {
+                'agent': name,
                 'type': 'extraction',
                 'message': message,
                 'result': result,
@@ -322,6 +334,7 @@ def build_agent_router(
             agent = pick_agent_func(result)
             run = await agent(event_callback, prev_runs)
             return {
+                'agent': name,
                 'type': 'chain',
                 'runs': [
                     extraction,
