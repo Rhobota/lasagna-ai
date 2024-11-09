@@ -281,7 +281,12 @@ async def _run_single_tool(
                     'role': 'tool_call',
                     'tools': [tool_call],
                 })
-            prev_runs: List[AgentRun] = [flat_messages(messages)]
+            prev_runs: List[AgentRun] = [
+                flat_messages(
+                    agent_name = 'upstream_agent',
+                    messages = messages,
+                ),
+            ]
 
             if is_agent_callable:
                 agent = cast(AgentCallable, func)
