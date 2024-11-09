@@ -177,6 +177,15 @@ def strip_tool_calls_and_results(
     ]
 
 
+def strip_all_but_last_human_message(
+    messages: List[Message],
+) -> List[Message]:
+    for m in reversed(messages):
+        if m['role'] == 'human':
+            return [m]
+    return []
+
+
 async def noop_callback(event: EventPayload) -> None:
     # "noop" mean "no operation" means DON'T DO ANYTHING!
     assert event
@@ -186,15 +195,22 @@ MessageExtractor = Callable[[List[AgentRun]], List[Message]]
 
 
 def build_standard_message_extractor(
+    extract_from_layered_agents: bool = False,
+    keep_only_last_human_message: bool = False,
+    strip_tool_messages: bool = False,
     system_prompt_override: Union[str, None] = None,
-    strip_old_tool_use_messages: bool = False,
 ) -> MessageExtractor:
     def extractor(prev_runs: List[AgentRun]) -> List[Message]:
-        messages = recursive_extract_messages(prev_runs, from_layered_agents=False)
+        messages = recursive_extract_messages(
+            agent_runs = prev_runs,
+            from_layered_agents = extract_from_layered_agents,
+        )
+        if keep_only_last_human_message:
+            messages = strip_all_but_last_human_message(messages)
+        if strip_tool_messages:
+            messages = strip_tool_calls_and_results(messages)
         if system_prompt_override:
             messages = override_system_prompt(messages, system_prompt_override)
-        if strip_old_tool_use_messages:
-            messages = strip_tool_calls_and_results(messages)
         return messages
 
     return extractor
