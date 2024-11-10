@@ -48,6 +48,8 @@ async def tui_input_loop(
         while True:
             human_input = input(Fore.GREEN + Style.BRIGHT + '> ')
             print(Style.RESET_ALL, end='', flush=True)
+            if not human_input:
+                continue
             prev_runs.append(flat_messages(
                 'tui_input_loop',
                 [
