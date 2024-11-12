@@ -365,3 +365,33 @@ def build_agent_router(
     if doc:
         a.__doc__ = doc
     return a
+
+
+def build_static_output_agent(
+    name: str,
+    output: str,
+    doc: Union[str, None] = None,
+) -> AgentCallable:
+    class StaticOutputAgent():
+        async def __call__(
+            self,
+            model: Model,
+            event_callback: EventCallback,
+            prev_runs: List[AgentRun],
+        ) -> AgentRun:
+            assert model is not None and prev_runs is not None
+            await event_callback(('ai', 'text_event', output))
+            return flat_messages(name, [
+                {
+                    'role': 'ai',
+                    'text': output,
+                },
+            ])
+
+        def __str__(self) -> str:
+            return name
+
+    a = StaticOutputAgent()
+    if doc:
+        a.__doc__ = doc
+    return a

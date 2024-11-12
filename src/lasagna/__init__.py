@@ -19,6 +19,7 @@ from .agent_util import (
     build_extraction_agent,
     build_agent_chainer,
     build_agent_router,
+    build_static_output_agent,
 )
 
 __all__ = [
@@ -39,6 +40,7 @@ __all__ = [
     'build_extraction_agent',
     'build_agent_chainer',
     'build_agent_router',
+    'build_static_output_agent',
 ]
 
 __version__ = "0.10.0"
