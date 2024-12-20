@@ -73,7 +73,7 @@ Anyway, run it in your terminal and you can chat interactively with the model. ð
 (taken from [./examples/quickstart.py](./examples/quickstart.py))
 
 ```python
-from lasagna import (
+from lasagna import (     # <-- pip install -U lasagna-ai[openai,anthropic]
     known_models,
     build_simple_agent,
 )
