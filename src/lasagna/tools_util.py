@@ -76,6 +76,14 @@ def is_async_callable(f: Any) -> bool:
     return callable(f) and inspect.iscoroutinefunction(f)
 
 
+def _grab_correct_docstring(f: Any) -> str:
+    outer_doc = getattr(f, '__doc__', None)
+    inner_doc = None
+    if not inspect.isfunction(f) and hasattr(f, '__call__'):
+        inner_doc = getattr(f.__call__, '__doc__', None)
+    return inner_doc or outer_doc or ''
+
+
 def is_callable_of_type(
     concrete_callable: Any,
     expected_callable_type: Any,
@@ -130,7 +138,7 @@ def is_callable_of_type(
 
 def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
     doc_params: List[ToolParam]
-    description, doc_params = parse_docstring(tool.__doc__ or '')
+    description, doc_params = parse_docstring(_grab_correct_docstring(tool))
 
     is_agent_callable = is_callable_of_type(tool, AgentCallable, no_throw=True)
     is_bound_agent_callable = is_callable_of_type(tool, BoundAgentCallable, no_throw=True)
@@ -177,7 +185,7 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
 
 def validate_args(tool: Callable, parsed_args: Dict) -> Dict:
     tool_name = get_name(tool)
-    _, doc_params = parse_docstring(tool.__doc__ or '')
+    _, doc_params = parse_docstring(_grab_correct_docstring(tool))
     concrete_sig = inspect.signature(tool)
     concrete_params = concrete_sig.parameters.values()
 
