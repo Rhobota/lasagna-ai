@@ -172,9 +172,23 @@ def exponential_backoff_retry_delays(
     return [min(d, max_delay) for d in delay_list]
 
 
+def _has_own_str_method(obj: Any) -> bool:
+    if not hasattr(obj, '__class__'):
+        return False
+    class_str = obj.__class__.__str__
+    superclass_str = obj.__class__.__base__.__str__
+    return class_str is not superclass_str
+
+
 def get_name(obj: Any) -> str:
-    name = str(obj.__name__) if hasattr(obj, '__name__') else str(obj)
-    return name
+    if hasattr(obj, '__name__'):
+        return str(obj.__name__)
+    elif _has_own_str_method(obj):
+        return str(obj)
+    elif hasattr(obj, '__class__'):
+        return get_name(obj.__class__)
+    else:
+        return str(obj)
 
 
 class HashAlgorithm(Protocol):
