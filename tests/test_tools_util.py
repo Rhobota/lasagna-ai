@@ -977,6 +977,63 @@ def test_get_tool_params_function():
     assert str(e.value) == "tool `unknown_type` has parameter `a` type mismatch: tool type is `typing.Callable`, docstring type is `<class 'float'>`"
 
 
+def test_get_tool_params_async_function():
+    async def sample_tool(
+        a: int,
+        b: str,
+        c: bool,
+        d: Color, # <-- we support enums as Enum
+        e: str,   # <-- we support enums as str
+        f: float = 0.0,
+    ) -> str:
+        """
+        Use this for
+        anything you want.
+        :param: a: int: first param
+        :param: b: str: second param
+        :param: c: bool: third param
+        :param: d: enum red blue green: forth param
+        :param: e: enum red blue green: fifth param
+        :param: f: float: (optional) last param
+        """
+        return ''
+    description, params = get_tool_params(sample_tool)
+    assert description == 'Use this for\nanything you want.'
+    assert params == [
+        {
+            'name': 'a',
+            'type': 'int',
+            'description': 'first param',
+        },
+        {
+            'name': 'b',
+            'type': 'str',
+            'description': 'second param',
+        },
+        {
+            'name': 'c',
+            'type': 'bool',
+            'description': 'third param',
+        },
+        {
+            'name': 'd',
+            'type': 'enum red blue green',
+            'description': 'forth param',
+        },
+        {
+            'name': 'e',
+            'type': 'enum red blue green',
+            'description': 'fifth param',
+        },
+        {
+            'name': 'f',
+            'type': 'float',
+            'description': '(optional) last param',
+            'optional': True,
+        },
+    ]
+
+
 def test_get_tool_params_callable_object():
     class sample_tool:
         def __call__(
