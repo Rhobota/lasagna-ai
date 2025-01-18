@@ -436,10 +436,14 @@ class class_with_str_method:
     def __str__(self) -> str:
         return 'Hi!'
 
+class class_with_no_str_method:
+    pass
+
 def test_get_name():
     assert get_name(regular_function) == 'regular_function'
     assert get_name(async_regular_function) == 'async_regular_function'
     assert get_name(class_with_str_method()) == 'Hi!'
+    assert get_name(class_with_no_str_method()) == 'class_with_no_str_method'
 
 
 def test_recursive_hash():

@@ -1,8 +1,10 @@
 import pytest
+import copy
 
 from lasagna.agent_util import (
     bind_model,
     build_simple_agent,
+    flat_messages,
     noop_callback,
 )
 
@@ -16,6 +18,9 @@ from lasagna.types import (
     Message,
     ModelSpec,
     ToolResult,
+    Model,
+    EventCallback,
+    AgentRun,
 )
 
 from typing import List, Dict, Callable, Awaitable
@@ -149,6 +154,40 @@ def tool_with_enum_missing_annotation(c):
     :param: c: enum red blue green: a param
     """
     return str(c)
+
+class ToolAsCallableObject:
+    def __call__(self, a: int) -> int:
+        """
+        This is a callable object tool.
+        :param: a: int: the param named `a`
+        """
+        return 4 * a
+
+class ToolAsAsyncCallableObject:
+    async def __call__(self, a: int) -> int:
+        """
+        This is an async callable object tool.
+        :param: a: int: the param named `a`
+        """
+        return 5 * a
+
+async def agent_as_function(
+    model: Model,
+    event_callback: EventCallback,
+    prev_runs: List[AgentRun],
+) -> AgentRun:
+    """This is an agent as a function."""
+    return flat_messages('agent_as_function', [])
+
+class AgentAsAsyncCallableObject:
+    async def __call__(
+        self,
+        model: Model,
+        event_callback: EventCallback,
+        prev_runs: List[AgentRun],
+    ) -> AgentRun:
+        """This is an agent as an async callable object."""
+        return flat_messages('AgentAsAsyncCallableObject', [])
 
 
 def test_validate_args():
@@ -303,6 +342,36 @@ def test_validate_args():
     )
     assert args == {'c': 'red'}
 
+    args = validate_args(
+        ToolAsCallableObject(),
+        {
+            'a': 5,
+        },
+    )
+    assert args == {'a': 5}
+
+    args = validate_args(
+        ToolAsAsyncCallableObject(),
+        {
+            'a': 5,
+        },
+    )
+    assert args == {'a': 5}
+
+    args = validate_args(
+        agent_as_function,
+        {
+        },
+    )
+    assert args == {}
+
+    args = validate_args(
+        AgentAsAsyncCallableObject(),
+        {
+        },
+    )
+    assert args == {}
+
 
 @pytest.mark.asyncio
 async def test_handle_tools_standard_functions():
@@ -323,8 +392,10 @@ async def test_handle_tools_standard_functions():
         'tool_a': tool_a,
         'tool_b': tool_b,
         'tool_c': tool_c,
+        'tool_object': ToolAsCallableObject(),
         'tool_async_a': tool_async_a,
         'tool_async_b': tool_async_b,
+        'tool_async_object': ToolAsAsyncCallableObject(),
     }
     message: Message = {
         'role': 'tool_call',
@@ -346,6 +417,8 @@ async def test_handle_tools_standard_functions():
             {'call_id': '1015', 'function': {'arguments': '{}', 'name': 'tool_async_b'}, 'call_type': 'function'},
             {'call_id': '1016', 'function': {'arguments': '{}', 'name': 'tool_async_a'}, 'call_type': 'function'},
             {'call_id': '1017', 'function': {'arguments': '[1, 2, 3]', 'name': 'tool_a'}, 'call_type': 'function'},
+            {'call_id': '1018', 'function': {'arguments': '{"a": 5}', 'name': 'tool_object'}, 'call_type': 'function'},
+            {'call_id': '1019', 'function': {'arguments': '{"a": 5}', 'name': 'tool_async_object'}, 'call_type': 'function'},
         ],
         'cost': None,
         'raw': None,
@@ -376,6 +449,8 @@ async def test_handle_tools_standard_functions():
         {'type': 'any', 'call_id': '1015', 'result': 20 },
         {'type': 'any', 'call_id': '1016', 'result': "TypeError: tool_async_a() missing 1 required argument: 'x'", 'is_error': True },
         {'type': 'any', 'call_id': '1017', 'result': "TypeError: tool output must be a JSON object", 'is_error': True },
+        {'type': 'any', 'call_id': '1018', 'result': 20 },
+        {'type': 'any', 'call_id': '1019', 'result': 25 },
     ]
 
 
@@ -413,6 +488,8 @@ async def test_handle_tools_layered_agents():
     tool_map: Dict[str, Callable] = {
         'agent_1': agent_1,
         'bound_agent_2': bound_agent_2,
+        'agent_as_function': agent_as_function,
+        'agent_as_callable_object': AgentAsAsyncCallableObject(),
     }
 
     message: Message = {
@@ -424,6 +501,8 @@ async def test_handle_tools_layered_agents():
             {'call_id': '1004', 'function': {'arguments': '{"prompt": "Hey"}', 'name': 'bound_agent_2'}, 'call_type': 'function'},
             {'call_id': '1005', 'function': {'arguments': '{"bad_name": "Hi"}', 'name': 'agent_1'}, 'call_type': 'function'},
             {'call_id': '1006', 'function': {'arguments': '{"bad_name": "Hey"}', 'name': 'bound_agent_2'}, 'call_type': 'function'},
+            {'call_id': '1007', 'function': {'arguments': '{}', 'name': 'agent_as_function'}, 'call_type': 'function'},
+            {'call_id': '1008', 'function': {'arguments': '{}', 'name': 'agent_as_callable_object'}, 'call_type': 'function'},
         ],
     }
 
@@ -589,6 +668,30 @@ async def test_handle_tools_layered_agents():
             'is_error': True,
             'result': "TypeError: bound_agent_2() got 1 unexpected argument: 'bad_name'",
         },
+        {
+            'type': 'layered_agent',
+            'call_id': '1007',
+            'run': {
+                'type': 'messages',
+                'agent': 'agent_as_function',
+                'provider': 'MockProvider',
+                'model': 'some_model',
+                'model_kwargs': {'outer': True},
+                'messages': [],
+            },
+        },
+        {
+            'type': 'layered_agent',
+            'call_id': '1008',
+            'run': {
+                'type': 'messages',
+                'agent': 'AgentAsAsyncCallableObject',
+                'provider': 'MockProvider',
+                'model': 'some_model',
+                'model_kwargs': {'outer': True},
+                'messages': [],
+            },
+        },
     ]
 
 
@@ -597,14 +700,15 @@ def test_build_tool_response_message():
         {'type': 'any', 'call_id': '1002', 'result': 10.8 },
         {'type': 'any', 'call_id': '1003', 'result': "hihi" },
     ]
-    message = build_tool_response_message(res)
+    message = build_tool_response_message(copy.deepcopy(res))
     assert message == {
         'role': 'tool_res',
         'tools': res,
     }
 
 
-MyCallable = Callable[[int, str], Awaitable[bool]]
+MyCallable = Callable[[int, str], bool]
+MyAsyncCallable = Callable[[int, str], Awaitable[bool]]
 
 async def correct_function(a: int, b: str) -> bool:
     return True
@@ -670,6 +774,12 @@ def test_is_async_callable():
     assert is_async_callable(correct_class())
     assert not is_async_callable(not_async_class())
 
+    assert not is_async_callable(ToolAsCallableObject())
+    assert is_async_callable(ToolAsAsyncCallableObject())
+
+    assert is_async_callable(agent_as_function)
+    assert is_async_callable(AgentAsAsyncCallableObject())
+
 
 def test_is_callable_of_type():
     objects = [
@@ -698,7 +808,15 @@ def test_is_callable_of_type():
         for o in objects
         if is_callable_of_type(o, MyCallable, no_throw=True)
     ]
+    assert len(matching_objects) == 2
+    assert matching_objects[0] is not_async
+    assert isinstance(matching_objects[1], not_async_class)  # !!!
 
+    matching_objects = [
+        o
+        for o in objects
+        if is_callable_of_type(o, MyAsyncCallable, no_throw=True)
+    ]
     assert len(matching_objects) == 2
     assert matching_objects[0] is correct_function
     assert isinstance(matching_objects[1], correct_class)
@@ -714,6 +832,12 @@ def test_is_callable_of_type_agent_callables():
 
     assert not is_callable_of_type(my_agent, BoundAgentCallable)
     assert not is_callable_of_type(my_bound_agent, AgentCallable)
+
+    assert not is_callable_of_type(ToolAsCallableObject(), AgentCallable)
+    assert not is_callable_of_type(ToolAsAsyncCallableObject(), AgentCallable)
+
+    assert is_callable_of_type(agent_as_function, AgentCallable)
+    assert is_callable_of_type(AgentAsAsyncCallableObject(), AgentCallable)
 
 
 def test_get_tool_params_function():
@@ -851,6 +975,181 @@ def test_get_tool_params_function():
     with pytest.raises(ValueError) as e:
         get_tool_params(unknown_type)
     assert str(e.value) == "tool `unknown_type` has parameter `a` type mismatch: tool type is `typing.Callable`, docstring type is `<class 'float'>`"
+
+
+def test_get_tool_params_async_function():
+    async def sample_tool(
+        a: int,
+        b: str,
+        c: bool,
+        d: Color, # <-- we support enums as Enum
+        e: str,   # <-- we support enums as str
+        f: float = 0.0,
+    ) -> str:
+        """
+        Use this for
+        anything you want.
+        :param: a: int: first param
+        :param: b: str: second param
+        :param: c: bool: third param
+        :param: d: enum red blue green: forth param
+        :param: e: enum red blue green: fifth param
+        :param: f: float: (optional) last param
+        """
+        return ''
+    description, params = get_tool_params(sample_tool)
+    assert description == 'Use this for\nanything you want.'
+    assert params == [
+        {
+            'name': 'a',
+            'type': 'int',
+            'description': 'first param',
+        },
+        {
+            'name': 'b',
+            'type': 'str',
+            'description': 'second param',
+        },
+        {
+            'name': 'c',
+            'type': 'bool',
+            'description': 'third param',
+        },
+        {
+            'name': 'd',
+            'type': 'enum red blue green',
+            'description': 'forth param',
+        },
+        {
+            'name': 'e',
+            'type': 'enum red blue green',
+            'description': 'fifth param',
+        },
+        {
+            'name': 'f',
+            'type': 'float',
+            'description': '(optional) last param',
+            'optional': True,
+        },
+    ]
+
+
+def test_get_tool_params_callable_object():
+    class sample_tool:
+        def __call__(
+            self,
+            a: int,
+            b: str,
+            c: bool,
+            d: Color, # <-- we support enums as Enum
+            e: str,   # <-- we support enums as str
+            f: float = 0.0,
+        ) -> str:
+            """
+            Use this for
+            anything you want.
+            :param: a: int: first param
+            :param: b: str: second param
+            :param: c: bool: third param
+            :param: d: enum red blue green: forth param
+            :param: e: enum red blue green: fifth param
+            :param: f: float: (optional) last param
+            """
+            return ''
+    description, params = get_tool_params(sample_tool())
+    assert description == 'Use this for\nanything you want.'
+    assert params == [
+        {
+            'name': 'a',
+            'type': 'int',
+            'description': 'first param',
+        },
+        {
+            'name': 'b',
+            'type': 'str',
+            'description': 'second param',
+        },
+        {
+            'name': 'c',
+            'type': 'bool',
+            'description': 'third param',
+        },
+        {
+            'name': 'd',
+            'type': 'enum red blue green',
+            'description': 'forth param',
+        },
+        {
+            'name': 'e',
+            'type': 'enum red blue green',
+            'description': 'fifth param',
+        },
+        {
+            'name': 'f',
+            'type': 'float',
+            'description': '(optional) last param',
+            'optional': True,
+        },
+    ]
+
+
+def test_get_tool_params_async_callable_object():
+    class sample_tool:
+        async def __call__(
+            self,
+            a: int,
+            b: str,
+            c: bool,
+            d: Color, # <-- we support enums as Enum
+            e: str,   # <-- we support enums as str
+            f: float = 0.0,
+        ) -> str:
+            """
+            Use this for
+            anything you want.
+            :param: a: int: first param
+            :param: b: str: second param
+            :param: c: bool: third param
+            :param: d: enum red blue green: forth param
+            :param: e: enum red blue green: fifth param
+            :param: f: float: (optional) last param
+            """
+            return ''
+    description, params = get_tool_params(sample_tool())
+    assert description == 'Use this for\nanything you want.'
+    assert params == [
+        {
+            'name': 'a',
+            'type': 'int',
+            'description': 'first param',
+        },
+        {
+            'name': 'b',
+            'type': 'str',
+            'description': 'second param',
+        },
+        {
+            'name': 'c',
+            'type': 'bool',
+            'description': 'third param',
+        },
+        {
+            'name': 'd',
+            'type': 'enum red blue green',
+            'description': 'forth param',
+        },
+        {
+            'name': 'e',
+            'type': 'enum red blue green',
+            'description': 'fifth param',
+        },
+        {
+            'name': 'f',
+            'type': 'float',
+            'description': '(optional) last param',
+            'optional': True,
+        },
+    ]
 
 
 def test_get_tool_params_layered_agents():
