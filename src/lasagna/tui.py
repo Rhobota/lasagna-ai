@@ -7,9 +7,14 @@ from .types import (
     AgentRun,
 )
 
+import os
+
 from typing import Union, List
 
 from colorama import just_fix_windows_console, Fore, Style
+
+
+TRUNCATE_PAST_CHARS = int(os.environ.get('LASAGNA_TUI_TOOL_RESULT_TRUNCATE', 50))
 
 
 async def tui_event_callback(event: EventPayload) -> None:
@@ -23,6 +28,7 @@ async def tui_event_callback(event: EventPayload) -> None:
         print(s, end='', flush=True)
     elif event[0] == 'tool_res' and event[1] == 'tool_res_event':
         content = extract_tool_result_as_sting(event[2])
+        content = _truncate_str(content, TRUNCATE_PAST_CHARS)
         r = Fore.BLUE + f" -> {content}"
         print(r)
     print(Style.RESET_ALL, end='', flush=True)
@@ -70,3 +76,15 @@ async def tui_input_loop(
         pass
     finally:
         print(Style.RESET_ALL)
+
+
+def _truncate_str(s: str, truncate_past_chars: int) -> str:
+    if len(s) <= truncate_past_chars:
+        return s
+    truncated_s = s[:truncate_past_chars]
+    n_truncated = len(s) - len(truncated_s)
+    truncate_message = f' [... truncated {n_truncated} characters ...]'
+    new_s = f'{truncated_s}{truncate_message}'
+    if len(new_s) >= len(s):
+        return s
+    return new_s
