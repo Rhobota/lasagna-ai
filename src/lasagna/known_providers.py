@@ -14,6 +14,7 @@ def attempt_load_all_known_providers() -> None:
     providers_to_try_to_load = [
         'openai',
         'anthropic',
+        'ollama',
         'nvidia',
     ]
     for provider in providers_to_try_to_load:
@@ -61,6 +62,16 @@ def attempt_load_known_providers(provider: str) -> None:
             name = 'Anthropic',
             factory = LasagnaAnthropic,
             models = ANTHROPIC_KNOWN_MODELS,
+        )
+
+    elif provider == 'ollama':
+        from .known_models import OLLAMA_KNOWN_MODELS
+        from .lasagna_ollama import LasagnaOllama
+        register_provider(
+            key  = 'ollama',
+            name = 'Ollama',
+            factory = LasagnaOllama,
+            models = OLLAMA_KNOWN_MODELS,
         )
 
     elif provider == 'nvidia':
