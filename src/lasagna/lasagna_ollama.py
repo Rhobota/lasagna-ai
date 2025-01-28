@@ -152,12 +152,12 @@ async def _event_stream(url: str, payload: Dict) -> AsyncIterator[Dict]:
         async with client.stream('POST', url, json=payload) as r:
             if r.status_code != 200:
                 error_text = json.loads(await r.aread())['error']
-                raise RuntimeError(f'Ollama error: {error_text}')   # TODO TEST ME
+                raise RuntimeError(f'Ollama error: {error_text}')
             async for line in r.aiter_lines():
                 rec = json.loads(line)
                 if rec.get('error'):
                     error_text = rec['error']
-                    raise RuntimeError(f'Ollama error: {error_text}')   # TODO TEST ME
+                    raise RuntimeError(f'Ollama error: {error_text}')
                 yield rec
 
 
@@ -424,23 +424,25 @@ class LasagnaOllama(Model):
 
         arguments = new_message['text'] or '{}'
 
-        tool_message: MessageToolCall = {
-            'role': 'tool_call',
-            'tools': [
-                {
-                    'call_id': 'extraction_tool_call',
-                    'call_type': 'function',
-                    'function': {
-                        'name': '...',  # TODO
-                        'arguments': arguments,
-                    },
-                },
-            ],
-            #'cost': new_message.get('cost', None),  # TODO
-            #'raw': new_message.get('raw', None),  # TODO
+        tool_call: ToolCall = {
+            'call_id': 'extraction_tool_call',
+            'call_type': 'function',
+            'function': {
+                'name': get_name(extraction_type),
+                'arguments': arguments,
+            },
         }
 
-        await event_callback(('tool_call', 'tool_call_event', tool_message['tools'][0]))
+        tool_message: MessageToolCall = {
+            'role': 'tool_call',
+            'tools': [tool_call],
+        }
+        if 'cost' in new_message:
+            tool_message['cost'] = new_message['cost']
+        if 'raw' in new_message:
+            tool_message['raw'] = new_message['raw']
+
+        await event_callback(('tool_call', 'tool_call_event', tool_call))
 
         parsed = json.loads(arguments)
         result = build_and_validate(extraction_type, parsed)
