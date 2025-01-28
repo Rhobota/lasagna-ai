@@ -6,6 +6,9 @@ For more information about Ollama, see:
 """
 
 from .types import (
+    Cost,
+    EventPayload,
+    MessageToolCall,
     ModelSpec,
     Message,
     Media,
@@ -32,8 +35,6 @@ from .tools_util import (
 
 from .pydantic_util import ensure_pydantic_model, build_and_validate
 
-from .known_models import OLLAMA_KNOWN_MODELS
-
 from openai.lib._pydantic import to_strict_json_schema
 
 from typing import (
@@ -56,9 +57,12 @@ _LOG = logging.getLogger(__name__)
 def _convert_to_ollama_tool(tool: Callable) -> Dict:
     description, params = get_tool_params(tool)
     return {
-        'name': get_name(tool),
-        'description': description,
-        'input_schema': convert_to_json_schema(params),
+        'type': 'function',
+        'function': {
+            'name': get_name(tool),
+            'description': description,
+            'parameters': convert_to_json_schema(params),
+        },
     }
 
 
@@ -77,7 +81,6 @@ def _log_dumps(val: Any) -> str:
 
 
 async def _convert_to_ollama_media(media: List[Media]) -> Dict:
-    # Ollama only supports *images* as media. But, so does lasagna, so all good.
     res: Dict = {
         'images': [],
     }
@@ -110,6 +113,7 @@ async def _convert_to_ollama_messages(messages: List[Message]) -> List[Dict]:
         'human': 'user',
         'ai': 'assistant',
     }
+    prev_tool_call_map = {}
     for m in messages:
         if m['role'] == 'system' or m['role'] == 'human' or m['role'] == 'ai':  # <-- not using boolean 'in' to make mypy happy
             media = {}
@@ -126,13 +130,17 @@ async def _convert_to_ollama_messages(messages: List[Message]) -> List[Dict]:
                 'content': '',
                 'tool_calls': _convert_to_ollama_tool_calls(m['tools']),
             })
+            prev_tool_call_map = {
+                t['call_id']: t['function']['name']
+                for t in m['tools']
+            }
         elif m['role'] == 'tool_res':
             for t in m['tools']:
                 # t['is_error'] IS NOT USED!
                 res.append({
                     'role': 'tool',
                     'content': extract_tool_result_as_sting(t),
-                    'name': t['call_id'],  # <-- weird, I know, but Ollama sort of uses the name as the call id, so we do that too
+                    'name': prev_tool_call_map.get(t['call_id'], 'unknown'),
                 })
         else:
             raise RuntimeError(f"unreachable: {m['role']}")
@@ -144,34 +152,111 @@ async def _event_stream(url: str, payload: Dict) -> AsyncIterator[Dict]:
         async with client.stream('POST', url, json=payload) as r:
             if r.status_code != 200:
                 error_text = json.loads(await r.aread())['error']
-                raise RuntimeError(f'Ollama error: {error_text}')
+                raise RuntimeError(f'Ollama error: {error_text}')   # TODO TEST ME
             async for line in r.aiter_lines():
                 rec = json.loads(line)
                 if rec.get('error'):
                     error_text = rec['error']
-                    raise RuntimeError(f'Ollama error: {error_text}')
+                    raise RuntimeError(f'Ollama error: {error_text}')   # TODO TEST ME
                 yield rec
+
+
+def _set_cost_raw(message: Message, raw: List[Dict]) -> Message:
+    cost: Cost = {
+        'input_tokens': None,
+        'output_tokens': None,
+        'total_tokens': None,
+    }
+    for event in raw:
+        if 'prompt_eval_count' in event:
+            cost['input_tokens'] = (cost['input_tokens'] or 0) + event['prompt_eval_count']
+        if 'eval_count' in event:
+            cost['output_tokens'] = (cost['output_tokens'] or 0) + event['eval_count']
+    cost['total_tokens'] = (cost['input_tokens'] or 0) + (cost['output_tokens'] or 0)
+    new_message: Message = copy.copy(message)
+    if (cost['total_tokens'] or 0) > 0:
+        new_message['cost'] = cost
+    new_message['raw'] = raw
+    return new_message
 
 
 async def _process_stream(
     stream: AsyncIterator[Dict],
     event_callback: EventCallback,
 ) -> List[Message]:
+    raw: List[Dict] = []
+    content: List[str] = []
+    tools: List[ToolCall] = []
     async for event in stream:
+        raw.append(event)
         if 'message' in event:
             m = event['message']
             if 'content' in m:
                 c = m['content']
-                assert isinstance(c, str)
-                await event_callback(('ai', 'text_event', c))  # TODO
-    return []  # TODO
+                if c:
+                    assert isinstance(c, str)
+                    await event_callback(('ai', 'text_event', c))
+                    content.append(c)
+            if 'tool_calls' in m:
+                for i, t in enumerate(m['tool_calls']):
+                    assert 'function' in t
+                    f = t['function']
+                    name = f['name']
+                    args = f['arguments']  # is a dict
+                    args_str = json.dumps(args)
+                    tool_call: ToolCall = {
+                        'call_id': f'call_{i}',  # <-- Ollama doesn't do the `call_id` thing, so we invent a call_id
+                        'call_type': 'function',
+                        'function': {
+                            'name': name,
+                            'arguments': args_str,
+                        },
+                    }
+                    await event_callback(('tool_call', 'text_event', f'{name}({args_str})\n'))
+                    await event_callback(('tool_call', 'tool_call_event', tool_call))
+                    tools.append(tool_call)
+    messages: List[Message] = []
+    if content:
+        messages.append({
+            'role': 'ai',
+            'text': ''.join(content),
+        })
+    if tools:
+        messages.append({
+            'role': 'tool_call',
+            'tools': tools,
+        })
+    if len(messages) > 0:
+        messages[-1] = _set_cost_raw(messages[-1], raw)
+    return messages
+
+
+def _wrap_event_callback_convert_ai_text_to_tool_call_text(
+    wrapped: EventCallback,
+) -> EventCallback:
+    async def wrapper(event: EventPayload) -> None:
+        if event[0] == 'ai' and event[1] == 'text_event':
+            await wrapped(('tool_call', 'text_event', event[2]))
+        else:
+            await wrapped(event)
+
+    return wrapper
+
+
+def _get_ollama_format_for_structured_output(
+    extraction_type: Type[ExtractionType],
+) -> Dict:
+    format: Dict = to_strict_json_schema(ensure_pydantic_model(extraction_type))
+
+    docstr = getattr(extraction_type, '__doc__', None)
+    if docstr:
+        format['description'] = docstr
+
+    return format
 
 
 class LasagnaOllama(Model):
     def __init__(self, model: str, **model_kwargs: Dict[str, Any]):
-        known_model_names = [m['formal_name'] for m in OLLAMA_KNOWN_MODELS]
-        if model not in known_model_names:
-            _LOG.warning(f'untested model: {model} (may or may not work)')
         self.model = model
         self.model_kwargs = copy.deepcopy(model_kwargs or {})
         self.n_retries: int = cast(int, self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
@@ -197,19 +282,24 @@ class LasagnaOllama(Model):
         messages: List[Message],
         tools_spec: Union[None, List[Dict]],
         force_tool: bool,
+        format: Union[None, Dict],
     ) -> List[Message]:
         stream = True
-        tools = None
 
-        if tools_spec and len(tools_spec) > 0:
+        if tools_spec and format:
+            raise ValueError("Oops! You cannot do both tool-use and structured output at the same time!")
+
+        if tools_spec:
             stream = False   # Ollama does not yet support streaming tool responses.
-            tools = tools_spec
             if not force_tool:
                 raise ValueError("Oops! Ollama currently does not support *optional* tool use. Thus, if you pass tools, you must also pass `force_tool=True` to show that your intended use matches Ollama's behavior.")
+        else:
+            if force_tool:
+                raise ValueError("Oops! You cannot force tools that are not specified!")
 
         ollama_messages = await _convert_to_ollama_messages(messages)
 
-        _LOG.info(f"Invoking {self.model} with:\n  messages: {_log_dumps(ollama_messages)}\n  tools: {_log_dumps(tools)}")
+        _LOG.info(f"Invoking {self.model} with:\n  messages: {_log_dumps(ollama_messages)}\n  tools: {_log_dumps(tools_spec)}")
 
         url = f'{self.base_url}/api/chat'
 
@@ -217,7 +307,8 @@ class LasagnaOllama(Model):
             'model': self.model,
             'messages': ollama_messages,
             'stream': stream,
-            **({'tools': tools} if tools is not None else {}),
+            **({'tools': tools_spec} if tools_spec else {}),
+            **({'format': format} if format else {}),
         }
 
         event_stream = _event_stream(url, payload)
@@ -233,6 +324,7 @@ class LasagnaOllama(Model):
         messages: List[Message],
         tools_spec: Union[None, List[Dict]],
         force_tool: bool,
+        format: Union[None, Dict],
     ) -> List[Message]:
         last_error: Union[Exception, None] = None
         assert self.n_retries + 1 > 0   # <-- we know this is true from the check in __init__
@@ -245,6 +337,7 @@ class LasagnaOllama(Model):
                         messages = messages,
                         tools_spec = tools_spec,
                         force_tool = force_tool,
+                        format = format,
                     )
                 except:
                     await event_callback(('transaction', 'rollback', None))
@@ -288,6 +381,7 @@ class LasagnaOllama(Model):
                 messages       = messages,
                 tools_spec     = tools_spec,
                 force_tool     = force_tool,
+                format         = None,
             )
             tools_results = await handle_tools(
                 prev_messages = messages,
@@ -313,39 +407,42 @@ class LasagnaOllama(Model):
         messages: List[Message],
         extraction_type: Type[ExtractionType],
     ) -> Tuple[Message, ExtractionType]:
-        tools_spec: List[Dict] = [
-            {
-                'name': get_name(extraction_type),
-                'input_schema': to_strict_json_schema(ensure_pydantic_model(extraction_type)),
-            },
-        ]
-
-        # TODO: use the `format` feature of Ollama
-
-        docstr = getattr(extraction_type, '__doc__', None)
-        if docstr:
-            tools_spec[0]['description'] = docstr
+        format = _get_ollama_format_for_structured_output(extraction_type)
 
         new_messages = await self._retrying_run_once(
-            event_callback = event_callback,
+            event_callback = _wrap_event_callback_convert_ai_text_to_tool_call_text(event_callback),
             messages       = messages,
-            tools_spec     = tools_spec,
-            force_tool     = True,
+            tools_spec     = None,
+            force_tool     = False,
+            format         = format,
         )
 
         assert len(new_messages) == 1
         new_message = new_messages[0]
 
-        if new_message['role'] == 'tool_call':
-            tools = new_message['tools']
+        assert new_message['role'] == 'ai'  # Ollama generates structured output just like it does normal text, so at this point it is just text.
 
-            assert len(tools) == 1
-            parsed = json.loads(tools[0]['function']['arguments'])
-            result = build_and_validate(extraction_type, parsed)
+        arguments = new_message['text'] or '{}'
 
-            return new_message, result
+        tool_message: MessageToolCall = {
+            'role': 'tool_call',
+            'tools': [
+                {
+                    'call_id': 'extraction_tool_call',
+                    'call_type': 'function',
+                    'function': {
+                        'name': '...',  # TODO
+                        'arguments': arguments,
+                    },
+                },
+            ],
+            #'cost': new_message.get('cost', None),  # TODO
+            #'raw': new_message.get('raw', None),  # TODO
+        }
 
-        else:
-            assert new_message['role'] == 'ai'
-            text = new_message['text']
-            raise RuntimeError(f"Model failed to generate structured output; instead, it output: {text}")
+        await event_callback(('tool_call', 'tool_call_event', tool_message['tools'][0]))
+
+        parsed = json.loads(arguments)
+        result = build_and_validate(extraction_type, parsed)
+
+        return tool_message, result
