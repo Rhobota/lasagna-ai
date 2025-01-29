@@ -26,7 +26,8 @@
   - Yes, you _can_ have _both_ streaming and easy database storage.
 
 - ↔️ **Provider/model agnostic and interoperable!**
-  - Native support for [OpenAI](https://platform.openai.com/docs/models), [Anthropic](https://docs.anthropic.com/en/docs/welcome), [NVIDIA NIM/NGC](https://build.nvidia.com/explore/reasoning) (+ more to come).
+  - Core support for [OpenAI](https://platform.openai.com/docs/models) and [Anthropic](https://docs.anthropic.com/en/docs/welcome).
+  - Experimental support for [Ollama](https://ollama.com/search) and [NVIDIA NIM/NGC](https://build.nvidia.com/explore/reasoning).
   - Message representations are canonized. 😇
   - Supports vision!
   - Easily build committees!

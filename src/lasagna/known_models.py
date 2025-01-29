@@ -63,6 +63,30 @@ BIND_ANTHROPIC_claude_3_sonnet  = partial_bind_model('anthropic', 'claude-3-sonn
 BIND_ANTHROPIC_claude_3_haiku   = partial_bind_model('anthropic', 'claude-3-haiku-20240307')
 
 
+OLLAMA_KNOWN_MODELS: List[ModelRecord] = [
+    # We'll only list models here that (1) support tool-calling because
+    # that's kind of the whole point of lasagna, and (2) we've tested
+    # ourselves and pass our "vibe" test. Users are of course more than
+    # welcome to use *other* Ollama models as they see fit.
+    {
+        'formal_name': 'llama3.2',
+        'display_name': 'Meta Llama 3.2',
+    },
+    {
+        'formal_name': 'mistral-small',
+        'display_name': 'Mistral Small',
+    },
+    {
+        'formal_name': 'mistral-large',
+        'display_name': 'Mistral Large',
+    },
+]
+
+BIND_OLLAMA_llama3_2 = partial_bind_model('ollama', 'llama3.2')
+BIND_OLLAMA_mistral_small = partial_bind_model('ollama', 'mistral-small')
+BIND_OLLAMA_mistral_large = partial_bind_model('ollama', 'mistral-large')
+
+
 NVIDIA_KNOWN_MODELS: List[ModelRecord] = [
     {
         'formal_name': 'meta/llama3-70b-instruct',

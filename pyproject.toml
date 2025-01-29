@@ -35,6 +35,7 @@ classifiers = [
 dependencies = [
   "svs",
   "aiohttp[speedups]",
+  "httpx",
   "python-dotenv",
   "colorama",
   "pydantic >= 2.7, < 3",
