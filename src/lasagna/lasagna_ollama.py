@@ -267,7 +267,12 @@ class LasagnaOllama(Model):
             'model': self.model,
             'model_kwargs': self.model_kwargs,
         }
-        self.base_url = model_kwargs.get('base_url', os.environ.get('OLLAMA_BASE_URL', 'http://127.0.0.1:11434'))
+        self.base_url = self.model_kwargs.get('base_url', os.environ.get('OLLAMA_BASE_URL', 'http://127.0.0.1:11434'))
+        self.keep_alive = self.model_kwargs.get('keep_alive', '5m')
+        self.payload_options = copy.deepcopy(self.model_kwargs)
+        for key_to_remove in ['retries', 'base_url', 'keep_alive']:
+            if key_to_remove in self.payload_options:
+                del self.payload_options[key_to_remove]
 
     def config_hash(self) -> str:
         return recursive_hash(None, {
@@ -309,6 +314,8 @@ class LasagnaOllama(Model):
             'stream': stream,
             **({'tools': tools_spec} if tools_spec else {}),
             **({'format': format} if format else {}),
+            'options': self.payload_options,
+            'keep_alive': self.keep_alive,
         }
 
         event_stream = _event_stream(url, payload)
