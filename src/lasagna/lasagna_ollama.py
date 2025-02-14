@@ -147,8 +147,13 @@ async def _convert_to_ollama_messages(messages: List[Message]) -> List[Dict]:
     return res
 
 
-async def _event_stream(url: str, payload: Dict) -> AsyncIterator[Dict]:
-    async with httpx.AsyncClient() as client:
+async def _event_stream(
+    url: str,
+    payload: Dict,
+    timeout_seconds: float,
+) -> AsyncIterator[Dict]:
+    timeout = httpx.Timeout(timeout_seconds, connect=2.0)  # 2s timeout on connect. `timeout_seconds` elsewhere (read/write/pool).
+    async with httpx.AsyncClient(timeout=timeout) as client:
         async with client.stream('POST', url, json=payload) as r:
             if r.status_code != 200:
                 error_text = json.loads(await r.aread())['error']
@@ -269,8 +274,11 @@ class LasagnaOllama(Model):
         }
         self.base_url = self.model_kwargs.get('base_url', os.environ.get('OLLAMA_BASE_URL', 'http://127.0.0.1:11434'))
         self.keep_alive = self.model_kwargs.get('keep_alive', '5m')
+        self.timeout_seconds: float = cast(float, self.model_kwargs['timeout_seconds']) if 'timeout_seconds' in self.model_kwargs else 120.0
+        if not isinstance(self.timeout_seconds, float) or self.timeout_seconds < 0.0:
+            raise ValueError(f"model_kwargs['timeout_seconds'] must be a non-negative float (got {self.model_kwargs['timeout_seconds']})")
         self.payload_options = copy.deepcopy(self.model_kwargs)
-        for key_to_remove in ['retries', 'base_url', 'keep_alive']:
+        for key_to_remove in ['retries', 'base_url', 'keep_alive', 'timeout_seconds']:
             if key_to_remove in self.payload_options:
                 del self.payload_options[key_to_remove]
 
@@ -318,7 +326,7 @@ class LasagnaOllama(Model):
             'keep_alive': self.keep_alive,
         }
 
-        event_stream = _event_stream(url, payload)
+        event_stream = _event_stream(url, payload, self.timeout_seconds)
         new_messages = await _process_stream(event_stream, event_callback)
 
         _LOG.info(f"Finished {self.model}")
