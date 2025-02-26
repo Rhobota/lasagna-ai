@@ -108,7 +108,7 @@ class AgentRunChained(AgentRunBase):
 
 class AgentRunExtraction(AgentRunBase):
     type: Literal['extraction']
-    message: Message
+    messages: List[Message]
     result: Any    # ideally, it's `ExtractionType`, and we'd inherit from Generic[ExtractionType], but that's not supported until python3.11
 
 

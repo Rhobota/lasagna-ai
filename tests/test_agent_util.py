@@ -180,10 +180,12 @@ async def test_model_extract():
             'end',
             {
                 'type': 'extraction',
-                'message': {
-                    'role': 'ai',
-                    'text': None,
-                },
+                'messages': [
+                    {
+                        'role': 'ai',
+                        'text': None,
+                    },
+                ],
                 'result': MyTestType(a='yes', b=6),
                 'provider': 'MockProvider',
                 'agent': 'my_extraction_agent',
@@ -196,10 +198,12 @@ async def test_model_extract():
         ),
     ]
     assert run['type'] == 'extraction'
-    assert run['message'] == {
-        'role': 'ai',
-        'text': None,
-    }
+    assert run['messages'] == [
+        {
+            'role': 'ai',
+            'text': None,
+        },
+    ]
     result = run['result']
     assert isinstance(result, MyTestType)
     assert result.a == 'yes'
@@ -285,19 +289,21 @@ def test_recursive_extract_messages():
             {
                 'agent': 'inner_agent_5',
                 'type': 'extraction',
-                'message': {
-                    'role': 'tool_call',
-                    'tools': [
-                        {
-                            'call_id': 'call002',
-                            'call_type': 'function',
-                            'function': {
-                                'name': 'foo',
-                                'arguments': '{"value": 7}',
+                'messages': [
+                    {
+                        'role': 'tool_call',
+                        'tools': [
+                            {
+                                'call_id': 'call002',
+                                'call_type': 'function',
+                                'function': {
+                                    'name': 'foo',
+                                    'arguments': '{"value": 7}',
+                                },
                             },
-                        },
-                    ],
-                },
+                        ],
+                    },
+                ],
                 'result': {'value': 7},
             },
             {
