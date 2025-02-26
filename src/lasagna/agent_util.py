@@ -119,9 +119,9 @@ def recursive_extract_messages(
         elif run['type'] == 'extraction':
             messages.extend(
                 (
-                    _recursive_extract_messages_from_tool_res([run['message']])
+                    _recursive_extract_messages_from_tool_res(run['messages'])
                     if from_layered_agents else
-                    [run['message']]
+                    run['messages']
                 ),
             )
         else:
@@ -271,7 +271,7 @@ def build_extraction_agent(
             return {
                 'agent': name,
                 'type': 'extraction',
-                'message': message,
+                'messages': [message],
                 'result': result,
             }
 
@@ -344,7 +344,7 @@ def build_agent_router(
             extraction: AgentRun = {
                 'agent': name,
                 'type': 'extraction',
-                'message': message,
+                'messages': [message],
                 'result': result,
             }
             agent = pick_agent_func(result)
