@@ -26,7 +26,7 @@
   - Yes, you _can_ have _both_ streaming and easy database storage.
 
 - ↔️ **Provider/model agnostic and interoperable!**
-  - Core support for [OpenAI](https://platform.openai.com/docs/models) and [Anthropic](https://docs.anthropic.com/en/docs/welcome).
+  - Core support for [OpenAI](https://platform.openai.com/docs/models), [Anthropic](https://docs.anthropic.com/en/docs/welcome), and [AWS Bedrock](https://docs.aws.amazon.com/bedrock/).
   - Experimental support for [Ollama](https://ollama.com/search) and [NVIDIA NIM/NGC](https://build.nvidia.com/explore/reasoning).
   - Message representations are canonized. 😇
   - Supports vision!
@@ -49,14 +49,14 @@
 ## Installation
 
 ```console
-pip install -U lasagna-ai[openai,anthropic]
+pip install -U lasagna-ai[openai,anthropic,bedrock]
 ```
 
 If you want to easily run all the [./examples](./examples), then you can
 install the extra dependencies used by those examples:
 
 ```console
-pip install -U lasagna-ai[openai,anthropic,example-deps]
+pip install -U lasagna-ai[openai,anthropic,bedrock,example-deps]
 ```
 
 ## Used By
@@ -74,7 +74,7 @@ Anyway, run it in your terminal and you can chat interactively with the model. �
 (taken from [./examples/quickstart.py](./examples/quickstart.py))
 
 ```python
-from lasagna import (     # <-- pip install -U lasagna-ai[openai,anthropic]
+from lasagna import (     # <-- pip install -U lasagna-ai[openai,anthropic,bedrock]
     known_models,
     build_simple_agent,
 )
