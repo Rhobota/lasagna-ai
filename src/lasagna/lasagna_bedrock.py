@@ -42,6 +42,7 @@ from typing import (
     Tuple, Dict, Union,
 )
 
+import botocore.client  # type: ignore
 import boto3.session  # type: ignore
 from botocore.exceptions import ClientError  # type: ignore
 
@@ -427,7 +428,8 @@ class LasagnaBedrock(Model):
             region_name           = self.model_kwargs.get('region_name',           os.environ.get('AWS_REGION')),
             profile_name          = self.model_kwargs.get('profile_name',          os.environ.get('AWS_PROFILE')),
         )
-        self.bedrock_client = self.session.client(service_name='bedrock-runtime')
+        self.config = botocore.client.Config(**self.model_kwargs.get('aws_client_config', {}))
+        self.bedrock_client = self.session.client(service_name='bedrock-runtime', config=self.config)
         # Note: `bedrock_client` is thread-safe, so you *can* safely pass
         #       it around to the event loop's thread pool.
         # See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/clients.html#multithreading-or-multiprocessing-with-clients
