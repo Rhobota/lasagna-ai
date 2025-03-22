@@ -421,11 +421,11 @@ class LasagnaBedrock(Model):
 
         # The boto3 client!
         self.session = boto3.session.Session(
-            aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY'),
-            aws_session_token = os.environ.get('AWS_SESSION_TOKEN'),
-            region_name = os.environ.get('AWS_REGION'),
-            profile_name = os.environ.get('AWS_PROFILE'),
+            aws_access_key_id     = self.model_kwargs.get('aws_access_key_id',     os.environ.get('AWS_ACCESS_KEY_ID')),
+            aws_secret_access_key = self.model_kwargs.get('aws_secret_access_key', os.environ.get('AWS_SECRET_ACCESS_KEY')),
+            aws_session_token     = self.model_kwargs.get('aws_session_token',     os.environ.get('AWS_SESSION_TOKEN')),
+            region_name           = self.model_kwargs.get('region_name',           os.environ.get('AWS_REGION')),
+            profile_name          = self.model_kwargs.get('profile_name',          os.environ.get('AWS_PROFILE')),
         )
         self.bedrock_client = self.session.client(service_name='bedrock-runtime')
         # Note: `bedrock_client` is thread-safe, so you *can* safely pass
@@ -488,9 +488,11 @@ class LasagnaBedrock(Model):
         params = {
             'modelId': self.model,
             'messages': bedrock_messages,
-            'system': system,
             'inferenceConfig': inference_config,
         }
+
+        if system is not None:
+            params['system'] = system
 
         if tool_config is not None:
             params['toolConfig'] = tool_config
@@ -626,7 +628,7 @@ class LasagnaBedrock(Model):
 
         docstr = getattr(extraction_type, '__doc__', None)
         if docstr:
-            tools_spec[0]['description'] = docstr
+            tools_spec[0]['toolSpec']['description'] = docstr
 
         new_messages = await self._retrying_run_once(
             event_callback = event_callback,
