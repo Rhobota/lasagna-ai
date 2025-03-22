@@ -58,7 +58,6 @@ from openai import APIError
 from typing import (
     List, Callable, Type, AsyncIterator, Any,
     Tuple, Dict, Optional, Union, Literal,
-    cast,
 )
 
 import asyncio
@@ -356,15 +355,15 @@ def _log_dumps(val: Any) -> str:
 
 
 class LasagnaOpenAI(Model):
-    def __init__(self, model: str, **model_kwargs: Dict[str, Any]):
+    def __init__(self, model: str, **model_kwargs: Any):
         known_model_names = [m['formal_name'] for m in OPENAI_KNOWN_MODELS]
         if model not in known_model_names:
             _LOG.warning(f'untested model: {model} (may or may not work)')
         self.model = model
-        self.model_kwargs = copy.deepcopy(model_kwargs or {})
-        self.n_retries: int = cast(int, self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
+        self.model_kwargs = copy.deepcopy(model_kwargs)
+        self.n_retries: int = self.model_kwargs.get('retries', 3)
         if not isinstance(self.n_retries, int) or self.n_retries < 0:
-            raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.model_kwargs['retries']})")
+            raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.n_retries})")
         self.model_spec: ModelSpec = {
             'provider': 'openai',
             'model': self.model,
@@ -372,18 +371,12 @@ class LasagnaOpenAI(Model):
         }
 
     def config_hash(self) -> str:
-        return recursive_hash(None, {
-            'provider': 'openai',
-            'model': self.model,
-            'model_kwargs': self.model_kwargs,
-        })
+        return recursive_hash(None, self.model_spec)
 
     def _make_client(self) -> AsyncOpenAI:
-        api_key: Union[str, None] = cast(str, self.model_kwargs['api_key']) if 'api_key' in self.model_kwargs else None
-        base_url: Union[str, None] = cast(str, self.model_kwargs['base_url']) if 'base_url' in self.model_kwargs else None
         client = AsyncOpenAI(
-            api_key  = api_key,
-            base_url = base_url,
+            api_key  = self.model_kwargs.get('api_key', None),
+            base_url = self.model_kwargs.get('base_url', None),
         )
         return client
 
@@ -411,15 +404,36 @@ class LasagnaOpenAI(Model):
 
         openai_messages = await _convert_to_openai_messages(messages)
 
-        logprobs: Union[bool, NotGiven] = cast(bool, self.model_kwargs['logprobs']) if 'logprobs' in self.model_kwargs else NOT_GIVEN
-        top_logprobs: Union[int, NotGiven] = cast(int, self.model_kwargs['top_logprobs']) if 'top_logprobs' in self.model_kwargs else (20 if logprobs is True else NOT_GIVEN)
-        frequency_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['frequency_penalty']) if 'frequency_penalty' in self.model_kwargs else NOT_GIVEN
-        presence_penalty: Union[float, NotGiven] = cast(float, self.model_kwargs['presence_penalty']) if 'presence_penalty' in self.model_kwargs else NOT_GIVEN
-        max_tokens: Union[int, NotGiven] = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else NOT_GIVEN
-        stop: Union[List[str], NotGiven] = cast(List[str], self.model_kwargs['stop']) if 'stop' in self.model_kwargs else NOT_GIVEN
-        temperature: Union[float, NotGiven] = cast(float, self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
-        top_p: Union[float, NotGiven] = cast(float, self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
-        user: Union[str, NotGiven] = cast(str, self.model_kwargs['user']) if 'user' in self.model_kwargs else NOT_GIVEN
+        logprobs: Union[bool, NotGiven] = self.model_kwargs.get('logprobs', NOT_GIVEN)
+        top_logprobs: Union[int, NotGiven] = self.model_kwargs.get('top_logprobs', (20 if logprobs is True else NOT_GIVEN))
+        frequency_penalty: Union[float, NotGiven] = float(self.model_kwargs['frequency_penalty']) if 'frequency_penalty' in self.model_kwargs else NOT_GIVEN
+        presence_penalty: Union[float, NotGiven] = float(self.model_kwargs['presence_penalty']) if 'presence_penalty' in self.model_kwargs else NOT_GIVEN
+        max_tokens: Union[int, NotGiven] = self.model_kwargs.get('max_tokens', NOT_GIVEN)
+        stop: Union[List[str], NotGiven] = self.model_kwargs.get('stop', NOT_GIVEN)
+        temperature: Union[float, NotGiven] = float(self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
+        top_p: Union[float, NotGiven] = float(self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
+        user: Union[str, NotGiven] = self.model_kwargs.get('user', NOT_GIVEN)
+
+        if logprobs is not NOT_GIVEN:
+            assert isinstance(logprobs, bool)
+        if top_logprobs is not NOT_GIVEN:
+            assert isinstance(top_logprobs, int)
+        if frequency_penalty is not NOT_GIVEN:
+            assert isinstance(frequency_penalty, float)
+        if presence_penalty is not NOT_GIVEN:
+            assert isinstance(presence_penalty, float)
+        if max_tokens is not NOT_GIVEN:
+            assert isinstance(max_tokens, int)
+        if stop is not NOT_GIVEN:
+            assert isinstance(stop, list)
+            for s in stop:
+                assert isinstance(s, str)
+        if temperature is not NOT_GIVEN:
+            assert isinstance(temperature, float)
+        if top_p is not NOT_GIVEN:
+            assert isinstance(top_p, float)
+        if user is not NOT_GIVEN:
+            assert isinstance(user, str)
 
         _LOG.info(f"Invoking {self.model} with:\n  messages: {_log_dumps(openai_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
 

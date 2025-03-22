@@ -26,7 +26,7 @@ from typing import (
 def bind_model(
     provider: Union[str, ModelFactory],
     model: Union[str, ModelRecord],
-    model_kwargs: Union[Dict[str, Any], None] = None,
+    **model_kwargs: Any,
 ) -> Callable[[AgentCallable], BoundAgentCallable]:
     class ModelBinder():
         def __call__(self, agent: AgentCallable) -> BoundAgentCallable:
@@ -34,7 +34,7 @@ def bind_model(
                 'agent': agent,
                 'provider': provider,
                 'model': model,
-                'model_kwargs': model_kwargs or {},
+                'model_kwargs': model_kwargs,
             }
             async def bound_agent(event_callback: EventCallback, prev_runs: List[AgentRun]) -> AgentRun:
                 return await run(spec, event_callback, prev_runs)
@@ -45,7 +45,7 @@ def bind_model(
             return bound_agent
 
         def __str__(self) -> str:
-            info = (provider, model, model_kwargs) if model_kwargs else (provider, model)
+            info = (provider, model, model_kwargs)
             return f'model binder: {info}'
 
     return ModelBinder()
@@ -54,7 +54,7 @@ def bind_model(
 class PartiallyBoundAgentCallable(Protocol):
     def __call__(
         self,
-        model_kwargs: Union[Dict[str, Any], None] = None,
+        **model_kwargs: Any,
     ) -> Callable[[AgentCallable], BoundAgentCallable]: ...
 
 
@@ -65,9 +65,9 @@ def partial_bind_model(
     class PartialModelBinder():
         def __call__(
             self,
-            model_kwargs: Union[Dict[str, Any], None] = None,
+            **model_kwargs: Any,
         ) -> Callable[[AgentCallable], BoundAgentCallable]:
-            return bind_model(provider, model, model_kwargs)
+            return bind_model(provider, model, **model_kwargs)
 
         def __str__(self) -> str:
             info = (provider, model)

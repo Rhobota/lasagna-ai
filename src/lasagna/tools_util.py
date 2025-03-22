@@ -298,7 +298,12 @@ async def _run_single_tool(
 
             if is_agent_callable:
                 agent = cast(AgentCallable, func)
-                bound_agent = bind_model(**model_spec)(agent)
+                binder = bind_model(
+                    provider = model_spec['provider'],
+                    model = model_spec['model'],
+                    **model_spec.get('model_kwargs', {}),
+                )
+                bound_agent = binder(agent)
             elif is_bound_agent_callable:
                 bound_agent = cast(BoundAgentCallable, func)
             else:

@@ -216,7 +216,7 @@ class ModelRecord(TypedDict):
 
 
 class ModelFactory(Protocol):
-    def __call__(self, model: str, **model_kwargs: Dict[str, Any]) -> Model: ...
+    def __call__(self, model: str, **model_kwargs: Any) -> Model: ...
 
 
 class ProviderRecord(TypedDict):
