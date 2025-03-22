@@ -43,4 +43,4 @@ __all__ = [
     'build_static_output_agent',
 ]
 
-__version__ = "0.12.0"
+__version__ = "0.13.0"

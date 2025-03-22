@@ -54,6 +54,9 @@ openai = [
 anthropic = [
   "anthropic>=0.37.1",
 ]
+bedrock = [
+  "boto3>=1.37.0",
+]
 dev = [
   "mypy>=1.10.0",
   "pytest>=8.1.1",
@@ -71,10 +74,10 @@ path = "src/lasagna/__init__.py"
 
 [tool.hatch.envs.default]
 python = "3.8"
-features = ["dev", "example-deps", "openai", "anthropic"]
+features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 
 [tool.hatch.envs.types]
-features = ["dev", "example-deps", "openai", "anthropic"]
+features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 
 [[tool.hatch.envs.types.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
@@ -83,7 +86,7 @@ python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 check = "mypy --install-types --non-interactive {args:src/lasagna tests examples}"
 
 [tool.hatch.envs.hatch-test]
-features = ["dev", "openai", "anthropic"]
+features = ["dev", "openai", "anthropic", "bedrock"]
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]

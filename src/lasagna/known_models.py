@@ -87,6 +87,46 @@ BIND_OLLAMA_mistral_small = partial_bind_model('ollama', 'mistral-small')
 BIND_OLLAMA_mistral_large = partial_bind_model('ollama', 'mistral-large')
 
 
+BEDROCK_KNOWN_MODELS: List[ModelRecord] = [
+    {
+        'formal_name': 'us.anthropic.claude-3-haiku-20240307-v1:0',
+        'display_name': 'Claude 3 Haiku',
+    },
+    {
+        'formal_name': 'us.anthropic.claude-3-sonnet-20240229-v1:0',
+        'display_name': 'Claude 3 Sonnet',
+    },
+    {
+        'formal_name': 'us.anthropic.claude-3-opus-20240229-v1:0',
+        'display_name': 'Claude 3 Opus',
+    },
+    {
+        'formal_name': 'us.anthropic.claude-3-5-haiku-20241022-v1:0',
+        'display_name': 'Claude 3.5 Haiku',
+    },
+    {
+        'formal_name': 'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
+        'display_name': 'Claude 3.5 Sonnet',
+    },
+    {
+        'formal_name': 'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
+        'display_name': 'Claude 3.5 Sonnet v2',
+    },
+    {
+        'formal_name': 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
+        'display_name': 'Claude 3.7 Sonnet',
+    },
+]
+
+BIND_BEDROCK_Claude_3_Haiku       = partial_bind_model('bedrock', 'us.anthropic.claude-3-haiku-20240307-v1:0')
+BIND_BEDROCK_Claude_3_Sonnet      = partial_bind_model('bedrock', 'us.anthropic.claude-3-sonnet-20240229-v1:0')
+BIND_BEDROCK_Claude_3_Opus        = partial_bind_model('bedrock', 'us.anthropic.claude-3-opus-20240229-v1:0')
+BIND_BEDROCK_Claude_3_5_Haiku     = partial_bind_model('bedrock', 'us.anthropic.claude-3-5-haiku-20241022-v1:0')
+BIND_BEDROCK_Claude_3_5_Sonnet    = partial_bind_model('bedrock', 'us.anthropic.claude-3-5-sonnet-20240620-v1:0')
+BIND_BEDROCK_Claude_3_5_Sonnet_v2 = partial_bind_model('bedrock', 'us.anthropic.claude-3-5-sonnet-20241022-v2:0')
+BIND_BEDROCK_Claude_3_7_Sonnet    = partial_bind_model('bedrock', 'us.anthropic.claude-3-7-sonnet-20250219-v1:0')
+
+
 NVIDIA_KNOWN_MODELS: List[ModelRecord] = [
     {
         'formal_name': 'meta/llama3-70b-instruct',

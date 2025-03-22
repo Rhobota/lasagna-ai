@@ -16,6 +16,7 @@ def attempt_load_all_known_providers() -> None:
         'anthropic',
         'ollama',
         'nvidia',
+        'bedrock',
     ]
     for provider in providers_to_try_to_load:
         try:
@@ -82,6 +83,16 @@ def attempt_load_known_providers(provider: str) -> None:
             name = 'NVIDIA',
             factory = LasagnaNVIDIA,
             models = NVIDIA_KNOWN_MODELS,
+        )
+
+    elif provider == 'bedrock':
+        from .known_models import BEDROCK_KNOWN_MODELS
+        from .lasagna_bedrock import LasagnaBedrock
+        register_provider(
+            key  = 'bedrock',
+            name = 'AWS Bedrock',
+            factory = LasagnaBedrock,
+            models = BEDROCK_KNOWN_MODELS,
         )
 
     else:
