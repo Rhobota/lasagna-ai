@@ -199,6 +199,14 @@ async def agent_as_function_specific_return_type(
         'result': True,
     }
 
+async def agent_as_function_everything_any(
+    model: Any,
+    event_callback: Any,
+    prev_runs: Any,
+) -> AgentRun:
+    """This is an agent as a function, but everything is specified as `Any`."""
+    return flat_messages('agent_as_function_everything_any', [])
+
 class AgentAsAsyncCallableObject:
     async def __call__(
         self,
@@ -223,6 +231,16 @@ class AgentAsAsyncCallableObjectWithSpecificReturnType:
             'messages': [],
             'result': True,
         }
+
+class AgentAsAsyncCallableObjectEverythingAny:
+    async def __call__(
+        self,
+        model: Any,
+        event_callback: Any,
+        prev_runs: Any,
+    ) -> AgentRun:
+        """This is an agent as an async callable object, but everything is specified as `Any`."""
+        return flat_messages('AgentAsAsyncCallableObjectEverythingAny', [])
 
 
 def test_validate_args():
@@ -884,6 +902,13 @@ def test_is_callable_of_type_agent_callables():
     assert not is_callable_of_type(AgentAsAsyncCallableObjectWithSpecificReturnType(), MyCallable)
     assert not is_callable_of_type(agent_as_function_specific_return_type, MyAsyncCallable)
     assert not is_callable_of_type(AgentAsAsyncCallableObjectWithSpecificReturnType(), MyAsyncCallable)
+
+    assert is_callable_of_type(agent_as_function_everything_any, AgentCallable)
+    assert is_callable_of_type(AgentAsAsyncCallableObjectEverythingAny(), AgentCallable)
+    assert not is_callable_of_type(agent_as_function_everything_any, MyCallable)
+    assert not is_callable_of_type(AgentAsAsyncCallableObjectEverythingAny(), MyCallable)
+    assert not is_callable_of_type(agent_as_function_everything_any, MyAsyncCallable)
+    assert not is_callable_of_type(AgentAsAsyncCallableObjectEverythingAny(), MyAsyncCallable)
 
 
 def test_get_tool_params_function():

@@ -120,7 +120,7 @@ def is_callable_of_type(
         return False
 
     for concrete_param, expected_param in zip(concrete_params, expected_params):
-        if concrete_param.annotation != expected_param:
+        if not type_a_isa_b(expected_param, concrete_param.annotation):
             return False
 
     if is_async_callable(concrete_callable):
@@ -240,7 +240,7 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
                         raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param['type']}`")
                 else:
                     doc_param_type = DOCSTRING_PARAM_SUPPORTED_TYPES.get(doc_param['type'], 'unknown')
-                    if concrete_param.annotation != doc_param_type:
+                    if not type_a_isa_b(doc_param_type, concrete_param.annotation):
                         raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param_type}`")
 
     return description, doc_params
