@@ -6,8 +6,9 @@ from enum import Enum
 
 from typing import (
     List, Dict, Tuple, Union, Any, Callable, Literal,
-    get_origin, get_args, cast, is_typeddict,
+    get_origin, get_args, cast,
 )
+from typing_extensions import is_typeddict
 
 from .agent_util import bind_model, extract_last_message, flat_messages
 
