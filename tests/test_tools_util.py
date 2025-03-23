@@ -186,6 +186,19 @@ async def agent_as_function(
     """This is an agent as a function."""
     return flat_messages('agent_as_function', [])
 
+async def agent_as_function_specific_return_type(
+    model: Model,
+    event_callback: EventCallback,
+    prev_runs: List[AgentRun],
+) -> AgentRunExtraction:
+    """This is an agent as a function with a more specific return type."""
+    return {
+        'agent': 'agent_as_function_specific_return_type',
+        'type': 'extraction',
+        'messages': [],
+        'result': True,
+    }
+
 class AgentAsAsyncCallableObject:
     async def __call__(
         self,
@@ -195,6 +208,21 @@ class AgentAsAsyncCallableObject:
     ) -> AgentRun:
         """This is an agent as an async callable object."""
         return flat_messages('AgentAsAsyncCallableObject', [])
+
+class AgentAsAsyncCallableObjectWithSpecificReturnType:
+    async def __call__(
+        self,
+        model: Model,
+        event_callback: EventCallback,
+        prev_runs: List[AgentRun],
+    ) -> AgentRunExtraction:
+        """This is an agent as an async callable object with a more specific return type."""
+        return {
+            'agent': 'AgentAsAsyncCallableObjectWithSpecificReturnType',
+            'type': 'extraction',
+            'messages': [],
+            'result': True,
+        }
 
 
 def test_validate_args():
@@ -849,6 +877,13 @@ def test_is_callable_of_type_agent_callables():
 
     assert is_callable_of_type(agent_as_function, AgentCallable)
     assert is_callable_of_type(AgentAsAsyncCallableObject(), AgentCallable)
+
+    assert is_callable_of_type(agent_as_function_specific_return_type, AgentCallable)
+    assert is_callable_of_type(AgentAsAsyncCallableObjectWithSpecificReturnType(), AgentCallable)
+    assert not is_callable_of_type(agent_as_function_specific_return_type, MyCallable)
+    assert not is_callable_of_type(AgentAsAsyncCallableObjectWithSpecificReturnType(), MyCallable)
+    assert not is_callable_of_type(agent_as_function_specific_return_type, MyAsyncCallable)
+    assert not is_callable_of_type(AgentAsAsyncCallableObjectWithSpecificReturnType(), MyAsyncCallable)
 
 
 def test_get_tool_params_function():

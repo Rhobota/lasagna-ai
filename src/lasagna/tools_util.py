@@ -127,11 +127,11 @@ def is_callable_of_type(
         if get_origin(expected_return) is not collections.abc.Awaitable:
             return False
         eret = get_args(expected_return)[0]
-        if concrete_sig.return_annotation != eret:
+        if not type_a_isa_b(concrete_sig.return_annotation, eret):
             return False
 
     else:
-        if concrete_sig.return_annotation != expected_return:
+        if not type_a_isa_b(concrete_sig.return_annotation, expected_return):
             return False
 
     return True
