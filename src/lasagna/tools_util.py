@@ -5,8 +5,8 @@ import collections.abc
 from enum import Enum
 
 from typing import (
-    List, Dict, Tuple, Union, Any, Callable,
-    get_origin, get_args, cast,
+    List, Dict, Tuple, Union, Any, Callable, Literal,
+    get_origin, get_args, cast, is_typeddict,
 )
 
 from .agent_util import bind_model, extract_last_message, flat_messages
@@ -131,6 +131,68 @@ def is_callable_of_type(
 
     else:
         if concrete_sig.return_annotation != expected_return:
+            return False
+
+    return True
+
+
+def type_a_isa_b(a: Any, b: Any) -> bool:
+    """
+    Correctly compares annotation types such that, e.g., these are equal:
+        a = List[dict[str, Set[int]]]
+        b = list[Dict[str, set[int]]]
+
+    Also correctly identifies `a isa b`, e.g.
+        a = List[str]
+        b = Iterable[str]
+
+    Also correctly handles `Union` and `Literal` types.
+    """
+    a_origin = get_origin(a) or a
+    b_origin = get_origin(b) or b
+    a_args = get_args(a)
+    b_args = get_args(b)
+
+    if b_origin is Any:
+        return True
+
+    if a_origin is Union:
+        return all(type_a_isa_b(option, b) for option in a_args)
+    elif b_origin is Union:
+        return any(type_a_isa_b(a, option) for option in b_args)
+
+    if a_origin is Literal and b_origin is Literal:
+        return len(set(a_args) - set(b_args)) == 0
+    elif a_origin is Literal:
+        return all(type_a_isa_b(type(option), b) for option in a_args)
+    elif b_origin is Literal:
+        _LOG.warning(f'Cannot check against target literal: {a=} {b=}')
+        return False
+
+    if is_typeddict(a) and b_origin is dict:
+        if not b_args or b_args == (str, Any):
+            # Special case we want to handle!
+            return True
+
+    try:
+        if not (a_origin == b_origin or issubclass(a_origin, b_origin)):
+            return False
+    except TypeError:
+        # Note: Calling `issubclass` on two TypedDicts will land here.
+        #       Our equality check above should catch the cases we need, for now.
+        #       But, we might need to fix this in the future if we ever need to
+        #       compare two TypedDicts that are not the *same* but are *compatible*
+        #       with one another.
+        return False
+
+    if len(b_args) == 0:
+        # Since `b` is totally generic, then `a` must merely be a more
+        # specific version, which passes our test.
+        return True
+    if len(a_args) != len(b_args):
+        return False
+    for a_arg, b_arg in zip(a_args, b_args):
+        if not type_a_isa_b(a_arg, b_arg):
             return False
 
     return True

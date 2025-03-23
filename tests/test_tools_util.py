@@ -1,5 +1,6 @@
 import pytest
 import copy
+import sys
 
 from lasagna.agent_util import (
     bind_model,
@@ -21,9 +22,14 @@ from lasagna.types import (
     Model,
     EventCallback,
     AgentRun,
+    AgentRunExtraction,
+    MessageContent,
 )
 
-from typing import List, Dict, Callable, Awaitable
+from typing import (
+    List, Dict, Set, Callable, Awaitable,
+    Literal, Union, Iterable, Any,
+)
 
 from enum import Enum
 
@@ -36,6 +42,7 @@ from lasagna.tools_util import (
     is_callable_of_type,
     extract_tool_result_as_sting,
     validate_args,
+    type_a_isa_b,
 )
 
 
@@ -1342,3 +1349,128 @@ def test_extract_tool_result_as_sting():
         },
     }
     assert extract_tool_result_as_sting(m4) == 'Hi again'
+
+
+def test_type_a_isa_b():
+    # True
+    assert type_a_isa_b(Literal['hi'], str)
+    assert type_a_isa_b(Literal[5], int)
+    assert type_a_isa_b(Literal[5], Any)
+    assert type_a_isa_b(Literal['hi'], Literal['hi', 'mom'])
+    assert type_a_isa_b(Literal['hi'], Union[Literal['hi'], Literal['mom']])
+    assert type_a_isa_b(Literal['hi', 'mom'], Literal['mom', 'hi'])
+    assert type_a_isa_b(Literal['hi', 'mom'], Literal['hi', 'mom', '!'])
+    # False
+    assert not type_a_isa_b(Literal['hi'], int)
+    assert not type_a_isa_b(Literal[5], str)
+    assert not type_a_isa_b(Literal[5], List[int])
+    assert not type_a_isa_b(Literal['hi'], Literal['hi_', 'mom_'])
+    assert not type_a_isa_b(Literal['hi'], Union[Literal['hi_'], Literal['mom_']])
+    assert not type_a_isa_b(Literal['hi', 'mom', '!'], Literal['hi', 'mom'])
+
+    # True
+    assert type_a_isa_b(List[str], Iterable[str])
+    assert type_a_isa_b(Set[str], Iterable[str])
+    assert type_a_isa_b(Set[int], Iterable[int])
+    assert type_a_isa_b(Dict[int, int], Union[Dict[int, int], str])
+    assert type_a_isa_b(Dict[int, int], Any)
+    # False
+    assert not type_a_isa_b(List[str], Iterable[int])
+    assert not type_a_isa_b(Set[str], Iterable[int])
+    assert not type_a_isa_b(Set[int], Iterable[str])
+    assert not type_a_isa_b(Dict[int, int], Union[Dict[str, int], int])
+    assert not type_a_isa_b(Dict[int, int], int)
+
+    # True
+    assert type_a_isa_b(Set[int], Set)
+    assert type_a_isa_b(Set[int], Set[int])
+    assert type_a_isa_b(Set[Dict[int, str]], Set)
+    assert type_a_isa_b(Set[Dict[int, str]], Set[Dict])
+    assert type_a_isa_b(Set[Dict[int, str]], Set[Dict[int, str]])
+    assert type_a_isa_b(List[Dict[str, Set[int]]], List)
+    assert type_a_isa_b(List[Dict[str, Set[int]]], List[Dict])
+    assert type_a_isa_b(List[Dict[str, Set[int]]], List[Dict[str, Set]])
+    assert type_a_isa_b(List[Dict[str, Set[int]]], List[Dict[str, Set[int]]])
+    # False
+    assert not type_a_isa_b(Set[int], List)
+    assert not type_a_isa_b(Set[int], Set[str])
+    assert not type_a_isa_b(Set[Dict[int, str]], Set[List])
+    assert not type_a_isa_b(Set[Dict[int, str]], Set[Dict[str, str]])
+    assert not type_a_isa_b(Set[Dict[int, str]], Set[Dict[int, Set[str]]])
+    assert not type_a_isa_b(List[Dict[str, Set[int]]], List[int])
+    assert not type_a_isa_b(List[Dict[str, Set[int]]], List[Dict[int, int]])
+    assert not type_a_isa_b(List[Dict[str, Set[int]]], List[Dict[str, Set[str]]])
+    assert not type_a_isa_b(List[Dict[str, Set[int]]], List[Dict[str, Set[Set[int]]]])
+
+    # True
+    assert type_a_isa_b(Set[int], Union[Set[int], int])
+    assert type_a_isa_b(Set[int], Union[Set, int])
+    assert type_a_isa_b(int, Union[Set[int], int])
+    assert type_a_isa_b(Union[Set[int], int], Any)
+    assert type_a_isa_b(Union[Set[int], List[int]], Iterable[int])
+    assert type_a_isa_b(Union[Set[int], List[int]], Iterable)
+    assert type_a_isa_b(Union[Set[int], List[int]], Union[Iterable[int], str])
+    assert type_a_isa_b(Set[int], Any)
+    assert type_a_isa_b(Set, Any)
+    assert type_a_isa_b(int, Any)
+    # False
+    assert not type_a_isa_b(Set[int], Union[Set[str], int])
+    assert not type_a_isa_b(int, Union[Set[int], str])
+    assert not type_a_isa_b(Union[Set[int], int], Set[int])
+    assert not type_a_isa_b(Union[Set[int], List[str]], Iterable[int])
+    assert not type_a_isa_b(Union[Set[int], List[int]], Union[Iterable[str], str])
+    assert not type_a_isa_b(Union[Set[int], List[str]], Union[Iterable[int], str])
+    assert not type_a_isa_b(Set[int], int)
+    assert not type_a_isa_b(Set, int)
+    assert not type_a_isa_b(int, str)
+
+    # True
+    assert type_a_isa_b(AgentRunExtraction, AgentRun)
+    assert type_a_isa_b(MessageContent, Message)
+    assert type_a_isa_b(AgentRunExtraction, Dict)
+    assert type_a_isa_b(AgentRun, Dict)
+    assert type_a_isa_b(MessageContent, Dict)
+    assert type_a_isa_b(Message, Dict)
+    assert type_a_isa_b(Message, Dict[str, Any])
+    # False
+    assert not type_a_isa_b(AgentRunExtraction, Message)
+    assert not type_a_isa_b(MessageContent, AgentRun)
+    assert not type_a_isa_b(AgentRunExtraction, Set)
+    assert not type_a_isa_b(AgentRun, Set)
+    assert not type_a_isa_b(MessageContent, Set)
+    assert not type_a_isa_b(Message, Set)
+
+    # The remaining tests only works for Python 3.9+, where the builtin types
+    # can be used in generic type hints.
+    if sys.version_info < (3, 9):
+        return
+
+    # True
+    assert type_a_isa_b(List[int], list[int])
+    assert type_a_isa_b(List[int], list)
+    assert type_a_isa_b(list[int], List[int])
+    assert type_a_isa_b(list[int], List)
+    assert type_a_isa_b(List[str], list[str])
+    assert type_a_isa_b(List[str], list)
+    assert type_a_isa_b(list[str], List[str])
+    assert type_a_isa_b(list[str], List)
+    # False
+    assert not type_a_isa_b(List[int], list[str])
+    assert not type_a_isa_b(List[str], list[int])
+    assert not type_a_isa_b(list[int], List[str])
+    assert not type_a_isa_b(list[str], List[int])
+
+    # True
+    assert type_a_isa_b(
+        List[dict[str, Set[int]]],
+        list[Dict[str, set[int]]],
+    )
+    # False
+    assert not type_a_isa_b(
+        List[dict[str, Set[int]]],
+        list[Dict[str, set[str]]],
+    )
+    assert not type_a_isa_b(
+        List[dict[str, List[int]]],
+        list[Dict[str, set[int]]],
+    )
