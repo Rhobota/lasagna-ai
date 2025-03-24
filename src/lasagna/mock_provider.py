@@ -9,7 +9,7 @@ from lasagna.types import (
 
 from lasagna.util import recursive_hash
 
-from typing import List, Dict, Tuple, Any, Callable, Type
+from typing import List, Tuple, Any, Callable, Type
 
 import json
 
