@@ -396,6 +396,7 @@ async def _run_single_tool(
             }
 
     except Exception as e:
+        _LOG.exception(e)
         error = f"{get_name(type(e))}: {e}"
         return {
             'type': 'any',
