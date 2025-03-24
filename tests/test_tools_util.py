@@ -1,5 +1,6 @@
 import pytest
 import copy
+import sys
 
 from lasagna.agent_util import (
     bind_model,
@@ -21,9 +22,14 @@ from lasagna.types import (
     Model,
     EventCallback,
     AgentRun,
+    AgentRunExtraction,
+    MessageContent,
 )
 
-from typing import List, Dict, Callable, Awaitable
+from typing import (
+    List, Dict, Set, Callable, Awaitable,
+    Literal, Union, Iterable, Any,
+)
 
 from enum import Enum
 
@@ -36,6 +42,7 @@ from lasagna.tools_util import (
     is_callable_of_type,
     extract_tool_result_as_sting,
     validate_args,
+    type_a_isa_b,
 )
 
 
@@ -179,6 +186,27 @@ async def agent_as_function(
     """This is an agent as a function."""
     return flat_messages('agent_as_function', [])
 
+async def agent_as_function_specific_return_type(
+    model: Model,
+    event_callback: EventCallback,
+    prev_runs: List[AgentRun],
+) -> AgentRunExtraction:
+    """This is an agent as a function with a more specific return type."""
+    return {
+        'agent': 'agent_as_function_specific_return_type',
+        'type': 'extraction',
+        'messages': [],
+        'result': True,
+    }
+
+async def agent_as_function_everything_any(
+    model: Any,
+    event_callback: Any,
+    prev_runs: Any,
+) -> AgentRun:
+    """This is an agent as a function, but everything is specified as `Any`."""
+    return flat_messages('agent_as_function_everything_any', [])
+
 class AgentAsAsyncCallableObject:
     async def __call__(
         self,
@@ -188,6 +216,31 @@ class AgentAsAsyncCallableObject:
     ) -> AgentRun:
         """This is an agent as an async callable object."""
         return flat_messages('AgentAsAsyncCallableObject', [])
+
+class AgentAsAsyncCallableObjectWithSpecificReturnType:
+    async def __call__(
+        self,
+        model: Model,
+        event_callback: EventCallback,
+        prev_runs: List[AgentRun],
+    ) -> AgentRunExtraction:
+        """This is an agent as an async callable object with a more specific return type."""
+        return {
+            'agent': 'AgentAsAsyncCallableObjectWithSpecificReturnType',
+            'type': 'extraction',
+            'messages': [],
+            'result': True,
+        }
+
+class AgentAsAsyncCallableObjectEverythingAny:
+    async def __call__(
+        self,
+        model: Any,
+        event_callback: Any,
+        prev_runs: Any,
+    ) -> AgentRun:
+        """This is an agent as an async callable object, but everything is specified as `Any`."""
+        return flat_messages('AgentAsAsyncCallableObjectEverythingAny', [])
 
 
 def test_validate_args():
@@ -477,7 +530,11 @@ async def test_handle_tools_layered_agents():
         name = 'agent_1',
         doc = doc,
     )
-    my_binder = bind_model(**inner_model_spec)
+    my_binder = bind_model(
+        provider = inner_model_spec['provider'],
+        model = inner_model_spec['model'],
+        **inner_model_spec['model_kwargs'],
+    )
     bound_agent_2 = my_binder(
         build_simple_agent(
             name = 'bound_agent_2',
@@ -823,7 +880,7 @@ def test_is_callable_of_type():
 
 
 def test_is_callable_of_type_agent_callables():
-    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
     my_agent = build_simple_agent(name = 'agent')
     my_bound_agent = my_binder(my_agent)
 
@@ -838,6 +895,20 @@ def test_is_callable_of_type_agent_callables():
 
     assert is_callable_of_type(agent_as_function, AgentCallable)
     assert is_callable_of_type(AgentAsAsyncCallableObject(), AgentCallable)
+
+    assert is_callable_of_type(agent_as_function_specific_return_type, AgentCallable)
+    assert is_callable_of_type(AgentAsAsyncCallableObjectWithSpecificReturnType(), AgentCallable)
+    assert not is_callable_of_type(agent_as_function_specific_return_type, MyCallable)
+    assert not is_callable_of_type(AgentAsAsyncCallableObjectWithSpecificReturnType(), MyCallable)
+    assert not is_callable_of_type(agent_as_function_specific_return_type, MyAsyncCallable)
+    assert not is_callable_of_type(AgentAsAsyncCallableObjectWithSpecificReturnType(), MyAsyncCallable)
+
+    assert is_callable_of_type(agent_as_function_everything_any, AgentCallable)
+    assert is_callable_of_type(AgentAsAsyncCallableObjectEverythingAny(), AgentCallable)
+    assert not is_callable_of_type(agent_as_function_everything_any, MyCallable)
+    assert not is_callable_of_type(AgentAsAsyncCallableObjectEverythingAny(), MyCallable)
+    assert not is_callable_of_type(agent_as_function_everything_any, MyAsyncCallable)
+    assert not is_callable_of_type(AgentAsAsyncCallableObjectEverythingAny(), MyAsyncCallable)
 
 
 def test_get_tool_params_function():
@@ -1153,7 +1224,7 @@ def test_get_tool_params_async_callable_object():
 
 
 def test_get_tool_params_layered_agents():
-    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
     my_agent = build_simple_agent(
         name = 'my_layered_agent',
         doc = 'Use this for everything.',
@@ -1168,7 +1239,7 @@ def test_get_tool_params_layered_agents():
     assert description == 'Use this for everything.'
     assert params == []
 
-    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
     my_agent = build_simple_agent(
         name = 'my_layered_agent',
         doc = """
@@ -1198,7 +1269,7 @@ def test_get_tool_params_layered_agents():
         },
     ]
 
-    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
     my_agent = build_simple_agent(
         name = 'my_layered_agent',
         doc = """
@@ -1228,7 +1299,7 @@ def test_get_tool_params_layered_agents():
         },
     ]
 
-    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
     my_agent = build_simple_agent(
         name = 'my_layered_agent',
         doc = """
@@ -1338,3 +1409,126 @@ def test_extract_tool_result_as_sting():
         },
     }
     assert extract_tool_result_as_sting(m4) == 'Hi again'
+
+
+def test_type_a_isa_b():
+    # True
+    assert type_a_isa_b(Literal['hi'], str)
+    assert type_a_isa_b(Literal[5], int)
+    assert type_a_isa_b(Literal[5], Any)
+    assert type_a_isa_b(Literal['hi'], Literal['hi', 'mom'])
+    assert type_a_isa_b(Literal['hi'], Union[Literal['hi'], Literal['mom']])
+    assert type_a_isa_b(Literal['hi', 'mom'], Literal['mom', 'hi'])
+    assert type_a_isa_b(Literal['hi', 'mom'], Literal['hi', 'mom', '!'])
+    # False
+    assert not type_a_isa_b(Literal['hi'], int)
+    assert not type_a_isa_b(Literal[5], str)
+    assert not type_a_isa_b(Literal[5], List[int])
+    assert not type_a_isa_b(Literal['hi'], Literal['hi_', 'mom_'])
+    assert not type_a_isa_b(Literal['hi'], Union[Literal['hi_'], Literal['mom_']])
+    assert not type_a_isa_b(Literal['hi', 'mom', '!'], Literal['hi', 'mom'])
+
+    # True
+    assert type_a_isa_b(List[str], Iterable[str])
+    assert type_a_isa_b(Set[str], Iterable[str])
+    assert type_a_isa_b(Set[int], Iterable[int])
+    assert type_a_isa_b(Dict[int, int], Union[Dict[int, int], str])
+    assert type_a_isa_b(Dict[int, int], Any)
+    # False
+    assert not type_a_isa_b(List[str], Iterable[int])
+    assert not type_a_isa_b(Set[str], Iterable[int])
+    assert not type_a_isa_b(Set[int], Iterable[str])
+    assert not type_a_isa_b(Dict[int, int], Union[Dict[str, int], int])
+    assert not type_a_isa_b(Dict[int, int], int)
+
+    # True
+    assert type_a_isa_b(Set[int], Set)
+    assert type_a_isa_b(Set[int], Set[int])
+    assert type_a_isa_b(Set[Dict[int, str]], Set)
+    assert type_a_isa_b(Set[Dict[int, str]], Set[Dict])
+    assert type_a_isa_b(Set[Dict[int, str]], Set[Dict[int, str]])
+    assert type_a_isa_b(List[Dict[str, Set[int]]], List)
+    assert type_a_isa_b(List[Dict[str, Set[int]]], List[Dict])
+    assert type_a_isa_b(List[Dict[str, Set[int]]], List[Dict[str, Set]])
+    assert type_a_isa_b(List[Dict[str, Set[int]]], List[Dict[str, Set[int]]])
+    # False
+    assert not type_a_isa_b(Set[int], List)
+    assert not type_a_isa_b(Set[int], Set[str])
+    assert not type_a_isa_b(Set[Dict[int, str]], Set[List])
+    assert not type_a_isa_b(Set[Dict[int, str]], Set[Dict[str, str]])
+    assert not type_a_isa_b(Set[Dict[int, str]], Set[Dict[int, Set[str]]])
+    assert not type_a_isa_b(List[Dict[str, Set[int]]], List[int])
+    assert not type_a_isa_b(List[Dict[str, Set[int]]], List[Dict[int, int]])
+    assert not type_a_isa_b(List[Dict[str, Set[int]]], List[Dict[str, Set[str]]])
+    assert not type_a_isa_b(List[Dict[str, Set[int]]], List[Dict[str, Set[Set[int]]]])
+
+    # True
+    assert type_a_isa_b(Set[int], Union[Set[int], int])
+    assert type_a_isa_b(Set[int], Union[Set, int])
+    assert type_a_isa_b(int, Union[Set[int], int])
+    assert type_a_isa_b(Union[Set[int], int], Any)
+    assert type_a_isa_b(Union[Set[int], List[int]], Iterable[int])
+    assert type_a_isa_b(Union[Set[int], List[int]], Iterable)
+    assert type_a_isa_b(Union[Set[int], List[int]], Union[Iterable[int], str])
+    assert type_a_isa_b(Set[int], Any)
+    assert type_a_isa_b(Set, Any)
+    assert type_a_isa_b(int, Any)
+    # False
+    assert not type_a_isa_b(Set[int], Union[Set[str], int])
+    assert not type_a_isa_b(int, Union[Set[int], str])
+    assert not type_a_isa_b(Union[Set[int], int], Set[int])
+    assert not type_a_isa_b(Union[Set[int], List[str]], Iterable[int])
+    assert not type_a_isa_b(Union[Set[int], List[int]], Union[Iterable[str], str])
+    assert not type_a_isa_b(Union[Set[int], List[str]], Union[Iterable[int], str])
+    assert not type_a_isa_b(Set[int], int)
+    assert not type_a_isa_b(Set, int)
+    assert not type_a_isa_b(int, str)
+
+    # True
+    assert type_a_isa_b(AgentRunExtraction, AgentRun)
+    assert type_a_isa_b(MessageContent, Message)
+    assert type_a_isa_b(AgentRunExtraction, Dict)
+    assert type_a_isa_b(AgentRun, Dict)
+    assert type_a_isa_b(MessageContent, Dict)
+    assert type_a_isa_b(Message, Dict)
+    assert type_a_isa_b(Message, Dict[str, Any])
+    # False
+    assert not type_a_isa_b(AgentRunExtraction, Message)
+    assert not type_a_isa_b(MessageContent, AgentRun)
+    assert not type_a_isa_b(AgentRunExtraction, Set)
+    assert not type_a_isa_b(AgentRun, Set)
+    assert not type_a_isa_b(MessageContent, Set)
+    assert not type_a_isa_b(Message, Set)
+
+    # The next set of tests only works for Python 3.9+, where the builtin types
+    # can be used as generic type hints.
+    if sys.version_info >= (3, 9):
+        # True
+        assert type_a_isa_b(List[int], list[int])
+        assert type_a_isa_b(List[int], list)
+        assert type_a_isa_b(list[int], List[int])
+        assert type_a_isa_b(list[int], List)
+        assert type_a_isa_b(List[str], list[str])
+        assert type_a_isa_b(List[str], list)
+        assert type_a_isa_b(list[str], List[str])
+        assert type_a_isa_b(list[str], List)
+        # False
+        assert not type_a_isa_b(List[int], list[str])
+        assert not type_a_isa_b(List[str], list[int])
+        assert not type_a_isa_b(list[int], List[str])
+        assert not type_a_isa_b(list[str], List[int])
+
+        # True
+        assert type_a_isa_b(
+            List[dict[str, Set[int]]],
+            list[Dict[str, set[int]]],
+        )
+        # False
+        assert not type_a_isa_b(
+            List[dict[str, Set[int]]],
+            list[Dict[str, set[str]]],
+        )
+        assert not type_a_isa_b(
+            List[dict[str, List[int]]],
+            list[Dict[str, set[int]]],
+        )

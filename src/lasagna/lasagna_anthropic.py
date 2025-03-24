@@ -64,7 +64,6 @@ from openai.lib._pydantic import to_strict_json_schema
 from typing import (
     List, Callable, AsyncIterator, Any, Type,
     Tuple, Dict, Union, Literal,
-    cast,
 )
 
 import asyncio
@@ -348,15 +347,15 @@ def _log_dumps(val: Any) -> str:
 
 
 class LasagnaAnthropic(Model):
-    def __init__(self, model: str, **model_kwargs: Dict[str, Any]):
+    def __init__(self, model: str, **model_kwargs: Any):
         known_model_names = [m['formal_name'] for m in ANTHROPIC_KNOWN_MODELS]
         if model not in known_model_names:
             _LOG.warning(f'untested model: {model} (may or may not work)')
         self.model = model
-        self.model_kwargs = copy.deepcopy(model_kwargs or {})
-        self.n_retries: int = cast(int, self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
+        self.model_kwargs = copy.deepcopy(model_kwargs)
+        self.n_retries: int = self.model_kwargs.get('retries', 3)
         if not isinstance(self.n_retries, int) or self.n_retries < 0:
-            raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.model_kwargs['retries']})")
+            raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.n_retries})")
         self.model_spec: ModelSpec = {
             'provider': 'anthropic',
             'model': self.model,
@@ -364,18 +363,12 @@ class LasagnaAnthropic(Model):
         }
 
     def config_hash(self) -> str:
-        return recursive_hash(None, {
-            'provider': 'anthropic',
-            'model': self.model,
-            'model_kwargs': self.model_kwargs,
-        })
+        return recursive_hash(None, self.model_spec)
 
     def _make_client(self) -> AsyncAnthropic:
-        api_key: Union[str, None] = cast(str, self.model_kwargs['api_key']) if 'api_key' in self.model_kwargs else None
-        base_url: Union[str, None] = cast(str, self.model_kwargs['base_url']) if 'base_url' in self.model_kwargs else None
         client = AsyncAnthropic(
-            api_key  = api_key,
-            base_url = base_url,
+            api_key  = self.model_kwargs.get('api_key', None),
+            base_url = self.model_kwargs.get('base_url', None),
         )
         return client
 
@@ -413,12 +406,26 @@ class LasagnaAnthropic(Model):
 
         system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
 
-        max_tokens: int = cast(int, self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else 4096
-        stop: Union[List[str], NotGiven] = cast(List[str], self.model_kwargs['stop']) if 'stop' in self.model_kwargs else NOT_GIVEN
-        temperature: Union[float, NotGiven] = cast(float, self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
-        top_p: Union[float, NotGiven] = cast(float, self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
-        top_k: Union[int, NotGiven] = cast(int, self.model_kwargs['top_k']) if 'top_k' in self.model_kwargs else NOT_GIVEN
-        user: Union[str, None] = cast(str, self.model_kwargs['user']) if 'user' in self.model_kwargs else None
+        max_tokens: int = self.model_kwargs.get('max_tokens', 4096)
+        stop: Union[List[str], NotGiven] = self.model_kwargs.get('stop', NOT_GIVEN)
+        temperature: Union[float, NotGiven] = float(self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
+        top_p: Union[float, NotGiven] = float(self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
+        top_k: Union[int, NotGiven] = self.model_kwargs.get('top_k', NOT_GIVEN)
+        user: Union[str, None] = self.model_kwargs.get('user', None)
+
+        assert isinstance(max_tokens, int)
+        if stop is not NOT_GIVEN:
+            assert isinstance(stop, list)
+            for s in stop:
+                assert isinstance(s, str)
+        if temperature is not NOT_GIVEN:
+            assert isinstance(temperature, float)
+        if top_p is not NOT_GIVEN:
+            assert isinstance(top_p, float)
+        if top_k is not NOT_GIVEN:
+            assert isinstance(top_k, int)
+        if user is not None:
+            assert isinstance(user, str)
 
         _LOG.info(f"Invoking {self.model} with:\n  system_prompt: {system_prompt}\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
 

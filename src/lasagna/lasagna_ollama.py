@@ -40,7 +40,6 @@ from openai.lib._pydantic import to_strict_json_schema
 from typing import (
     List, Callable, AsyncIterator, Any, Type,
     Tuple, Dict, Union,
-    cast,
 )
 
 import os
@@ -261,33 +260,35 @@ def _get_ollama_format_for_structured_output(
 
 
 class LasagnaOllama(Model):
-    def __init__(self, model: str, **model_kwargs: Dict[str, Any]):
+    def __init__(self, model: str, **model_kwargs: Any):
         self.model = model
-        self.model_kwargs = copy.deepcopy(model_kwargs or {})
-        self.n_retries: int = cast(int, self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
+        self.model_kwargs = copy.deepcopy(model_kwargs)
+        self.n_retries: int = self.model_kwargs.get('retries', 3)
         if not isinstance(self.n_retries, int) or self.n_retries < 0:
-            raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.model_kwargs['retries']})")
+            raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.n_retries})")
         self.model_spec: ModelSpec = {
             'provider': 'ollama',
             'model': self.model,
             'model_kwargs': self.model_kwargs,
         }
-        self.base_url = self.model_kwargs.get('base_url', os.environ.get('OLLAMA_BASE_URL', 'http://127.0.0.1:11434'))
-        self.keep_alive = self.model_kwargs.get('keep_alive', '5m')
-        self.timeout_seconds: float = cast(float, self.model_kwargs['timeout_seconds']) if 'timeout_seconds' in self.model_kwargs else 120.0
-        if not isinstance(self.timeout_seconds, float) or self.timeout_seconds < 0.0:
-            raise ValueError(f"model_kwargs['timeout_seconds'] must be a non-negative float (got {self.model_kwargs['timeout_seconds']})")
+
+        self.base_url: str = self.model_kwargs.get('base_url', os.environ.get('OLLAMA_BASE_URL', 'http://127.0.0.1:11434'))
+        assert isinstance(self.base_url, str)
+
+        self.keep_alive: str = self.model_kwargs.get('keep_alive', '5m')
+        assert isinstance(self.keep_alive, str)
+
+        self.timeout_seconds = float(self.model_kwargs.get('timeout_seconds', 120.0))
+        if self.timeout_seconds < 0.0:
+            raise ValueError(f"model_kwargs['timeout_seconds'] must be a non-negative float (got {self.timeout_seconds})")
+
         self.payload_options = copy.deepcopy(self.model_kwargs)
         for key_to_remove in ['retries', 'base_url', 'keep_alive', 'timeout_seconds']:
             if key_to_remove in self.payload_options:
                 del self.payload_options[key_to_remove]
 
     def config_hash(self) -> str:
-        return recursive_hash(None, {
-            'provider': 'ollama',
-            'model': self.model,
-            'model_kwargs': self.model_kwargs,
-        })
+        return recursive_hash(None, self.model_spec)
 
     async def _run_once(
         self,

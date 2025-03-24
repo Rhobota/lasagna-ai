@@ -79,14 +79,14 @@ async def _agent_common_test(
 
 @pytest.mark.asyncio
 async def test_bind_model():
-    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
     my_agent = build_simple_agent(name = 'simple_agent')
     await _agent_common_test(my_binder, my_agent)
 
 
 @pytest.mark.asyncio
 async def test_partial_bind_model():
-    my_binder = partial_bind_model(MockProvider, 'some_model')({'a': 'yes', 'b': 6})
+    my_binder = partial_bind_model(MockProvider, 'some_model')(a = 'yes', b = 6)
     my_agent = build_simple_agent(name = 'simple_agent')
     await _agent_common_test(my_binder, my_agent)
 
@@ -146,7 +146,7 @@ async def test_build_layered_agent():
 
 @pytest.mark.asyncio
 async def test_model_extract():
-    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 6})
+    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
     events = []
     async def event_callback(event: EventPayload) -> None:
         events.append(event)
@@ -212,7 +212,7 @@ async def test_model_extract():
 
 @pytest.mark.asyncio
 async def test_model_extract_type_mismatch():
-    my_binder = bind_model(MockProvider, 'some_model', {'a': 'yes', 'b': 'BAD VALUE'})
+    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 'BAD VALUE')
     prev_runs: List[AgentRun] = []
     with pytest.raises(ValidationError):
         await my_binder(

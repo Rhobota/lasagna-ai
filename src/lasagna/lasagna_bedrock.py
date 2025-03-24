@@ -42,6 +42,7 @@ from typing import (
     Tuple, Dict, Union,
 )
 
+import botocore.client  # type: ignore
 import boto3.session  # type: ignore
 from botocore.exceptions import ClientError  # type: ignore
 
@@ -409,10 +410,10 @@ class LasagnaBedrock(Model):
         if model not in known_model_names:
             _LOG.warning(f'untested model: {model} (may or may not work)')
         self.model = model
-        self.model_kwargs = copy.deepcopy(model_kwargs or {})
-        self.n_retries: int = int(self.model_kwargs['retries']) if 'retries' in self.model_kwargs else 3
+        self.model_kwargs = copy.deepcopy(model_kwargs)
+        self.n_retries: int = self.model_kwargs.get('retries', 3)
         if not isinstance(self.n_retries, int) or self.n_retries < 0:
-            raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.model_kwargs['retries']})")
+            raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.n_retries})")
         self.model_spec: ModelSpec = {
             'provider': 'bedrock',
             'model': self.model,
@@ -427,17 +428,14 @@ class LasagnaBedrock(Model):
             region_name           = self.model_kwargs.get('region_name',           os.environ.get('AWS_REGION')),
             profile_name          = self.model_kwargs.get('profile_name',          os.environ.get('AWS_PROFILE')),
         )
-        self.bedrock_client = self.session.client(service_name='bedrock-runtime')
+        self.config = botocore.client.Config(**self.model_kwargs.get('aws_client_config', {}))
+        self.bedrock_client = self.session.client(service_name='bedrock-runtime', config=self.config)
         # Note: `bedrock_client` is thread-safe, so you *can* safely pass
         #       it around to the event loop's thread pool.
         # See: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/clients.html#multithreading-or-multiprocessing-with-clients
 
     def config_hash(self) -> str:
-        return recursive_hash(None, {
-            'provider': 'bedrock',
-            'model': self.model,
-            'model_kwargs': self.model_kwargs,
-        })
+        return recursive_hash(None, self.model_spec)
 
     async def _run_once(
         self,
@@ -466,12 +464,13 @@ class LasagnaBedrock(Model):
         elif force_tool:
             raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
 
-        max_tokens: int = int(self.model_kwargs['max_tokens']) if 'max_tokens' in self.model_kwargs else 4096
-        stop: Union[List[str], None] = self.model_kwargs['stop'] if 'stop' in self.model_kwargs else None
+        max_tokens: int = self.model_kwargs.get('max_tokens', 4096)
+        stop: Union[List[str], None] = self.model_kwargs.get('stop', None)
         temperature: Union[float, None] = float(self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else None
         top_p: Union[float, None] = float(self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else None
 
-        inference_config: Dict[str, Union[int, float, str, List[str]]] = {}
+        inference_config: Dict[str, Union[int, float, List[str]]] = {}
+        assert isinstance(max_tokens, int)
         inference_config['maxTokens'] = max_tokens
         if stop is not None:
             assert isinstance(stop, list)

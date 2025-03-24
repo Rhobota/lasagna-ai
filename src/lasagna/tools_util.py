@@ -5,9 +5,10 @@ import collections.abc
 from enum import Enum
 
 from typing import (
-    List, Dict, Tuple, Union, Any, Callable,
+    List, Dict, Tuple, Union, Any, Callable, Literal,
     get_origin, get_args, cast,
 )
+from typing_extensions import is_typeddict
 
 from .agent_util import bind_model, extract_last_message, flat_messages
 
@@ -119,18 +120,80 @@ def is_callable_of_type(
         return False
 
     for concrete_param, expected_param in zip(concrete_params, expected_params):
-        if concrete_param.annotation != expected_param:
+        if not type_a_isa_b(expected_param, concrete_param.annotation):
             return False
 
     if is_async_callable(concrete_callable):
         if get_origin(expected_return) is not collections.abc.Awaitable:
             return False
         eret = get_args(expected_return)[0]
-        if concrete_sig.return_annotation != eret:
+        if not type_a_isa_b(concrete_sig.return_annotation, eret):
             return False
 
     else:
-        if concrete_sig.return_annotation != expected_return:
+        if not type_a_isa_b(concrete_sig.return_annotation, expected_return):
+            return False
+
+    return True
+
+
+def type_a_isa_b(a: Any, b: Any) -> bool:
+    """
+    Correctly compares annotation types such that, e.g., these are equal:
+        a = List[dict[str, Set[int]]]
+        b = list[Dict[str, set[int]]]
+
+    Also correctly identifies `a isa b`, e.g.
+        a = List[str]
+        b = Iterable[str]
+
+    Also correctly handles `Union` and `Literal` types.
+    """
+    a_origin = get_origin(a) or a
+    b_origin = get_origin(b) or b
+    a_args = get_args(a)
+    b_args = get_args(b)
+
+    if b_origin is Any:
+        return True
+
+    if a_origin is Union:
+        return all(type_a_isa_b(option, b) for option in a_args)
+    elif b_origin is Union:
+        return any(type_a_isa_b(a, option) for option in b_args)
+
+    if a_origin is Literal and b_origin is Literal:
+        return len(set(a_args) - set(b_args)) == 0
+    elif a_origin is Literal:
+        return all(type_a_isa_b(type(option), b) for option in a_args)
+    elif b_origin is Literal:
+        _LOG.warning(f'Cannot check against target literal: {a=} {b=}')
+        return False
+
+    if is_typeddict(a) and b_origin is dict:
+        if not b_args or b_args == (str, Any):
+            # Special case we want to handle!
+            return True
+
+    try:
+        if not (a_origin == b_origin or issubclass(a_origin, b_origin)):
+            return False
+    except TypeError:
+        # Note: Calling `issubclass` on two TypedDicts will land here.
+        #       Our equality check above should catch the cases we need, for now.
+        #       But, we might need to fix this in the future if we ever need to
+        #       compare two TypedDicts that are not the *same* but are *compatible*
+        #       with one another.
+        return False
+
+    if len(b_args) == 0:
+        # Since `b` is totally generic, then `a` must merely be a more
+        # specific version, which passes our test.
+        return True
+    if len(a_args) != len(b_args):
+        return False
+    for a_arg, b_arg in zip(a_args, b_args):
+        if not type_a_isa_b(a_arg, b_arg):
             return False
 
     return True
@@ -177,7 +240,7 @@ def get_tool_params(tool: Callable) -> Tuple[str, List[ToolParam]]:
                         raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param['type']}`")
                 else:
                     doc_param_type = DOCSTRING_PARAM_SUPPORTED_TYPES.get(doc_param['type'], 'unknown')
-                    if concrete_param.annotation != doc_param_type:
+                    if not type_a_isa_b(doc_param_type, concrete_param.annotation):
                         raise ValueError(f"tool `{get_name(tool)}` has parameter `{concrete_param.name}` type mismatch: tool type is `{concrete_param.annotation}`, docstring type is `{doc_param_type}`")
 
     return description, doc_params
@@ -282,7 +345,7 @@ async def _run_single_tool(
         is_agent_callable = is_callable_of_type(func, AgentCallable, no_throw=True)
         is_bound_agent_callable = is_callable_of_type(func, BoundAgentCallable, no_throw=True)
 
-        if model_spec and (is_agent_callable or is_bound_agent_callable):
+        if is_agent_callable or is_bound_agent_callable:
             messages: List[Message] = [*prev_messages]  # shallow copy
             if len(parsed_args) > 0:
                 messages.append({
@@ -297,8 +360,14 @@ async def _run_single_tool(
             ]
 
             if is_agent_callable:
+                assert model_spec is not None
                 agent = cast(AgentCallable, func)
-                bound_agent = bind_model(**model_spec)(agent)
+                binder = bind_model(
+                    provider = model_spec['provider'],
+                    model = model_spec['model'],
+                    **model_spec.get('model_kwargs', {}),
+                )
+                bound_agent = binder(agent)
             elif is_bound_agent_callable:
                 bound_agent = cast(BoundAgentCallable, func)
             else:
@@ -327,6 +396,7 @@ async def _run_single_tool(
             }
 
     except Exception as e:
+        _LOG.exception(e)
         error = f"{get_name(type(e))}: {e}"
         return {
             'type': 'any',
