@@ -5,7 +5,6 @@ from .util import get_name
 from .types import (
     AgentSpec,
     AgentRun,
-    AgentRunMessageList,
     ModelFactory,
     ModelRecord,
     AgentCallable,
@@ -146,7 +145,7 @@ def extract_last_message(
 def flat_messages(
     agent_name: str,
     messages: List[Message],
-) -> AgentRunMessageList:
+) -> AgentRun:
     return {
         'agent': agent_name,
         'type': 'messages',
