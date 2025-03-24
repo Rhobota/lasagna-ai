@@ -345,7 +345,7 @@ async def _run_single_tool(
         is_agent_callable = is_callable_of_type(func, AgentCallable, no_throw=True)
         is_bound_agent_callable = is_callable_of_type(func, BoundAgentCallable, no_throw=True)
 
-        if model_spec and (is_agent_callable or is_bound_agent_callable):
+        if is_agent_callable or is_bound_agent_callable:
             messages: List[Message] = [*prev_messages]  # shallow copy
             if len(parsed_args) > 0:
                 messages.append({
@@ -360,6 +360,7 @@ async def _run_single_tool(
             ]
 
             if is_agent_callable:
+                assert model_spec is not None
                 agent = cast(AgentCallable, func)
                 binder = bind_model(
                     provider = model_spec['provider'],
