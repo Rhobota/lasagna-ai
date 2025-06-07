@@ -1,1 +1,1 @@
-Sitemap: https://Rhobota.github.io/lasagna-ai/sitemap.xml
+Sitemap: https://lasagna-ai.rhobota.com/sitemap.xml
