@@ -19,10 +19,11 @@ website:
     position: below-navbar
     dismissable: false
   navbar:
+    logo: "assets/Lasagna AI - Logo - Square - SMOOSHED.png"
     background: primary
     search: true
     left:
-      - text: Quickstart
+      - text: "🚀 Quickstart"
         href: quickstart.ipynb
       - about.qmd
     right:
