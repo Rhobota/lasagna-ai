@@ -1,5 +1,47 @@
 [
   {
+    "objectID": "recipes/rag.html",
+    "href": "recipes/rag.html",
+    "title": "RAG Recipe",
+    "section": "",
+    "text": "# TODO",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "RAG Recipe"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Lasagna AI: Documentation",
+    "section": "",
+    "text": "This is the homepage.\nTODO"
+  },
+  {
+    "objectID": "what_is_an_agent/what.html",
+    "href": "what_is_an_agent/what.html",
+    "title": "What is an Agent?",
+    "section": "",
+    "text": "# TODO",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🤖 What is an Agent?",
+      "What is an Agent?"
+    ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "💡 About",
+    "section": "",
+    "text": "About this site (TODO)",
+    "crumbs": [
+      "🚀 Quickstart",
+      "💡 About"
+    ]
+  },
+  {
     "objectID": "quickstart.html",
     "href": "quickstart.html",
     "title": "🚀 Quickstart your Lasagna",
@@ -19,48 +61,6 @@
     "crumbs": [
       "🚀 Quickstart",
       "🚀 Quickstart your Lasagna"
-    ]
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "💡 About",
-    "section": "",
-    "text": "About this site (TODO)",
-    "crumbs": [
-      "🚀 Quickstart",
-      "💡 About"
-    ]
-  },
-  {
-    "objectID": "what_is_an_agent/what.html",
-    "href": "what_is_an_agent/what.html",
-    "title": "What is an Agent?",
-    "section": "",
-    "text": "TODO\n\n\n---------------------------------------------------------------------------\nNameError                                 Traceback (most recent call last)\nCell In[1], line 1\n----&gt; 1 TODO\n\nNameError: name 'TODO' is not defined",
-    "crumbs": [
-      "🚀 Quickstart",
-      "🤖 What is an Agent?",
-      "What is an Agent?"
-    ]
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Lasagna AI: Documentation",
-    "section": "",
-    "text": "This is the homepage.\nTODO"
-  },
-  {
-    "objectID": "recipes/rag.html",
-    "href": "recipes/rag.html",
-    "title": "RAG Recipe",
-    "section": "",
-    "text": "TODO\n\n\n---------------------------------------------------------------------------\nNameError                                 Traceback (most recent call last)\nCell In[1], line 1\n----&gt; 1 TODO\n\nNameError: name 'TODO' is not defined",
-    "crumbs": [
-      "🚀 Quickstart",
-      "😋 Recipes",
-      "RAG Recipe"
     ]
   }
 ]

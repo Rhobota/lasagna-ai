@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://Rhobota.github.io/lasagna-ai/quickstart.html</loc>
-    <lastmod>2025-06-07T19:28:47.022Z</lastmod>
-  </url>
-  <url>
-    <loc>https://Rhobota.github.io/lasagna-ai/recipes/index.html</loc>
-    <lastmod>2025-06-07T18:32:04.282Z</lastmod>
-  </url>
-  <url>
-    <loc>https://Rhobota.github.io/lasagna-ai/about.html</loc>
-    <lastmod>2025-06-07T19:30:03.896Z</lastmod>
-  </url>
-  <url>
-    <loc>https://Rhobota.github.io/lasagna-ai/what_is_an_agent/index.html</loc>
-    <lastmod>2025-06-07T18:31:56.558Z</lastmod>
-  </url>
-  <url>
-    <loc>https://Rhobota.github.io/lasagna-ai/what_is_an_agent/what.html</loc>
-    <lastmod>2025-06-07T18:11:13.700Z</lastmod>
+    <loc>https://Rhobota.github.io/lasagna-ai/recipes/rag.html</loc>
+    <lastmod>2025-06-07T21:39:29.302Z</lastmod>
   </url>
   <url>
     <loc>https://Rhobota.github.io/lasagna-ai/index.html</loc>
-    <lastmod>2025-06-07T17:50:52.634Z</lastmod>
+    <lastmod>2025-06-07T21:39:29.302Z</lastmod>
   </url>
   <url>
-    <loc>https://Rhobota.github.io/lasagna-ai/recipes/rag.html</loc>
-    <lastmod>2025-06-07T18:10:50.024Z</lastmod>
+    <loc>https://Rhobota.github.io/lasagna-ai/what_is_an_agent/what.html</loc>
+    <lastmod>2025-06-07T21:39:29.302Z</lastmod>
+  </url>
+  <url>
+    <loc>https://Rhobota.github.io/lasagna-ai/about.html</loc>
+    <lastmod>2025-06-07T21:39:29.301Z</lastmod>
+  </url>
+  <url>
+    <loc>https://Rhobota.github.io/lasagna-ai/quickstart.html</loc>
+    <lastmod>2025-06-07T21:39:29.302Z</lastmod>
+  </url>
+  <url>
+    <loc>https://Rhobota.github.io/lasagna-ai/what_is_an_agent/index.html</loc>
+    <lastmod>2025-06-07T21:39:29.302Z</lastmod>
+  </url>
+  <url>
+    <loc>https://Rhobota.github.io/lasagna-ai/recipes/index.html</loc>
+    <lastmod>2025-06-07T21:39:29.302Z</lastmod>
   </url>
 </urlset>
