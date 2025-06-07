@@ -31,6 +31,7 @@ $(QUARTO_PATH) :
 	rm -f quarto-1.7.31-linux-amd64.deb
 
 quarto-serve : $(QUARTO_PATH)
+	rm -rf docs/_site/ docs/.quarto/
 	$(QUARTO_PATH) preview docs
 
 .PHONY: help test check testall checkall quarto-serve

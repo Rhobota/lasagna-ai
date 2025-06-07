@@ -33,7 +33,7 @@ website:
     style: "docked"
     contents: auto
   page-footer:
-    center: "Copyright © 2025 (see <a href=\"https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt\">LICENSE</a>)"
+    center: "Copyright © 2025 (<a href=\"https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt\">MIT License</a>)"
 
 format:
   html:
