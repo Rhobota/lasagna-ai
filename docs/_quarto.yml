@@ -1,0 +1,45 @@
+project:
+  type: website
+  preview:
+    port: 7777
+
+website:
+  title: "Lasagna AI: Documentation"
+  favicon: "assets/Lasagna AI - Logo - Square - SMOOSHED.png"
+  open-graph: true
+  repo-url: https://github.com/Rhobota/lasagna-ai
+  repo-subdir: "docs"
+  repo-actions: [edit, source, issue]
+  reader-mode: false
+  page-navigation: true
+  back-to-top-navigation: false
+  announcement:
+    icon: emoji-smile   # https://icons.getbootstrap.com/
+    content: "You found <strong>Lasagna AI</strong>!"
+    position: below-navbar
+    dismissable: false
+  navbar:
+    logo: "assets/Lasagna AI - Logo - Square - SMOOSHED.png"
+    background: primary
+    search: true
+    left:
+      - text: "🚀 Quickstart"
+        href: quickstart.ipynb
+      - about.qmd
+    right:
+      - icon: github
+        href: https://github.com/Rhobota/lasagna-ai
+        target: _blank
+  sidebar:
+    style: "docked"
+    contents: auto
+  page-footer:
+    center: "Copyright © 2025 (<a href=\"https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt\">MIT License</a>)"
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
+    css: styles.css
+    toc: true

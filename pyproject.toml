@@ -61,6 +61,7 @@ dev = [
   "mypy>=1.10.0",
   "pytest>=8.1.1",
   "pytest-asyncio>=0.23.6",
+  "nbqa",
 ]
 example-deps = [
   "sympy",
@@ -84,6 +85,13 @@ python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/lasagna tests examples}"
+
+[tool.hatch.envs.docs]
+python = "3.12"
+features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
+
+[tool.hatch.envs.docs.scripts]
+check = "nbqa mypy --install-types --non-interactive docs/"
 
 [tool.hatch.envs.hatch-test]
 features = ["dev", "openai", "anthropic", "bedrock"]
