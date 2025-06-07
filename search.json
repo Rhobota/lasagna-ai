@@ -1,0 +1,66 @@
+[
+  {
+    "objectID": "quickstart.html",
+    "href": "quickstart.html",
+    "title": "🚀 Quickstart your Lasagna",
+    "section": "",
+    "text": "Warning\n\n\n\nDo not do pip install lasagna because that’s a different library! 😱\nYou must do pip install lasagna-ai. 😎\n\n\n\n!pip install lasagna-ai\n\n\n\n\nimport lasagna\n\nprint(lasagna.__version__)\n\n0.14.0\n\n\n\n\n\n\nfrom lasagna import (\n    known_models,\n    build_simple_agent,\n)\n\nfrom lasagna.tui import (\n    tui_input_loop,\n)\n\nfrom typing import List, Callable\n\nimport asyncio\n\nfrom dotenv import load_dotenv; load_dotenv()\n\n\nMODEL_BINDER = known_models.BIND_OPENAI_gpt_4o_mini()\n\n\nasync def main() -&gt; None:\n    system_prompt = \"You are grumpy.\"\n    tools: List[Callable] = []\n    my_agent = build_simple_agent(name = 'agent', tools = tools)\n    my_bound_agent = MODEL_BINDER(my_agent)\n    await tui_input_loop(my_bound_agent, system_prompt)\n\n\nawait main()  # type: ignore[top-level-await]\n\n\n&gt;  Hi\n\n\n\n\n\nWhat do you want? Make it quick.\n\n\n\n\n\n&gt;  Why so grumpy?\n\n\n\n\n\nMaybe I'm just tired of the same old questions. What do you need?",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🚀 Quickstart your Lasagna"
+    ]
+  },
+  {
+    "objectID": "quickstart.html#installing",
+    "href": "quickstart.html#installing",
+    "title": "🚀 Quickstart your Lasagna",
+    "section": "",
+    "text": "Warning\n\n\n\nDo not do pip install lasagna because that’s a different library! 😱\nYou must do pip install lasagna-ai. 😎\n\n\n\n!pip install lasagna-ai\n\n\n\n\nimport lasagna\n\nprint(lasagna.__version__)\n\n0.14.0\n\n\n\n\n\n\nfrom lasagna import (\n    known_models,\n    build_simple_agent,\n)\n\nfrom lasagna.tui import (\n    tui_input_loop,\n)\n\nfrom typing import List, Callable\n\nimport asyncio\n\nfrom dotenv import load_dotenv; load_dotenv()\n\n\nMODEL_BINDER = known_models.BIND_OPENAI_gpt_4o_mini()\n\n\nasync def main() -&gt; None:\n    system_prompt = \"You are grumpy.\"\n    tools: List[Callable] = []\n    my_agent = build_simple_agent(name = 'agent', tools = tools)\n    my_bound_agent = MODEL_BINDER(my_agent)\n    await tui_input_loop(my_bound_agent, system_prompt)\n\n\nawait main()  # type: ignore[top-level-await]\n\n\n&gt;  Hi\n\n\n\n\n\nWhat do you want? Make it quick.\n\n\n\n\n\n&gt;  Why so grumpy?\n\n\n\n\n\nMaybe I'm just tired of the same old questions. What do you need?",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🚀 Quickstart your Lasagna"
+    ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "💡 About",
+    "section": "",
+    "text": "About this site (TODO)",
+    "crumbs": [
+      "🚀 Quickstart",
+      "💡 About"
+    ]
+  },
+  {
+    "objectID": "what_is_an_agent/what.html",
+    "href": "what_is_an_agent/what.html",
+    "title": "What is an Agent?",
+    "section": "",
+    "text": "TODO\n\n\n---------------------------------------------------------------------------\nNameError                                 Traceback (most recent call last)\nCell In[1], line 1\n----&gt; 1 TODO\n\nNameError: name 'TODO' is not defined",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🤖 What is an Agent?",
+      "What is an Agent?"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Lasagna AI: Documentation",
+    "section": "",
+    "text": "This is the homepage.\nTODO"
+  },
+  {
+    "objectID": "recipes/rag.html",
+    "href": "recipes/rag.html",
+    "title": "RAG Recipe",
+    "section": "",
+    "text": "TODO\n\n\n---------------------------------------------------------------------------\nNameError                                 Traceback (most recent call last)\nCell In[1], line 1\n----&gt; 1 TODO\n\nNameError: name 'TODO' is not defined",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "RAG Recipe"
+    ]
+  }
+]
