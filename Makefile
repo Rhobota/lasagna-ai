@@ -9,6 +9,7 @@ help :
 	@echo '  make checkall     # <-- check types in *all* python versions (uses hatch)'
 	@echo
 	@echo '  make quarto-serve # <-- run quarto over the docs'
+	@echo '  make docs-check   # <-- check types within the docs'
 	@echo
 
 test :
@@ -34,4 +35,7 @@ quarto-serve : $(QUARTO_PATH)
 	rm -rf docs/_site/ docs/.quarto/
 	$(QUARTO_PATH) preview docs
 
-.PHONY: help test check testall checkall quarto-serve
+docs-check :
+	hatch run docs:check
+
+.PHONY: help test check testall checkall quarto-serve docs-check
