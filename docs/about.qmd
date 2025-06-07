@@ -1,5 +1,6 @@
 ---
-title: "About"
+title: "About this Site"
+order: 999
 ---
 
 About this site (TODO)
