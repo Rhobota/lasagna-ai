@@ -14,7 +14,7 @@ website:
   page-navigation: true
   back-to-top-navigation: false
   announcement:
-    icon: emoji-smile
+    icon: emoji-smile   # https://icons.getbootstrap.com/
     content: "You found <strong>Lasagna AI</strong>!"
     position: below-navbar
     dismissable: false
@@ -22,8 +22,8 @@ website:
     background: primary
     search: true
     left:
-      - text: Home
-        href: index.qmd
+      - text: Quickstart
+        href: quickstart.ipynb
       - about.qmd
     right:
       - icon: github

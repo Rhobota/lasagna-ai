@@ -1,4 +1,4 @@
 ---
-title: "What is an Agent?"
+title: "🤖 What is an Agent?"
 order: 020
 ---
