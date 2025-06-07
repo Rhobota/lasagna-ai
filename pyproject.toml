@@ -43,7 +43,7 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/Rhobota/lasagna-ai#readme"
+Documentation = "https://lasagna-ai.rhobota.com/"
 Issues = "https://github.com/Rhobota/lasagna-ai/issues"
 Source = "https://github.com/Rhobota/lasagna-ai"
 
