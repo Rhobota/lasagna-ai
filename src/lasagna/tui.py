@@ -9,7 +9,7 @@ from .types import (
 )
 
 import os
-
+import asyncio
 from typing import Union, List
 
 from colorama import just_fix_windows_console, Fore, Style
@@ -69,9 +69,14 @@ async def tui_input_loop(
                 },
             ],
         ))
+    loop = asyncio.get_running_loop()
     try:
         while True:
-            human_input = input(Fore.GREEN + Style.BRIGHT + '> ')
+            human_input = await loop.run_in_executor(
+                None,
+                input,
+                Fore.GREEN + Style.BRIGHT + '> ',
+            )
             print(Style.RESET_ALL, end='', flush=True)
             if not human_input:
                 continue
