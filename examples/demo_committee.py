@@ -21,9 +21,9 @@ COMMITTEE_SPEC = [
     known_models.BIND_OPENAI_gpt_4o(),
     known_models.BIND_OPENAI_gpt_4o_mini(),
 
-    known_models.BIND_ANTHROPIC_claude_35_sonnet(),
-    known_models.BIND_ANTHROPIC_claude_3_opus(),
-    known_models.BIND_ANTHROPIC_claude_3_haiku(),
+    known_models.BIND_ANTHROPIC_claude_opus_4(),
+    known_models.BIND_ANTHROPIC_claude_sonnet_4(),
+    known_models.BIND_ANTHROPIC_claude_haiku_35(),
 
     known_models.BIND_NVIDIA_meta_llama3_8b_instruct(),
     known_models.BIND_NVIDIA_meta_llama3_1_8b_instruct(),
