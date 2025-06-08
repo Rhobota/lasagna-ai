@@ -25,7 +25,7 @@ website:
     left:
       - text: "🚀 Quickstart"
         href: quickstart.ipynb
-      - about.qmd
+      - about.ipynb
     right:
       - icon: github
         href: https://github.com/Rhobota/lasagna-ai
