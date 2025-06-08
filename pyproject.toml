@@ -74,7 +74,7 @@ packages = ["src/lasagna"]
 path = "src/lasagna/__init__.py"
 
 [tool.hatch.envs.default]
-python = "3.8"
+python = "3.12"
 features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 
 [tool.hatch.envs.types]
