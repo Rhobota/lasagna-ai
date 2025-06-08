@@ -7,12 +7,21 @@ from .agent_util import partial_bind_model
 
 OPENAI_KNOWN_MODELS: List[ModelRecord] = [
     {
+        'formal_name': 'gpt-4.1-2025-04-14',
+        'display_name': 'GPT-4.1',
+    },
+    {
         'formal_name': 'gpt-4o-mini-2024-07-18',
         'display_name': 'GPT-4o mini',
     },
     {
+        'formal_name': 'gpt-4o-2024-11-20',
+        'display_name': 'GPT-4o',
+    },
+    {
         'formal_name': 'gpt-4o-2024-08-06',
         'display_name': 'GPT-4o',
+        'outdated': True,
     },
     {
         'formal_name': 'gpt-4o-2024-05-13',
@@ -31,36 +40,54 @@ OPENAI_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
+BIND_OPENAI_gpt_41       = partial_bind_model('openai', 'gpt-4.1-2025-04-14')
 BIND_OPENAI_gpt_4o_mini  = partial_bind_model('openai', 'gpt-4o-mini-2024-07-18')
-BIND_OPENAI_gpt_4o       = partial_bind_model('openai', 'gpt-4o-2024-08-06')
-BIND_OPENAI_gpt_4_turbo  = partial_bind_model('openai', 'gpt-4-turbo-2024-04-09')
-BIND_OPENAI_gpt_35_turbo = partial_bind_model('openai', 'gpt-3.5-turbo-0125')
+BIND_OPENAI_gpt_4o       = partial_bind_model('openai', 'gpt-4o-2024-11-20')
 
 
 ANTHROPIC_KNOWN_MODELS: List[ModelRecord] = [
     {
+        'formal_name': 'claude-opus-4-20250514',
+        'display_name': 'Claude Opus 4',
+    },
+    {
+        'formal_name': 'claude-sonnet-4-20250514',
+        'display_name': 'Claude Sonnet 4',
+    },
+    {
+        'formal_name': 'claude-3-7-sonnet-20250219',
+        'display_name': 'Claude Sonnet 3.7',
+    },
+    {
+        'formal_name': 'claude-3-5-haiku-20241022',
+        'display_name': 'Claude Haiku 3.5',
+    },
+    {
         'formal_name': 'claude-3-5-sonnet-20240620',
-        'display_name': 'Claude3.5 Sonnet',
+        'display_name': 'Claude Sonnet 3.5',
+        'outdated': True,
     },
     {
         'formal_name': 'claude-3-opus-20240229',
-        'display_name': 'Claude3 Opus',
+        'display_name': 'Claude Opus 3',
+        'outdated': True,
     },
     {
         'formal_name': 'claude-3-sonnet-20240229',
-        'display_name': 'Claude3 Sonnet',
+        'display_name': 'Claude Sonnet 3',
         'outdated': True,
     },
     {
         'formal_name': 'claude-3-haiku-20240307',
-        'display_name': 'Claude3 Haiku',
+        'display_name': 'Claude Haiku 3',
+        'outdated': True,
     },
 ]
 
-BIND_ANTHROPIC_claude_35_sonnet = partial_bind_model('anthropic', 'claude-3-5-sonnet-20240620')
-BIND_ANTHROPIC_claude_3_opus    = partial_bind_model('anthropic', 'claude-3-opus-20240229')
-BIND_ANTHROPIC_claude_3_sonnet  = partial_bind_model('anthropic', 'claude-3-sonnet-20240229')
-BIND_ANTHROPIC_claude_3_haiku   = partial_bind_model('anthropic', 'claude-3-haiku-20240307')
+BIND_ANTHROPIC_claude_opus_4    = partial_bind_model('anthropic', 'claude-opus-4-20250514')
+BIND_ANTHROPIC_claude_sonnet_4  = partial_bind_model('anthropic', 'claude-sonnet-4-20250514')
+BIND_ANTHROPIC_claude_sonnet_37 = partial_bind_model('anthropic', 'claude-3-7-sonnet-20250219')
+BIND_ANTHROPIC_claude_haiku_35  = partial_bind_model('anthropic', 'claude-3-5-haiku-20241022')
 
 
 OLLAMA_KNOWN_MODELS: List[ModelRecord] = [
