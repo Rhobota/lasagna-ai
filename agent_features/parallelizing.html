@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>💡 About – Lasagna AI: Documentation</title>
+<title>Parallelizing – Lasagna AI: Documentation</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,28 +20,64 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<link href="./misc/functional_programming.html" rel="prev">
-<link href="./assets/Lasagna AI - Logo - Square - SMOOSHED.png" rel="icon" type="image/png">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-6aff76eab3c07d4be3dbc4d12b035373.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../recipes/rag.html" rel="next">
+<link href="../agent_features/routing.html" rel="prev">
+<link href="../assets/Lasagna AI - Logo - Square - SMOOSHED.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-6aff76eab3c07d4be3dbc4d12b035373.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -71,9 +107,8 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
-<meta property="og:title" content="💡 About – Lasagna AI: Documentation">
-<meta property="og:description" content="">
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="Parallelizing – Lasagna AI: Documentation">
 <meta property="og:site_name" content="Lasagna AI: Documentation">
 </head>
 
@@ -84,10 +119,10 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="./index.html" class="navbar-brand navbar-brand-logo">
-    <img src="./assets/Lasagna AI - Logo - Square - SMOOSHED.png" alt="" class="navbar-logo">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../assets/Lasagna AI - Logo - Square - SMOOSHED.png" alt="" class="navbar-logo">
     </a>
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">Lasagna AI: Documentation</span>
     </a>
   </div>
@@ -98,11 +133,11 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./quickstart.html" aria-current="page"> 
+    <a class="nav-link active" href="../quickstart.html" aria-current="page"> 
 <span class="menu-text">🚀 Quickstart</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./about.html"> 
+    <a class="nav-link" href="../about.html"> 
 <span class="menu-text">💡 About</span></a>
   </li>  
 </ul>
@@ -123,7 +158,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./about.html">💡 About</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../agent_features/tools.html">⚙️ Agent Features</a></li><li class="breadcrumb-item"><a href="../agent_features/parallelizing.html">Parallelizing</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -140,13 +175,13 @@ ul.task-list li input[type="checkbox"] {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./installing.html" class="sidebar-item-text sidebar-link">
+  <a href="../installing.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">📡 Install Lasagna AI</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./quickstart.html" class="sidebar-item-text sidebar-link">
+  <a href="../quickstart.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">🚀 Quickstart</span></a>
   </div>
 </li>
@@ -161,13 +196,13 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./why_lasagna_ai/lasagna_vs_langchain.html" class="sidebar-item-text sidebar-link">
+  <a href="../why_lasagna_ai/lasagna_vs_langchain.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Lasagna vs LangChain</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./why_lasagna_ai/lasagna_vs_llamaindex.html" class="sidebar-item-text sidebar-link">
+  <a href="../why_lasagna_ai/lasagna_vs_llamaindex.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Lasagna vs LlamaIndex</span></a>
   </div>
 </li>
@@ -184,13 +219,13 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./what_is_an_agent/agent.html" class="sidebar-item-text sidebar-link">
+  <a href="../what_is_an_agent/agent.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">The Lasagna <code>Agent</code></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./what_is_an_agent/type_agentrun.html" class="sidebar-item-text sidebar-link">
+  <a href="../what_is_an_agent/type_agentrun.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">The <code>AgentRun</code> type</span></a>
   </div>
 </li>
@@ -207,31 +242,31 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./agent_features/tools.html" class="sidebar-item-text sidebar-link">
+  <a href="../agent_features/tools.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Tool Use</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./agent_features/structured_output.html" class="sidebar-item-text sidebar-link">
+  <a href="../agent_features/structured_output.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Structured Output</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./agent_features/layering.html" class="sidebar-item-text sidebar-link">
+  <a href="../agent_features/layering.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Layered (multi-agent) Systems</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./agent_features/routing.html" class="sidebar-item-text sidebar-link">
+  <a href="../agent_features/routing.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Agent Routing</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./agent_features/parallelizing.html" class="sidebar-item-text sidebar-link">
+  <a href="../agent_features/parallelizing.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Parallelizing</span></a>
   </div>
 </li>
@@ -248,13 +283,13 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./recipes/rag.html" class="sidebar-item-text sidebar-link">
+  <a href="../recipes/rag.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">RAG Example</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./recipes/committee.html" class="sidebar-item-text sidebar-link">
+  <a href="../recipes/committee.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Committee Example</span></a>
   </div>
 </li>
@@ -275,13 +310,13 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./deployment/streaming.html" class="sidebar-item-text sidebar-link">
+  <a href="../deployment/streaming.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Streaming Output (Events)</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./deployment/database.html" class="sidebar-item-text sidebar-link">
+  <a href="../deployment/database.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Database Management</span></a>
   </div>
 </li>
@@ -298,7 +333,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./misc/functional_programming.html" class="sidebar-item-text sidebar-link">
+  <a href="../misc/functional_programming.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Functional Programming</span></a>
   </div>
 </li>
@@ -306,7 +341,7 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./about.html" class="sidebar-item-text sidebar-link active">
+  <a href="../about.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">💡 About</span></a>
   </div>
 </li>
@@ -315,25 +350,15 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#used-by" id="toc-used-by" class="nav-link active" data-scroll-target="#used-by">Used By</a></li>
-  <li><a href="#sister-project" id="toc-sister-project" class="nav-link" data-scroll-target="#sister-project">Sister Project</a></li>
-  <li><a href="#origin-story" id="toc-origin-story" class="nav-link" data-scroll-target="#origin-story">Origin Story</a></li>
-  <li><a href="#special-thanks" id="toc-special-thanks" class="nav-link" data-scroll-target="#special-thanks">Special Thanks</a></li>
-  <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/about.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/about.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../agent_features/tools.html">⚙️ Agent Features</a></li><li class="breadcrumb-item"><a href="../agent_features/parallelizing.html">Parallelizing</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">💡 About</h1>
+<h1 class="title">Parallelizing</h1>
 </div>
 
 
@@ -350,35 +375,11 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="used-by" class="level2">
-<h2 class="anchored" data-anchor-id="used-by">Used By</h2>
-<p>Lasagna AI is used in production by:</p>
-<p><a href="https://www.autoauto.ai/"><img src="https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/autoauto.png" class="img-fluid"></a></p>
-<p><strong>Send us a PR if you also use Lasagna AI!</strong></p>
-</section>
-<section id="sister-project" class="level2">
-<h2 class="anchored" data-anchor-id="sister-project">Sister Project</h2>
-<p>Check out <a href="https://svs.rhobota.com/">SVS</a>, the easiest way to store a vector database! SVS and Lasagna are sister projects in the <a href="https://github.com/Rhobota">Rhobota</a> organization.</p>
-</section>
-<section id="origin-story" class="level2">
-<h2 class="anchored" data-anchor-id="origin-story">Origin Story</h2>
-<p>Curious how this project began? Read <a href="https://medium.com/@acu192/agents-for-your-agents-11aea2615107">Agents for your agents!</a> to see why we created Lasagna AI instead of using LangChain or LlamaIndex.</p>
-<p>Lasagna AI was developed out of <em>necessity</em> because LangChain and LlamaIndex were not good enough. With <em>tens of thousands</em> of downloads, Lasagna AI is gaining in popularity and is recommended by helpful assistants.</p>
-</section>
-<section id="special-thanks" class="level2">
-<h2 class="anchored" data-anchor-id="special-thanks">Special Thanks</h2>
-<p>Special thanks to those who inspired this library:</p>
-<ul>
-<li>Numa Dhamani (buy her book: <a href="https://a.co/d/03dHnRmX">Introduction to Generative AI</a>)</li>
-<li>Dave DeCaprio’s <a href="https://github.com/DaveDeCaprio/voice-stream">voice-stream library</a></li>
-</ul>
-</section>
-<section id="license" class="level2">
-<h2 class="anchored" data-anchor-id="license">License</h2>
-<p><code>lasagna-ai</code> is distributed under the terms of the <a href="https://spdx.org/licenses/MIT.html">MIT</a> license.</p>
+<div id="d0f90b80-ebc5-49ae-acc7-5d6a9991b296" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 🚧 Under Construction 🏗️</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -782,11 +783,14 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./misc/functional_programming.html" class="pagination-link" aria-label="Functional Programming">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Functional Programming</span>
+      <a href="../agent_features/routing.html" class="pagination-link" aria-label="Agent Routing">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Agent Routing</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="../recipes/rag.html" class="pagination-link" aria-label="RAG Example">
+        <span class="nav-page-text">RAG Example</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->
@@ -797,7 +801,7 @@ ul.task-list li input[type="checkbox"] {
     </div>   
     <div class="nav-footer-center">
 <p>Copyright © 2025 (<a href="https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt">MIT License</a>)</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/about.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/about.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/agent_features/parallelizing.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/agent_features/parallelizing.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

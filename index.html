@@ -122,7 +122,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Lasagna AI: Documentation</li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -139,14 +139,20 @@ ul.task-list li input[type="checkbox"] {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./installing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">📡 Install Lasagna AI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./quickstart.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">🚀 Quickstart your Lasagna</span></a>
+ <span class="menu-text">🚀 Quickstart</span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="./what_is_an_agent/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">🤖 What is an Agent?</span></a>
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">❤️ Why Lasagna AI?</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -154,16 +160,22 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./what_is_an_agent/what.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">What is an Agent?</span></a>
+  <a href="./why_lasagna_ai/lasagna_vs_langchain.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lasagna vs LangChain</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./why_lasagna_ai/lasagna_vs_llamaindex.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lasagna vs LlamaIndex</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="./recipes/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">😋 Recipes</span></a>
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">🤖 What is an Agent?</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -171,8 +183,122 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./what_is_an_agent/agent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Lasagna <code>Agent</code></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./what_is_an_agent/type_agentrun.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The <code>AgentRun</code> type</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">⚙️ Agent Features</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./agent_features/tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tool Use</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./agent_features/structured_output.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Structured Output</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./agent_features/layering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Layered (multi-agent) Systems</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./agent_features/routing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agent Routing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./agent_features/parallelizing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Parallelizing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">😋 Recipes</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./recipes/rag.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">RAG Recipe</span></a>
+ <span class="menu-text">RAG Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./recipes/committee.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Committee Example</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <span class="sidebar-item-text sidebar-link text-start">
+ <span class="menu-text">🔌 Model Providers</span></span>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">☁️ How to Deploy</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./deployment/streaming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Streaming Output (Events)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./deployment/database.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Database Management</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">🤔 Misc Topics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./misc/functional_programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functional Programming</span></a>
   </div>
 </li>
       </ul>
@@ -188,35 +314,74 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#what-is-lasagna-ai" id="toc-what-is-lasagna-ai" class="nav-link active" data-scroll-target="#what-is-lasagna-ai">What is Lasagna AI?</a></li>
+  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started">Getting Started</a></li>
+  <li><a href="#features" id="toc-features" class="nav-link" data-scroll-target="#features">Features</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/index.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/index.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
-
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Lasagna AI: Documentation</h1>
-</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
 
 
-<div class="quarto-title-meta">
 
-    
-  
-    
-  </div>
-  
+<p><img src="https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/lasagna-ai.png" class="img-fluid"></p>
+<p><a href="https://pypi.org/project/lasagna-ai"><img src="https://img.shields.io/pypi/v/lasagna-ai.svg" class="img-fluid" alt="PyPI - Version"></a> <a href="https://pypi.org/project/lasagna-ai"><img src="https://img.shields.io/pypi/pyversions/lasagna-ai.svg" class="img-fluid" alt="PyPI - Python Version"></a> <img src="https://github.com/Rhobota/lasagna-ai/actions/workflows/test.yml/badge.svg?branch=main" class="img-fluid" alt="Test Status"></p>
+<section id="what-is-lasagna-ai" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-lasagna-ai">What is Lasagna AI?</h2>
+<p><strong>Lasagna AI</strong> is a production-minded agent-building library. Build powerful layered agents (multi-agent systems) from simple components. 💪</p>
+</section>
+<section id="getting-started" class="level2">
+<h2 class="anchored" data-anchor-id="getting-started">Getting Started</h2>
+<p>Start with:</p>
+<ul>
+<li><a href="./installing.html">📡 Installing</a></li>
+<li><a href="./quickstart.html">🚀 Quickstart</a></li>
+</ul>
+</section>
+<section id="features" class="level2">
+<h2 class="anchored" data-anchor-id="features">Features</h2>
+<p>🥞 <strong>Layered agents!</strong></p>
+<ul>
+<li>Agents for your agents!</li>
+<li>Tool-use, structured output (“extraction”), and layering FTW 💪</li>
+<li>Ever wanted a <em>recursive</em> agent? Now you can have one! 🤯</li>
+<li><em>Parallel</em> tool-calling by default.</li>
+<li>Fully asyncio.</li>
+<li>100% Python type hints.</li>
+<li>Functional-style 😎</li>
+<li>(optional) Easy &amp; pluggable caching! 🏦</li>
+</ul>
+<p>🚣 <strong>Streamable!</strong></p>
+<ul>
+<li>Event streams for <em>everything</em>.</li>
+<li>Asyncio generators are awesome.</li>
+</ul>
+<p>🗃️ <strong>Easy database integration!</strong></p>
+<ul>
+<li>Don’t rage when trying to store raw messages and token counts. 😡 🤬</li>
+<li>Yes, you <em>can</em> have <em>both</em> streaming and easy database storage.</li>
+</ul>
+<p>↔︎️ <strong>Provider/model agnostic and interoperable!</strong></p>
+<ul>
+<li>Core support for <a href="https://platform.openai.com/docs/models">OpenAI</a>, <a href="https://docs.anthropic.com/en/docs/welcome">Anthropic</a>, and <a href="https://docs.aws.amazon.com/bedrock/">AWS Bedrock</a>.</li>
+<li>Experimental support for <a href="https://ollama.com/search">Ollama</a> and <a href="https://build.nvidia.com/explore/reasoning">NVIDIA NIM/NGC</a>.</li>
+<li>Message representations are canonized. 😇</li>
+<li>Supports vision!</li>
+<li>Easily build committees!</li>
+<li>Swap providers or models mid-conversation.</li>
+<li>Delegate tasks among model providers or model sizes.</li>
+<li>Parallelize all the things.</li>
+</ul>
 
 
-</header>
-
-
-<p>This is the homepage.</p>
-<p>TODO</p>
-
-
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -626,7 +791,7 @@ ul.task-list li input[type="checkbox"] {
     </div>   
     <div class="nav-footer-center">
 <p>Copyright © 2025 (<a href="https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt">MIT License</a>)</p>
-<div class="toc-actions"><ul><li><a href="https://github.com/Rhobota/lasagna-ai/edit/main/docs/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/index.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/index.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/index.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

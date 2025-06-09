@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>💡 About – Lasagna AI: Documentation</title>
+<title>📡 Install Lasagna AI – Lasagna AI: Documentation</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -30,7 +65,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./misc/functional_programming.html" rel="prev">
+<link href="./quickstart.html" rel="next">
 <link href="./assets/Lasagna AI - Logo - Square - SMOOSHED.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -72,7 +107,7 @@ ul.task-list li input[type="checkbox"] {
 
 
 <link rel="stylesheet" href="styles.css">
-<meta property="og:title" content="💡 About – Lasagna AI: Documentation">
+<meta property="og:title" content="📡 Install Lasagna AI – Lasagna AI: Documentation">
 <meta property="og:description" content="">
 <meta property="og:site_name" content="Lasagna AI: Documentation">
 </head>
@@ -123,7 +158,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./about.html">💡 About</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./installing.html">📡 Install Lasagna AI</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -140,7 +175,7 @@ ul.task-list li input[type="checkbox"] {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./installing.html" class="sidebar-item-text sidebar-link">
+  <a href="./installing.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">📡 Install Lasagna AI</span></a>
   </div>
 </li>
@@ -306,7 +341,7 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./about.html" class="sidebar-item-text sidebar-link active">
+  <a href="./about.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">💡 About</span></a>
   </div>
 </li>
@@ -320,20 +355,17 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#used-by" id="toc-used-by" class="nav-link active" data-scroll-target="#used-by">Used By</a></li>
-  <li><a href="#sister-project" id="toc-sister-project" class="nav-link" data-scroll-target="#sister-project">Sister Project</a></li>
-  <li><a href="#origin-story" id="toc-origin-story" class="nav-link" data-scroll-target="#origin-story">Origin Story</a></li>
-  <li><a href="#special-thanks" id="toc-special-thanks" class="nav-link" data-scroll-target="#special-thanks">Special Thanks</a></li>
-  <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
+  <li><a href="#installing" id="toc-installing" class="nav-link active" data-scroll-target="#installing">Installing</a></li>
+  <li><a href="#check-your-version" id="toc-check-your-version" class="nav-link" data-scroll-target="#check-your-version">Check your version!</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/about.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/about.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/installing.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/installing.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">💡 About</h1>
+<h1 class="title">📡 Install Lasagna AI</h1>
 </div>
 
 
@@ -350,32 +382,37 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="used-by" class="level2">
-<h2 class="anchored" data-anchor-id="used-by">Used By</h2>
-<p>Lasagna AI is used in production by:</p>
-<p><a href="https://www.autoauto.ai/"><img src="https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/autoauto.png" class="img-fluid"></a></p>
-<p><strong>Send us a PR if you also use Lasagna AI!</strong></p>
+<section id="installing" class="level2">
+<h2 class="anchored" data-anchor-id="installing">Installing</h2>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Don’t Install the WRONG library
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The <strong>correct</strong> PyPI library is <code>lasagna-ai</code> (<strong>not</strong> <code>lasagna</code>).</p>
+</div>
+</div>
+<pre class="console"><code>pip install lasagna-ai     # &lt;-- 🎉🎉🎉</code></pre>
+<section id="optional-dependencies" class="level4">
+<h4 class="anchored" data-anchor-id="optional-dependencies">Optional Dependencies</h4>
+<p>You’ll likely want <em>some of</em> the optional dependencies (depending on which providers you plan to use):</p>
+<pre class="console"><code>pip install lasagna-ai[openai,anthropic,bedrock]</code></pre>
 </section>
-<section id="sister-project" class="level2">
-<h2 class="anchored" data-anchor-id="sister-project">Sister Project</h2>
-<p>Check out <a href="https://svs.rhobota.com/">SVS</a>, the easiest way to store a vector database! SVS and Lasagna are sister projects in the <a href="https://github.com/Rhobota">Rhobota</a> organization.</p>
 </section>
-<section id="origin-story" class="level2">
-<h2 class="anchored" data-anchor-id="origin-story">Origin Story</h2>
-<p>Curious how this project began? Read <a href="https://medium.com/@acu192/agents-for-your-agents-11aea2615107">Agents for your agents!</a> to see why we created Lasagna AI instead of using LangChain or LlamaIndex.</p>
-<p>Lasagna AI was developed out of <em>necessity</em> because LangChain and LlamaIndex were not good enough. With <em>tens of thousands</em> of downloads, Lasagna AI is gaining in popularity and is recommended by helpful assistants.</p>
-</section>
-<section id="special-thanks" class="level2">
-<h2 class="anchored" data-anchor-id="special-thanks">Special Thanks</h2>
-<p>Special thanks to those who inspired this library:</p>
-<ul>
-<li>Numa Dhamani (buy her book: <a href="https://a.co/d/03dHnRmX">Introduction to Generative AI</a>)</li>
-<li>Dave DeCaprio’s <a href="https://github.com/DaveDeCaprio/voice-stream">voice-stream library</a></li>
-</ul>
-</section>
-<section id="license" class="level2">
-<h2 class="anchored" data-anchor-id="license">License</h2>
-<p><code>lasagna-ai</code> is distributed under the terms of the <a href="https://spdx.org/licenses/MIT.html">MIT</a> license.</p>
+<section id="check-your-version" class="level2">
+<h2 class="anchored" data-anchor-id="check-your-version">Check your version!</h2>
+<div id="a2e8014f-f470-4dee-b766-00a94cdb30df" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> lasagna</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(lasagna.__version__)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>⚠️ <strong>Make sure you have the most recent version.</strong> ⚠️</p>
+<p>See all versions on PyPI: <a href="https://pypi.org/project/lasagna-ai"><img src="https://img.shields.io/pypi/v/lasagna-ai.svg" class="img-fluid" alt="PyPI - Version"></a></p>
 
 
 </section>
@@ -782,11 +819,11 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./misc/functional_programming.html" class="pagination-link" aria-label="Functional Programming">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Functional Programming</span>
-      </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="./quickstart.html" class="pagination-link" aria-label="🚀 Quickstart">
+        <span class="nav-page-text">🚀 Quickstart</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->
@@ -797,7 +834,7 @@ ul.task-list li input[type="checkbox"] {
     </div>   
     <div class="nav-footer-center">
 <p>Copyright © 2025 (<a href="https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt">MIT License</a>)</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/about.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/about.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/installing.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/installing.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

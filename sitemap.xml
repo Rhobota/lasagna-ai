@@ -2,30 +2,74 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://lasagna-ai.rhobota.com/recipes/rag.html</loc>
-    <lastmod>2025-06-07T22:54:42.369Z</lastmod>
+    <lastmod>2025-06-09T01:36:56.423Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lasagna-ai.rhobota.com/agent_features/routing.html</loc>
+    <lastmod>2025-06-09T01:36:56.422Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lasagna-ai.rhobota.com/agent_features/layering.html</loc>
+    <lastmod>2025-06-09T01:36:56.422Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lasagna-ai.rhobota.com/agent_features/tools.html</loc>
+    <lastmod>2025-06-09T01:36:56.422Z</lastmod>
   </url>
   <url>
     <loc>https://lasagna-ai.rhobota.com/index.html</loc>
-    <lastmod>2025-06-07T22:54:42.369Z</lastmod>
+    <lastmod>2025-06-09T01:36:56.423Z</lastmod>
   </url>
   <url>
-    <loc>https://lasagna-ai.rhobota.com/what_is_an_agent/what.html</loc>
-    <lastmod>2025-06-07T22:54:42.369Z</lastmod>
+    <loc>https://lasagna-ai.rhobota.com/deployment/streaming.html</loc>
+    <lastmod>2025-06-09T01:36:56.422Z</lastmod>
   </url>
   <url>
-    <loc>https://lasagna-ai.rhobota.com/about.html</loc>
-    <lastmod>2025-06-07T22:54:42.368Z</lastmod>
+    <loc>https://lasagna-ai.rhobota.com/what_is_an_agent/type_agentrun.html</loc>
+    <lastmod>2025-06-09T01:36:56.423Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lasagna-ai.rhobota.com/why_lasagna_ai/lasagna_vs_llamaindex.html</loc>
+    <lastmod>2025-06-09T01:36:56.423Z</lastmod>
   </url>
   <url>
     <loc>https://lasagna-ai.rhobota.com/quickstart.html</loc>
-    <lastmod>2025-06-07T22:54:42.369Z</lastmod>
+    <lastmod>2025-06-09T01:36:56.423Z</lastmod>
   </url>
   <url>
-    <loc>https://lasagna-ai.rhobota.com/what_is_an_agent/index.html</loc>
-    <lastmod>2025-06-07T22:54:42.369Z</lastmod>
+    <loc>https://lasagna-ai.rhobota.com/about.html</loc>
+    <lastmod>2025-06-09T01:36:56.422Z</lastmod>
   </url>
   <url>
-    <loc>https://lasagna-ai.rhobota.com/recipes/index.html</loc>
-    <lastmod>2025-06-07T22:54:42.369Z</lastmod>
+    <loc>https://lasagna-ai.rhobota.com/misc/functional_programming.html</loc>
+    <lastmod>2025-06-09T01:36:56.423Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lasagna-ai.rhobota.com/why_lasagna_ai/lasagna_vs_langchain.html</loc>
+    <lastmod>2025-06-09T01:36:56.423Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lasagna-ai.rhobota.com/what_is_an_agent/agent.html</loc>
+    <lastmod>2025-06-09T01:36:56.423Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lasagna-ai.rhobota.com/deployment/database.html</loc>
+    <lastmod>2025-06-09T01:36:56.422Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lasagna-ai.rhobota.com/installing.html</loc>
+    <lastmod>2025-06-09T01:36:56.423Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lasagna-ai.rhobota.com/agent_features/structured_output.html</loc>
+    <lastmod>2025-06-09T01:36:56.422Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lasagna-ai.rhobota.com/agent_features/parallelizing.html</loc>
+    <lastmod>2025-06-09T01:36:56.422Z</lastmod>
+  </url>
+  <url>
+    <loc>https://lasagna-ai.rhobota.com/recipes/committee.html</loc>
+    <lastmod>2025-06-09T01:36:56.423Z</lastmod>
   </url>
 </urlset>
