@@ -1,28 +1,36 @@
-from lasagna import (
+from lasagna import (     # <-- pip install -U lasagna-ai[openai,anthropic,bedrock]
+    Model,
+    EventCallback,
+    AgentRun,
+    recursive_extract_messages,
+    flat_messages,
     known_models,
-    build_simple_agent,
 )
 
-from lasagna.tui import (
-    tui_input_loop,
-)
+from lasagna.tui import tui_input_loop
 
-from typing import List, Callable
+from typing import List
 
 import asyncio
 
 from dotenv import load_dotenv; load_dotenv()
 
 
-MODEL_BINDER = known_models.BIND_OPENAI_gpt_4o_mini()
+@known_models.BIND_OPENAI_gpt_4o()
+async def my_basic_agent(
+    model: Model,
+    event_callback: EventCallback,
+    prev_runs: List[AgentRun],
+) -> AgentRun:
+    messages = recursive_extract_messages(prev_runs, from_layered_agents=False)
+    new_messages = await model.run(event_callback, messages, tools=[])
+    this_run = flat_messages('my_basic_agent', new_messages)
+    return this_run
 
 
 async def main() -> None:
-    system_prompt = "You are grumpy."
-    tools: List[Callable] = []
-    my_agent = build_simple_agent(name = 'agent', tools = tools)
-    my_bound_agent = MODEL_BINDER(my_agent)
-    await tui_input_loop(my_bound_agent, system_prompt)
+    system_prompt = """You are a grumpy assistant. Be helpful, brief, and grumpy. Your name is Grumble."""
+    await tui_input_loop(my_basic_agent, system_prompt)
 
 
 if __name__ == '__main__':

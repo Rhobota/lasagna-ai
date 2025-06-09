@@ -74,7 +74,7 @@ packages = ["src/lasagna"]
 path = "src/lasagna/__init__.py"
 
 [tool.hatch.envs.default]
-python = "3.8"
+python = "3.12"
 features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 
 [tool.hatch.envs.types]
@@ -91,7 +91,7 @@ python = "3.12"
 features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 
 [tool.hatch.envs.docs.scripts]
-check = "nbqa mypy --install-types --non-interactive docs/"
+check = "nbqa mypy --install-types --non-interactive docs/ --nbqa-dont-skip-bad-cells"
 
 [tool.hatch.envs.hatch-test]
 features = ["dev", "openai", "anthropic", "bedrock"]

@@ -9,7 +9,7 @@ from .types import (
 )
 
 import os
-
+import asyncio
 from typing import Union, List
 
 from colorama import just_fix_windows_console, Fore, Style
@@ -52,6 +52,7 @@ async def tui_input_loop(
     system_prompt: Union[str, None] = None,
     truncate_past_chars: Union[int, None] = None,
     only_ai_messages: bool = False,
+    quit_list: List[str] = ['q', 'quit', 'exit'],
 ) -> None:
     just_fix_windows_console()
     event_callback = make_tui_event_callback(
@@ -69,12 +70,20 @@ async def tui_input_loop(
                 },
             ],
         ))
+    quit_list = [q.lower() for q in quit_list]
+    loop = asyncio.get_running_loop()
     try:
         while True:
-            human_input = input(Fore.GREEN + Style.BRIGHT + '> ')
+            human_input = await loop.run_in_executor(
+                None,
+                input,
+                Fore.GREEN + Style.BRIGHT + '> ',
+            )
             print(Style.RESET_ALL, end='', flush=True)
             if not human_input:
                 continue
+            if human_input.lower() in quit_list:
+                break
             prev_runs.append(flat_messages(
                 'tui_input_loop',
                 [

@@ -43,7 +43,6 @@
 
 - [Installation](#installation)
 - [Used By](#used-by)
-- [Quickstart](#quickstart)
 - [Debug Logging](#debug-logging)
 - [Special Thanks](#special-thanks)
 - [License](#license)
@@ -63,89 +62,9 @@ pip install -U lasagna-ai[openai,anthropic,bedrock,example-deps]
 
 ## Used By
 
-Lasagna is used in production by:
+Lasagna AI is used in production by:
 
 [![AutoAuto](https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/autoauto.png)](https://www.autoauto.ai/)
-
-## Quickstart
-
-Here is the _most simple_ agent (it doesn't add *anything* to the underlying model).
-More complex agents would add tools and/or use layers of agents, but not this one!
-Anyway, run it in your terminal and you can chat interactively with the model. 🤩
-
-(taken from [./examples/quickstart.py](./examples/quickstart.py))
-
-```python
-from lasagna import (     # <-- pip install -U lasagna-ai[openai,anthropic,bedrock]
-    known_models,
-    build_simple_agent,
-)
-
-from lasagna.tui import (
-    tui_input_loop,
-)
-
-from typing import List, Callable
-
-import asyncio
-
-from dotenv import load_dotenv; load_dotenv()
-
-
-MODEL_BINDER = known_models.BIND_OPENAI_gpt_4o_mini()
-
-
-async def main() -> None:
-    system_prompt = "You are grumpy."
-    tools: List[Callable] = []
-    my_agent = build_simple_agent(name = 'agent', tools = tools)
-    my_bound_agent = MODEL_BINDER(my_agent)
-    await tui_input_loop(my_bound_agent, system_prompt)
-
-
-if __name__ == '__main__':
-    asyncio.run(main())
-```
-
-**Want to add your first tool?** LLMs can't natively do arithmetic
-(beyond simple arithmetic with small numbers), so let's give our
-model a tool for doing arithmetic! 😎
-
-(full example at [./examples/quickstart_with_math_tool.py](./examples/quickstart_with_math_tool.py))
-
-```python
-import sympy as sp
-
-...
-
-def evaluate_math_expression(expression: str) -> float:
-    """
-    This tool evaluates a math expression and returns the result.
-    Pass math expression as a string, for example:
-     - "3 * 6 + 1"
-     - "cos(2 * pi / 3) + log(8)"
-     - "(4.5/2) + (6.3/1.2)"
-     - ... etc
-    :param: expression: str: the math expression to evaluate
-    """
-    expr = sp.sympify(expression)
-    result = float(expr.evalf())
-    return result
-
-...
-
-    ...
-    tools: List[Callable] = [
-        evaluate_math_expression,
-    ]
-    my_agent = build_simple_agent(name = 'agent', tools = tools)
-    ...
-
-...
-```
-
-**Simple RAG:** Everyone's favorite tool: _Retrieval Augmented Generation_ (RAG). Let's GO! 📚💨  
-See: [./examples/demo_rag.py](./examples/demo_rag.py)
 
 ## Debug Logging
 

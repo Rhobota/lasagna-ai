@@ -226,8 +226,8 @@ async def main() -> None:
     level: int = args.level
     model: str = args.model
 
-    if model == 'gpt3.5turbo':
-        model_binder = known_models.BIND_OPENAI_gpt_35_turbo()
+    if model == 'gpt41':
+        model_binder = known_models.BIND_OPENAI_gpt_41()
     elif model == 'gpt4omini':
         model_binder = known_models.BIND_OPENAI_gpt_4o_mini()
     else:
