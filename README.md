@@ -62,7 +62,7 @@ pip install -U lasagna-ai[openai,anthropic,bedrock,example-deps]
 
 ## Used By
 
-Lasagna is used in production by:
+Lasagna AI is used in production by:
 
 [![AutoAuto](https://raw.githubusercontent.com/Rhobota/lasagna-ai/main/logos/autoauto.png)](https://www.autoauto.ai/)
 
