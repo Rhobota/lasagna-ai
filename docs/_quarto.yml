@@ -32,7 +32,38 @@ website:
         target: _blank
   sidebar:
     style: "docked"
-    contents: auto
+    contents:
+      - installing.ipynb
+      - quickstart.ipynb
+      - section: "❤️ Why Lasagna AI?"
+        contents:
+          - why_lasagna_ai/lasagna_vs_langchain.ipynb
+          - why_lasagna_ai/lasagna_vs_llamaindex.ipynb
+      - section: "🤖 What is an Agent?"
+        contents:
+          - what_is_an_agent/agent.ipynb
+          - what_is_an_agent/type_agentrun.ipynb
+      - section: "⚙️ Agent Features"
+        contents:
+          - agent_features/tools.ipynb
+          - agent_features/structured_output.ipynb
+          - agent_features/layering.ipynb
+          - agent_features/routing.ipynb
+          - agent_features/parallelizing.ipynb
+      - section: "😋 Recipes"
+        contents:
+          - recipes/rag.ipynb
+          - recipes/committee.ipynb
+      - section: "🔌 Model Providers"
+        contents: []
+      - section: "☁️ How to Deploy"
+        contents:
+          - deployment/streaming.ipynb
+          - deployment/database.ipynb
+      - section: "🤔 Misc Topics"
+        contents:
+          - misc/functional_programming.ipynb
+      - about.ipynb
   page-footer:
     center: "Copyright © 2025 (<a href=\"https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt\">MIT License</a>)"
 
