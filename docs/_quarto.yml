@@ -63,7 +63,8 @@ website:
           - deployment/database.ipynb
       - section: "🤔 Misc Topics"
         contents:
-          - misc/asyncio.ipynb
+          - misc/python_asyncio.ipynb
+          - misc/python_type_hints.ipynb
           - misc/functional_programming.ipynb
       - about.ipynb
   page-footer:
