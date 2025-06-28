@@ -43,7 +43,6 @@ website:
         contents:
           - what_is_an_agent/agent.ipynb
           - what_is_an_agent/type_agentrun.ipynb
-          - what_is_an_agent/streaming_and_events.ipynb
       - section: "⚙️ Agent Features"
         contents:
           - agent_features/tools.ipynb
@@ -70,7 +69,7 @@ website:
           - providers/nvidia.ipynb
       - section: "☁️ How to Deploy"
         contents:
-          - deployment/streaming.ipynb
+          - deployment/streaming_and_events.ipynb
           - deployment/database.ipynb
       - section: "🤔 Misc Topics"
         contents:
