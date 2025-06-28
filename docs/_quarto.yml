@@ -50,6 +50,7 @@ website:
           - agent_features/layering.ipynb
           - agent_features/routing.ipynb
           - agent_features/parallelizing.ipynb
+          - agent_features/recursive_agent.ipynb
       - section: "😋 Recipes"
         contents:
           - recipes/rag.ipynb
