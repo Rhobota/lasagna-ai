@@ -57,6 +57,10 @@ website:
         contents:
           - recipes/rag.ipynb
           - recipes/committee.ipynb
+          - recipes/vision.ipynb
+          - recipes/swapping_providers.ipynb
+          - recipes/delegating_subtasks.ipynb
+          - recipes/parallelize.ipynb
       - section: "🔌 Model Providers"
         contents:
           - providers/openai.ipynb
