@@ -11,6 +11,7 @@ from .agent_util import (
     override_system_prompt,
     strip_tool_calls_and_results,
     strip_all_but_last_human_message,
+    recursive_sum_costs,
     noop_callback,
     MessageExtractor,
     build_standard_message_extractor,
@@ -32,6 +33,7 @@ __all__ = [
     'override_system_prompt',
     'strip_tool_calls_and_results',
     'strip_all_but_last_human_message',
+    'recursive_sum_costs',
     'noop_callback',
     'MessageExtractor',
     'build_standard_message_extractor',
@@ -43,4 +45,4 @@ __all__ = [
     'build_static_output_agent',
 ]
 
-__version__ = "0.15.0"
+__version__ = "0.16.0"

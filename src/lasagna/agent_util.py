@@ -5,6 +5,7 @@ from .util import get_name
 from .types import (
     AgentSpec,
     AgentRun,
+    Cost,
     ModelFactory,
     ModelRecord,
     AgentCallable,
@@ -184,6 +185,30 @@ def strip_all_but_last_human_message(
         if m['role'] == 'human':
             return [m]
     return []
+
+
+def recursive_sum_costs(
+    agent_run_or_runs: Union[AgentRun, List[AgentRun]],
+) -> Cost:
+    if isinstance(agent_run_or_runs, list):
+        messages = recursive_extract_messages(agent_run_or_runs, from_layered_agents=True)
+    else:
+        messages = recursive_extract_messages([agent_run_or_runs], from_layered_agents=True)
+
+    input_tokens  = [m['cost']['input_tokens']  for m in messages if 'cost' in m and 'input_tokens'  in m['cost']]
+    output_tokens = [m['cost']['output_tokens'] for m in messages if 'cost' in m and 'output_tokens' in m['cost']]
+    total_tokens  = [m['cost']['total_tokens']  for m in messages if 'cost' in m and 'total_tokens'  in m['cost']]
+
+    cost: Cost = {}
+
+    if input_tokens:
+        cost['input_tokens'] = sum(input_tokens)
+    if output_tokens:
+        cost['output_tokens'] = sum(output_tokens)
+    if total_tokens:
+        cost['total_tokens'] = sum(total_tokens)
+
+    return cost
 
 
 async def noop_callback(event: EventPayload) -> None:
