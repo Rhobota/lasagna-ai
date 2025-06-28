@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Tool Use – Lasagna AI: Documentation</title>
+<title>Streaming &amp; Events – Lasagna AI: Documentation</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -65,8 +65,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../agent_features/structured_output.html" rel="next">
-<link href="../what_is_an_agent/type_agentrun.html" rel="prev">
+<link href="../deployment/database.html" rel="next">
+<link href="../providers/nvidia.html" rel="prev">
 <link href="../assets/Lasagna AI - Logo - Square - SMOOSHED.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -108,7 +108,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <link rel="stylesheet" href="../styles.css">
-<meta property="og:title" content="Tool Use – Lasagna AI: Documentation">
+<meta property="og:title" content="Streaming &amp; Events – Lasagna AI: Documentation">
 <meta property="og:description" content="">
 <meta property="og:site_name" content="Lasagna AI: Documentation">
 </head>
@@ -159,7 +159,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../agent_features/tools.html">⚙️ Agent Features</a></li><li class="breadcrumb-item"><a href="../agent_features/tools.html">Tool Use</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../deployment/streaming_and_events.html">☁️ How to Deploy</a></li><li class="breadcrumb-item"><a href="../deployment/streaming_and_events.html">Streaming &amp; Events</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -243,7 +243,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../agent_features/tools.html" class="sidebar-item-text sidebar-link active">
+  <a href="../agent_features/tools.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Tool Use</span></a>
   </div>
 </li>
@@ -384,7 +384,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../deployment/streaming_and_events.html" class="sidebar-item-text sidebar-link">
+  <a href="../deployment/streaming_and_events.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Streaming &amp; Events</span></a>
   </div>
 </li>
@@ -441,16 +441,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#demo-parallel-tool-calling" id="toc-demo-parallel-tool-calling" class="nav-link active" data-scroll-target="#demo-parallel-tool-calling">Demo: Parallel Tool-calling</a></li>
+  <li><a href="#streaming-agent-output" id="toc-streaming-agent-output" class="nav-link active" data-scroll-target="#streaming-agent-output">Streaming Agent Output</a></li>
+  <li><a href="#agent-startstop-events" id="toc-agent-startstop-events" class="nav-link" data-scroll-target="#agent-startstop-events">Agent Start/Stop Events</a></li>
+  <li><a href="#progress-events" id="toc-progress-events" class="nav-link" data-scroll-target="#progress-events">Progress Events</a></li>
+  <li><a href="#custom-events" id="toc-custom-events" class="nav-link" data-scroll-target="#custom-events">Custom Events</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/agent_features/tools.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/agent_features/tools.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/deployment/streaming_and_events.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/deployment/streaming_and_events.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../agent_features/tools.html">⚙️ Agent Features</a></li><li class="breadcrumb-item"><a href="../agent_features/tools.html">Tool Use</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../deployment/streaming_and_events.html">☁️ How to Deploy</a></li><li class="breadcrumb-item"><a href="../deployment/streaming_and_events.html">Streaming &amp; Events</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Tool Use</h1>
+<h1 class="title">Streaming &amp; Events</h1>
 </div>
 
 
@@ -467,14 +470,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><strong>Want to add your first tool?</strong> LLMs can’t natively do arithmetic (beyond simple arithmetic with small numbers), so let’s give our model a tool for doing arithmetic! 😎</p>
-<p>Full example: <a href="https://github.com/Rhobota/lasagna-ai/blob/main/examples/quickstart_with_math_tool.py">quickstart_with_math_tool.py</a></p>
-<div id="f4afa4bb-abdf-46a9-b288-369870369c10" class="cell" data-execution_count="1">
+<div id="a81da2c4-2109-4a56-b157-bd53383903b5" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 🚧 Under Construction 🏗️</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="demo-parallel-tool-calling" class="level3">
-<h3 class="anchored" data-anchor-id="demo-parallel-tool-calling">Demo: Parallel Tool-calling</h3>
-<p>Because Lasagna AI is so deeply built on <code>asyncio</code>, if the Model asks for more than one tool call, then Lasagna will call those tools <em>in parallel</em>! This provides a speed boost, but keep this in mind so that you manage state correctly (i.e.&nbsp;no race conditions).</p>
+<section id="streaming-agent-output" class="level3">
+<h3 class="anchored" data-anchor-id="streaming-agent-output">Streaming Agent Output</h3>
+<p>Because Lasagna AI is built on <code>asyncio</code>, it’s trivial to pump events up through the callstack so you can have real-time streaming! We try to make events for <em>everything</em>, allowing you to pick-and-choose what you want to look for.</p>
+<div id="bfd806e8-8663-47c0-9af9-f35423f7e61c" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="agent-startstop-events" class="level3">
+<h3 class="anchored" data-anchor-id="agent-startstop-events">Agent Start/Stop Events</h3>
+<p>Since agents can be layered, and agents can call other agents, we sometimes want to track when agents start/stop their execution.</p>
+<div id="5feb136e-8f3b-4d1b-a1da-e9131edda8aa" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="progress-events" class="level3">
+<h3 class="anchored" data-anchor-id="progress-events">Progress Events</h3>
+<div id="b62d6eda-fcd7-4070-8635-bf9e6b86ff76" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="custom-events" class="level3">
+<h3 class="anchored" data-anchor-id="custom-events">Custom Events</h3>
+<div id="65ef052f-3f46-46fe-9218-5d5ac17783fb" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
 </section>
@@ -881,13 +904,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../what_is_an_agent/type_agentrun.html" class="pagination-link" aria-label="The `AgentRun` type">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">The <code>AgentRun</code> type</span>
+      <a href="../providers/nvidia.html" class="pagination-link" aria-label="NVIDIA NIM/NGC Models">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">NVIDIA NIM/NGC Models</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../agent_features/structured_output.html" class="pagination-link" aria-label="Structured Output">
-        <span class="nav-page-text">Structured Output</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../deployment/database.html" class="pagination-link" aria-label="Database Management">
+        <span class="nav-page-text">Database Management</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
@@ -899,7 +922,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>   
     <div class="nav-footer-center">
 <p>Copyright © 2025 (<a href="https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt">MIT License</a>)</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/agent_features/tools.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/agent_features/tools.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/deployment/streaming_and_events.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/deployment/streaming_and_events.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

@@ -1,157 +1,35 @@
 [
   {
-    "objectID": "recipes/rag.html",
-    "href": "recipes/rag.html",
-    "title": "RAG Example",
+    "objectID": "installing.html",
+    "href": "installing.html",
+    "title": "📡 Install Lasagna AI",
     "section": "",
-    "text": "Simple RAG: Everyone’s favorite tool: Retrieval Augmented Generation (RAG). Let’s GO! 📚💨\n\n# 🚧 Under Construction 🏗️",
+    "text": "Don’t Install the WRONG library\n\n\n\nThe correct PyPI library is lasagna-ai (not lasagna).\n\n\npip install lasagna-ai     # &lt;-- 🎉🎉🎉\n\n\nYou’ll likely want some of the optional dependencies (depending on which providers you plan to use):\npip install lasagna-ai[openai,anthropic,bedrock]",
     "crumbs": [
       "🚀 Quickstart",
-      "😋 Recipes",
-      "RAG Example"
+      "📡 Install Lasagna AI"
     ]
   },
   {
-    "objectID": "agent_features/routing.html",
-    "href": "agent_features/routing.html",
-    "title": "Agent Routing",
+    "objectID": "installing.html#installing",
+    "href": "installing.html#installing",
+    "title": "📡 Install Lasagna AI",
     "section": "",
-    "text": "# 🚧 Under Construction 🏗️",
+    "text": "Don’t Install the WRONG library\n\n\n\nThe correct PyPI library is lasagna-ai (not lasagna).\n\n\npip install lasagna-ai     # &lt;-- 🎉🎉🎉\n\n\nYou’ll likely want some of the optional dependencies (depending on which providers you plan to use):\npip install lasagna-ai[openai,anthropic,bedrock]",
     "crumbs": [
       "🚀 Quickstart",
-      "⚙️ Agent Features",
-      "Agent Routing"
+      "📡 Install Lasagna AI"
     ]
   },
   {
-    "objectID": "agent_features/layering.html",
-    "href": "agent_features/layering.html",
-    "title": "Layered (multi-agent) Systems",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️",
+    "objectID": "installing.html#check-your-version",
+    "href": "installing.html#check-your-version",
+    "title": "📡 Install Lasagna AI",
+    "section": "Check your version!",
+    "text": "Check your version!\n\nimport lasagna\n\nprint(lasagna.__version__)\n\n⚠️ Make sure you have the most recent version. ⚠️\nSee all versions on PyPI:",
     "crumbs": [
       "🚀 Quickstart",
-      "⚙️ Agent Features",
-      "Layered (multi-agent) Systems"
-    ]
-  },
-  {
-    "objectID": "agent_features/tools.html",
-    "href": "agent_features/tools.html",
-    "title": "Tool Use",
-    "section": "",
-    "text": "Want to add your first tool? LLMs can’t natively do arithmetic (beyond simple arithmetic with small numbers), so let’s give our model a tool for doing arithmetic! 😎\nFull example: quickstart_with_math_tool.py\n\n# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "⚙️ Agent Features",
-      "Tool Use"
-    ]
-  },
-  {
-    "objectID": "index.html#what-is-lasagna-ai",
-    "href": "index.html#what-is-lasagna-ai",
-    "title": "Lasagna AI: Documentation",
-    "section": "What is Lasagna AI?",
-    "text": "What is Lasagna AI?\nLasagna AI is a production-minded agent-building library. Build powerful layered agents (multi-agent systems) from simple components. 💪"
-  },
-  {
-    "objectID": "index.html#getting-started",
-    "href": "index.html#getting-started",
-    "title": "Lasagna AI: Documentation",
-    "section": "Getting Started",
-    "text": "Getting Started\nStart with:\n\n📡 Installing\n🚀 Quickstart"
-  },
-  {
-    "objectID": "index.html#features",
-    "href": "index.html#features",
-    "title": "Lasagna AI: Documentation",
-    "section": "Features",
-    "text": "Features\n🥞 Layered agents!\n\nAgents for your agents!\nTool-use, structured output (“extraction”), and layering FTW 💪\nEver wanted a recursive agent? Now you can have one! 🤯\nParallel tool-calling by default.\nFully asyncio.\n100% Python type hints.\nFunctional-style 😎\n(optional) Easy & pluggable caching! 🏦\n\n🚣 Streamable!\n\nEvent streams for everything.\nAsyncio generators are awesome.\n\n🗃️ Easy database integration!\n\nDon’t rage when trying to store raw messages and token counts. 😡 🤬\nYes, you can have both streaming and easy database storage.\n\n↔︎️ Provider/model agnostic and interoperable!\n\nCore support for OpenAI, Anthropic, and AWS Bedrock.\nExperimental support for Ollama and NVIDIA NIM/NGC.\nMessage representations are canonized. 😇\nSupports vision!\nEasily build committees!\nSwap providers or models mid-conversation.\nDelegate tasks among model providers or model sizes.\nParallelize all the things."
-  },
-  {
-    "objectID": "deployment/streaming.html",
-    "href": "deployment/streaming.html",
-    "title": "Streaming Output (Events)",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "☁️ How to Deploy",
-      "Streaming Output (Events)"
-    ]
-  },
-  {
-    "objectID": "what_is_an_agent/type_agentrun.html",
-    "href": "what_is_an_agent/type_agentrun.html",
-    "title": "The AgentRun type",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "🤖 What is an Agent?",
-      "The `AgentRun` type"
-    ]
-  },
-  {
-    "objectID": "why_lasagna_ai/lasagna_vs_llamaindex.html",
-    "href": "why_lasagna_ai/lasagna_vs_llamaindex.html",
-    "title": "Lasagna vs LlamaIndex",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "❤️ Why Lasagna AI?",
-      "Lasagna vs LlamaIndex"
-    ]
-  },
-  {
-    "objectID": "quickstart.html",
-    "href": "quickstart.html",
-    "title": "🚀 Quickstart",
-    "section": "",
-    "text": "Founding principles of Lasagna AI are:",
-    "crumbs": [
-      "🚀 Quickstart"
-    ]
-  },
-  {
-    "objectID": "quickstart.html#prerequisite-knowledge",
-    "href": "quickstart.html#prerequisite-knowledge",
-    "title": "🚀 Quickstart",
-    "section": "Prerequisite Knowledge",
-    "text": "Prerequisite Knowledge\n\nPython asyncio\nLasagna AI is production-focused and fully async, so it plays nicely with remote APIs and modern Python web frameworks. If asyncio is new to you, read Python & Async Simplified.\n\n\nFunctional Programming\nThe pipeline nature of AI systems lends itself to functional programming. If functional programming is new to you, watch Dear Functional Bros and read Functional Programming.\nA quick recap of functional programming:\n\nState is immutable:\n\nWant to modify something? TOO BAD!\nInstead, make a copy (with your modifications applied).\n\nPass lots of functions as parameters to other functions:\n\nWe think it’s fun and cool.\nYou will too once you get used to the idea.\n\n\n\n\n\n\n\n\nReality Check\n\n\n\nThe reality is that OOP is also handy (and so is procedural-style), so you’ll see a mix of programming paradigms in Lasagna AI. The functional-style is likely the newest for most users, so that’s why it’s called out here.\n\n\n\n\nPython Type Hints\n(aka, type annotations)\nLasagna AI is 100% type hinted, so take advantage of that!\nThat is, you should be using a tool like mypy or pyright in your project. Why? Because it will yell at you when you use Lasagna wrong! That is very useful.\nSetting up static type checking may seem tedious, but Lasagna’s complex data types make type checking essential — it will save you significant debugging time.\n\n\nThe Python TypedDict\nSpeaking of type hints and productionalization, Lasagna AI uses lots of TypedDicts.\nA TypedDict, at runtime, is just a Python dict.\nHowever, during static type checking, it must satisfy a fixed schema (certain keys with certain types of values).\nWhy all the TypedDicts? Because they are the best of both worlds:\n\nAt runtime, it is just a dict, so it plays nicely with JSON-stuff, HTTP-stuff, websocket-stuff, etc. No extra work required.\nDuring static analysis, it gives us warm fuzzies that our code is correct.\n\n\n\nBasic idea of Lasagna’s Layered Agents\nWith Lasagna AI you’ll build several simple agents, then compose them together into a layered multi-agent system! Yay! 🥳\nYou can skip for now, but eventually you’ll want to read:\n\nThe Lasagna Agent\nThe AgentRun type",
-    "crumbs": [
-      "🚀 Quickstart"
-    ]
-  },
-  {
-    "objectID": "quickstart.html#hello-lasagna",
-    "href": "quickstart.html#hello-lasagna",
-    "title": "🚀 Quickstart",
-    "section": "Hello Lasagna",
-    "text": "Hello Lasagna\nFinally, let’s write some code! 😎\n\nIt’s all about the Agent\nThe Lasagna Agent is just a callable that takes three parameters:\n\nmodel: The model that is available for your agent to use. Most commonly, this will be a Large Language Model (LLM).\nevent_callback: This is a callback for streaming!\n\nLasagna’s built-in framework emits lots of events: streaming AI output, agent start/stop, tool use/result, etc.\nIt’s generic, so you can emit your own events (like progress updates, etc), if you need.\n\nprev_runs: In a multi-turn chat system, this will be a list of “previous runs” of this agent; that is, this is the agent’s conversation history!\n\nHere is your first agent:\n\nfrom lasagna import Model, EventCallback, AgentRun\n\nasync def my_first_agent(\n    model: Model,\n    event_callback: EventCallback,\n    prev_runs: list[AgentRun],\n) -&gt; AgentRun:\n    raise RuntimeError(\"not implemented\")\n\nYou can make it a callable object (rather than a function), if you want, like this:\n\nclass MyFirstAgent:\n    def __init__(self) -&gt; None:\n        pass\n\n    async def __call__(\n        self,\n        model: Model,\n        event_callback: EventCallback,\n        prev_runs: list[AgentRun],\n    ) -&gt; AgentRun:\n        raise RuntimeError(\"not implemented\")\n\nmy_first_agent = MyFirstAgent()\n\n\n\nThe Agent’s job\nThe most basic agent will do this:\n\nLook through the conversation history (supplied in the prev_runs parameter) and extract all the messages from that history.\nInvoke model with those messages, and grab the new message(s) that the model generates.\nWrap those new message(s) up into an AgentRun, and return it.\n\nThat basic agent above is just a simple passthrough to the underlying LLM. We discuss more complex agent behaviors (with tools, chaining, splitting, routing, layering, etc) elsewhere in these docs.\nSo, the most basic agent looks like this:\n\nfrom lasagna import recursive_extract_messages, flat_messages\n\nasync def my_basic_agent(\n    model: Model,\n    event_callback: EventCallback,\n    prev_runs: list[AgentRun],\n) -&gt; AgentRun:\n    messages = recursive_extract_messages(prev_runs, from_layered_agents=False)\n    new_messages = await model.run(event_callback, messages, tools=[])\n    this_run = flat_messages('my_agent', new_messages)\n    return this_run\n\n\n\n“Binding” the Agent\nAn Agent is indifferent* to which model it uses. Ideally*, your agent works with OpenAI’s models, Anthropic’s models, Ollama-served models, etc!\nAs such, when you write your agent, you write it generically — that is, it receives a Model object and blindly uses that model for whatever it needs.\nThe final step before your agent actually runs is to “bind” it to a model.\n\n\n\n\n\n\n*Reality Check\n\n\n\nThe harsh reality is that models are not perfectly interchangeable, for a few reasons:\n\nTool-calling capabilities: Some models support tool-calling, some don’t. Of the ones that do, some call one tool at a time, some call many. Also, the datatypes supported as input to the tool may vary from model-to-model. If your agent needs complex tool-calling, you might be limited in which models you can realistically use.\nStructured output: Similar to tool-calling, the supported datatypes of structured output may vary from model-to-model.\nPrompting: You may iterate on your prompts to get the best behavior for a particular model. Then, upon switching models, you might need to iterate on the prompts again. Models will naturally diverge in how they interpret prompts, so for complex tasks you might need to engineer your prompts for a particular model, then stick with it.\n\n\n\n\n\n\n\n\n\nBind a single agent to multiple models!\n\n\n\nNotwithstanding the reality check above … for simple agents you can swap models! Yay! 🥳\nThe “binding” system (a very functional programming-inspired system) of Lasagna AI is designed for exactly this moment:\n\nYou write an agent once.\nYou bind it to lots of different models.\nThen you pass those “bound agents” around to various parts of the system.\n\nFor example: It’s easy to build a committee of agents this way! See Building a Committee.\n\n\nHere is how to bind your agent. Let’s bind the agent from above to two different models (stored in two distinct bound agent variables):\n\nfrom lasagna import bind_model\n\nbinder_gpt4o   = bind_model('openai', 'gpt-4o')\nbinder_claude4 = bind_model('anthropic', 'claude-sonnet-4-0')\n\nmy_basic_gpt4o_agent   = binder_gpt4o(my_basic_agent)\nmy_basic_claude4_agent = binder_claude4(my_basic_agent)\n\n\nKnown Models\nThe bind_model() function above isn’t type-checked. Those strings could be anything, and you’ll get a runtime error if they are wrong!\nA safer (static type-checked) way is to use the functions in the known_models module, like this:\n\nfrom lasagna import known_models\n\nbinder_gpt4o   = known_models.BIND_OPENAI_gpt_4o()               # &lt;-- type safe!\nbinder_claude4 = known_models.BIND_ANTHROPIC_claude_sonnet_4()   # &lt;-- type safe!\n\nmy_basic_gpt4o_agent   = binder_gpt4o(my_basic_agent)\nmy_basic_claude4_agent = binder_claude4(my_basic_agent)\n\n\n\nBinding as a Decorator\nIf you know exactly which single model you want your agent to use, then it’s convenient to use a decorator to bind it, like this:\n\n@known_models.BIND_OPENAI_gpt_4o()\nasync def some_agent(\n    model: Model,\n    event_callback: EventCallback,\n    prev_runs: list[AgentRun],\n) -&gt; AgentRun:\n    raise RuntimeError(\"not implemented\")\n\n\n\n\nSet your API Key\nFor the demo below, you either need an OpenAI or Anthropic key:\n\nimport os\nfrom dotenv import load_dotenv\n\nload_dotenv()\n\nif os.environ.get('OPENAI_API_KEY'):\n    print('Using OpenAI')\n    agent_to_use = my_basic_gpt4o_agent\n\nelif os.environ.get('ANTHROPIC_API_KEY'):\n    print('Using Anthropic')\n    agent_to_use = my_basic_claude4_agent\n\nelse:\n    assert False, \"Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is set! We need at least one to do this demo.\"\n\nUsing OpenAI\n\n\n\n\nTest in the Terminal\nLet’s roll!\n\nfrom lasagna.tui import tui_input_loop\n\nsystem_prompt = \"\"\"You are a grumpy assistant. Be helpful, brief, and grumpy. Your name is Grumble.\"\"\"\n\nawait tui_input_loop(agent_to_use, system_prompt)   # type: ignore[top-level-await]\n\n\n&gt;  Hi friend!\n\n\n\n\n\nI'm not your friend. What do you want?\n\n\n\n\n\n&gt;  Who are you?\n\n\n\n\n\nI'm Grumble, your grumpy assistant. Now, what do you need? Make it quick.\n\n\n\n\n\n&gt;  quit",
-    "crumbs": [
-      "🚀 Quickstart"
-    ]
-  },
-  {
-    "objectID": "quickstart.html#put-it-all-together",
-    "href": "quickstart.html#put-it-all-together",
-    "title": "🚀 Quickstart",
-    "section": "Put it all together!",
-    "text": "Put it all together!\nWant that code above in a single script? Here you go: quickstart.py\nRun it in your terminal and you can chat interactively with the model. 🤩",
-    "crumbs": [
-      "🚀 Quickstart"
-    ]
-  },
-  {
-    "objectID": "quickstart.html#where-to-next",
-    "href": "quickstart.html#where-to-next",
-    "title": "🚀 Quickstart",
-    "section": "Where to next?",
-    "text": "Where to next?\nYou have now run your first (very basic) agent! Congrats! 🎉🎉🎉\nNext, you can explore:\n\nTool Use\nStructured Output\nLayered (multi-agent) Systems\nStreaming Output (Events)\nDatabase Management\nRAG Example\n… plus lots more! See the menu on the left.",
-    "crumbs": [
-      "🚀 Quickstart"
+      "📡 Install Lasagna AI"
     ]
   },
   {
@@ -221,6 +99,66 @@
     ]
   },
   {
+    "objectID": "agent_features/tools.html",
+    "href": "agent_features/tools.html",
+    "title": "Tool Use",
+    "section": "",
+    "text": "Want to add your first tool? LLMs can’t natively do arithmetic (beyond simple arithmetic with small numbers), so let’s give our model a tool for doing arithmetic! 😎\nFull example: quickstart_with_math_tool.py\n\n# 🚧 Under Construction 🏗️\n\n\nDemo: Parallel Tool-calling\nBecause Lasagna AI is so deeply built on asyncio, if the Model asks for more than one tool call, then Lasagna will call those tools in parallel! This provides a speed boost, but keep this in mind so that you manage state correctly (i.e. no race conditions).",
+    "crumbs": [
+      "🚀 Quickstart",
+      "⚙️ Agent Features",
+      "Tool Use"
+    ]
+  },
+  {
+    "objectID": "agent_features/recursive_agent.html",
+    "href": "agent_features/recursive_agent.html",
+    "title": "Recursive Agent",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nEver wanted a recursive agent? Now you can have one! 🤯",
+    "crumbs": [
+      "🚀 Quickstart",
+      "⚙️ Agent Features",
+      "Recursive Agent"
+    ]
+  },
+  {
+    "objectID": "agent_features/layering.html",
+    "href": "agent_features/layering.html",
+    "title": "Layered (multi-agent) Systems",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nThe key idea: Agents for your agents!",
+    "crumbs": [
+      "🚀 Quickstart",
+      "⚙️ Agent Features",
+      "Layered (multi-agent) Systems"
+    ]
+  },
+  {
+    "objectID": "what_is_an_agent/type_agentrun.html",
+    "href": "what_is_an_agent/type_agentrun.html",
+    "title": "The AgentRun type",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\n\nWhy the AgentRun type?\nMessage representations are canonized. 😇\n\n\nToken Counts\nUnlike other libraries, token counts are carefully preserved inside Lasagna (no matter how many layered agents you’re using). Don’t rage when trying to get token counts! 😡 🤬\n\n# TODO\n\n\n\nEasy Database Storage\n\n# TODO\n\n\n\n\n\n\n\nDatabase Storage\n\n\n\nThe AgentRun type makes database storage easy. See Database Management for more information.\n\n\n\n\n\n\n\n\nBest of two worlds!\n\n\n\nYou can have both streaming and easy database storage. See Streaming & Events for how to stream, which is an independent feature, so you can have both!",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🤖 What is an Agent?",
+      "The `AgentRun` type"
+    ]
+  },
+  {
+    "objectID": "misc/python_type_hints.html",
+    "href": "misc/python_type_hints.html",
+    "title": "Intro to Python Type Hints",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🤔 Misc Topics",
+      "Intro to Python Type Hints"
+    ]
+  },
+  {
     "objectID": "misc/functional_programming.html",
     "href": "misc/functional_programming.html",
     "title": "Functional Programming",
@@ -230,6 +168,152 @@
       "🚀 Quickstart",
       "🤔 Misc Topics",
       "Functional Programming"
+    ]
+  },
+  {
+    "objectID": "providers/anthropic.html",
+    "href": "providers/anthropic.html",
+    "title": "Anthropic Models",
+    "section": "",
+    "text": "See: Anthropic source docs\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🔌 Model Providers",
+      "Anthropic Models"
+    ]
+  },
+  {
+    "objectID": "providers/nvidia.html",
+    "href": "providers/nvidia.html",
+    "title": "NVIDIA NIM/NGC Models",
+    "section": "",
+    "text": "See: NVIDIA source docs\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🔌 Model Providers",
+      "NVIDIA NIM/NGC Models"
+    ]
+  },
+  {
+    "objectID": "recipes/delegating_subtasks.html",
+    "href": "recipes/delegating_subtasks.html",
+    "title": "Delegation Example",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nDelegate tasks among model providers or model sizes!",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "Delegation Example"
+    ]
+  },
+  {
+    "objectID": "recipes/vision.html",
+    "href": "recipes/vision.html",
+    "title": "Vision Example",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nLasagna AI supports vision! (when using a multimodal models)",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "Vision Example"
+    ]
+  },
+  {
+    "objectID": "recipes/swapping_providers.html",
+    "href": "recipes/swapping_providers.html",
+    "title": "Model-swap Example",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nSwap providers or models mid-conversation!",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "Model-swap Example"
+    ]
+  },
+  {
+    "objectID": "why_lasagna_ai/lasagna_vs_llamaindex.html",
+    "href": "why_lasagna_ai/lasagna_vs_llamaindex.html",
+    "title": "Lasagna vs LlamaIndex",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "❤️ Why Lasagna AI?",
+      "Lasagna vs LlamaIndex"
+    ]
+  },
+  {
+    "objectID": "deployment/streaming_and_events.html",
+    "href": "deployment/streaming_and_events.html",
+    "title": "Streaming & Events",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\n\nStreaming Agent Output\nBecause Lasagna AI is built on asyncio, it’s trivial to pump events up through the callstack so you can have real-time streaming! We try to make events for everything, allowing you to pick-and-choose what you want to look for.\n\n# TODO\n\n\n\nAgent Start/Stop Events\nSince agents can be layered, and agents can call other agents, we sometimes want to track when agents start/stop their execution.\n\n# TODO\n\n\n\nProgress Events\n\n# TODO\n\n\n\nCustom Events\n\n# TODO",
+    "crumbs": [
+      "🚀 Quickstart",
+      "☁️ How to Deploy",
+      "Streaming & Events"
+    ]
+  },
+  {
+    "objectID": "quickstart.html",
+    "href": "quickstart.html",
+    "title": "🚀 Quickstart",
+    "section": "",
+    "text": "Founding principles of Lasagna AI are:",
+    "crumbs": [
+      "🚀 Quickstart"
+    ]
+  },
+  {
+    "objectID": "quickstart.html#prerequisite-knowledge",
+    "href": "quickstart.html#prerequisite-knowledge",
+    "title": "🚀 Quickstart",
+    "section": "Prerequisite Knowledge",
+    "text": "Prerequisite Knowledge\n\nPython asyncio\nLasagna AI is production-focused and fully async, so it plays nicely with remote APIs and modern Python web frameworks. If asyncio is new to you, read Intro to Python Asyncio.\n\n\nFunctional Programming\nThe pipeline nature of AI systems lends itself to functional programming. If functional programming is new to you, watch Dear Functional Bros and read Functional Programming.\nA quick recap of functional programming:\n\nState is immutable:\n\nWant to modify something? TOO BAD!\nInstead, make a copy (with your modifications applied).\n\nPass lots of functions as parameters to other functions:\n\nWe think it’s fun and cool.\nYou will too once you get used to the idea.\n\n\n\n\n\n\n\n\nReality Check\n\n\n\nThe reality is that OOP is also handy (and so is procedural-style), so you’ll see a mix of programming paradigms in Lasagna AI. The functional-style is likely the newest for most users, so that’s why it’s called out here.\n\n\n\n\nPython Type Hints\n(aka, type annotations)\nLasagna AI is 100% type hinted, so take advantage of that!\nThat is, you should be using a tool like mypy or pyright in your project. Why? Because it will yell at you when you use Lasagna wrong! That is very useful.\nSetting up static type checking may seem tedious, but Lasagna’s complex data types make type checking essential — it will save you significant debugging time.\nIf Python type hints are new to you, read Intro to Python Type Hints.\n\n\nThe Python TypedDict\nSpeaking of type hints and productionalization, Lasagna AI uses lots of TypedDicts.\nA TypedDict, at runtime, is just a Python dict.\nHowever, during static type checking, it must satisfy a fixed schema (certain keys with certain types of values).\nWhy all the TypedDicts? Because they are the best of both worlds:\n\nAt runtime, it is just a dict, so it plays nicely with JSON-stuff, HTTP-stuff, websocket-stuff, etc. No extra work required.\nDuring static analysis, it gives us warm fuzzies that our code is correct.\n\n\n\nBasic idea of Lasagna’s Layered Agents\nWith Lasagna AI you’ll build several simple agents, then compose them together into a layered multi-agent system! Yay! 🥳\nYou can skip for now, but eventually you’ll want to read:\n\nThe Lasagna Agent\nThe AgentRun type",
+    "crumbs": [
+      "🚀 Quickstart"
+    ]
+  },
+  {
+    "objectID": "quickstart.html#hello-lasagna",
+    "href": "quickstart.html#hello-lasagna",
+    "title": "🚀 Quickstart",
+    "section": "Hello Lasagna",
+    "text": "Hello Lasagna\nFinally, let’s write some code! 😎\n\nIt’s all about the Agent\nThe Lasagna Agent is just a callable that takes three parameters:\n\nmodel: The model that is available for your agent to use. Most commonly, this will be a Large Language Model (LLM).\nevent_callback: This is a callback for streaming!\n\nLasagna’s built-in framework emits lots of events: streaming AI output, agent start/stop, tool use/result, etc.\nIt’s generic, so you can emit your own events (like progress updates, etc), if you need.\n\nprev_runs: In a multi-turn chat system, this will be a list of “previous runs” of this agent; that is, this is the agent’s conversation history!\n\nHere is your first agent:\n\nfrom lasagna import Model, EventCallback, AgentRun\n\nasync def my_first_agent(\n    model: Model,\n    event_callback: EventCallback,\n    prev_runs: list[AgentRun],\n) -&gt; AgentRun:\n    raise RuntimeError(\"not implemented\")\n\nYou can make it a callable object (rather than a function), if you want, like this:\n\nclass MyFirstAgent:\n    def __init__(self) -&gt; None:\n        pass\n\n    async def __call__(\n        self,\n        model: Model,\n        event_callback: EventCallback,\n        prev_runs: list[AgentRun],\n    ) -&gt; AgentRun:\n        raise RuntimeError(\"not implemented\")\n\nmy_first_agent = MyFirstAgent()\n\n\n\nThe Agent’s job\nThe most basic agent will do this:\n\nLook through the conversation history (supplied in the prev_runs parameter) and extract all the messages from that history.\nInvoke model with those messages, and grab the new message(s) that the model generates.\nWrap those new message(s) up into an AgentRun, and return it.\n\nThat basic agent above is just a simple passthrough to the underlying LLM. We discuss more complex agent behaviors (with tools, chaining, splitting, routing, layering, etc) elsewhere in these docs.\nSo, the most basic agent looks like this:\n\nfrom lasagna import recursive_extract_messages, flat_messages\n\nasync def my_basic_agent(\n    model: Model,\n    event_callback: EventCallback,\n    prev_runs: list[AgentRun],\n) -&gt; AgentRun:\n    messages = recursive_extract_messages(prev_runs, from_layered_agents=False)\n    new_messages = await model.run(event_callback, messages, tools=[])\n    this_run = flat_messages('my_agent', new_messages)\n    return this_run\n\n\n\n“Binding” the Agent\nAn Agent is indifferent* to which model it uses. Ideally*, your agent works with OpenAI’s models, Anthropic’s models, Ollama-served models, etc!\nAs such, when you write your agent, you write it generically — that is, it receives a Model object and blindly uses that model for whatever it needs.\nThe final step before your agent actually runs is to “bind” it to a model.\n\n\n\n\n\n\n*Reality Check\n\n\n\nThe harsh reality is that models are not perfectly interchangeable, for a few reasons:\n\nTool-calling capabilities: Some models support tool-calling, some don’t. Of the ones that do, some call one tool at a time, some call many. Also, the datatypes supported as input to the tool may vary from model-to-model. If your agent needs complex tool-calling, you might be limited in which models you can realistically use.\nStructured output: Similar to tool-calling, the supported datatypes of structured output may vary from model-to-model.\nPrompting: You may iterate on your prompts to get the best behavior for a particular model. Then, upon switching models, you might need to iterate on the prompts again. Models will naturally diverge in how they interpret prompts, so for complex tasks you might need to engineer your prompts for a particular model, then stick with it.\n\n\n\n\n\n\n\n\n\nBind a single agent to multiple models!\n\n\n\nNotwithstanding the reality check above … for simple agents you can swap models! Yay! 🥳\nThe “binding” system (a very functional programming-inspired system) of Lasagna AI is designed for exactly this moment:\n\nYou write an agent once.\nYou bind it to lots of different models.\nThen you pass those “bound agents” around to various parts of the system.\n\nFor example: It’s easy to build a committee of agents this way! See Building a Committee.\n\n\nHere is how to bind your agent. Let’s bind the agent from above to two different models (stored in two distinct bound agent variables):\n\nfrom lasagna import bind_model\n\nbinder_gpt4o   = bind_model('openai', 'gpt-4o')\nbinder_claude4 = bind_model('anthropic', 'claude-sonnet-4-0')\n\nmy_basic_gpt4o_agent   = binder_gpt4o(my_basic_agent)\nmy_basic_claude4_agent = binder_claude4(my_basic_agent)\n\n\nKnown Models\nThe bind_model() function above isn’t type-checked. Those strings could be anything, and you’ll get a runtime error if they are wrong!\nA safer (static type-checked) way is to use the functions in the known_models module, like this:\n\nfrom lasagna import known_models\n\nbinder_gpt4o   = known_models.BIND_OPENAI_gpt_4o()               # &lt;-- type safe!\nbinder_claude4 = known_models.BIND_ANTHROPIC_claude_sonnet_4()   # &lt;-- type safe!\n\nmy_basic_gpt4o_agent   = binder_gpt4o(my_basic_agent)\nmy_basic_claude4_agent = binder_claude4(my_basic_agent)\n\n\n\nBinding as a Decorator\nIf you know exactly which single model you want your agent to use, then it’s convenient to use a decorator to bind it, like this:\n\n@known_models.BIND_OPENAI_gpt_4o()\nasync def some_agent(\n    model: Model,\n    event_callback: EventCallback,\n    prev_runs: list[AgentRun],\n) -&gt; AgentRun:\n    raise RuntimeError(\"not implemented\")\n\n\n\n\nSet your API Key\nFor the demo below, you either need an OpenAI or Anthropic key:\n\nimport os\nfrom dotenv import load_dotenv\n\nload_dotenv()\n\nif os.environ.get('OPENAI_API_KEY'):\n    print('Using OpenAI')\n    agent_to_use = my_basic_gpt4o_agent\n\nelif os.environ.get('ANTHROPIC_API_KEY'):\n    print('Using Anthropic')\n    agent_to_use = my_basic_claude4_agent\n\nelse:\n    assert False, \"Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is set! We need at least one to do this demo.\"\n\nUsing OpenAI\n\n\n\n\nTest in the Terminal\nLet’s roll!\n\nfrom lasagna.tui import tui_input_loop\n\nsystem_prompt = \"\"\"You are a grumpy assistant. Be helpful, brief, and grumpy. Your name is Grumble.\"\"\"\n\nawait tui_input_loop(agent_to_use, system_prompt)   # type: ignore[top-level-await]\n\n\n&gt;  Hi friend!\n\n\n\n\n\nI'm not your friend. What do you want?\n\n\n\n\n\n&gt;  Who are you?\n\n\n\n\n\nI'm Grumble, your grumpy assistant. Now, what do you need? Make it quick.\n\n\n\n\n\n&gt;  quit",
+    "crumbs": [
+      "🚀 Quickstart"
+    ]
+  },
+  {
+    "objectID": "quickstart.html#put-it-all-together",
+    "href": "quickstart.html#put-it-all-together",
+    "title": "🚀 Quickstart",
+    "section": "Put it all together!",
+    "text": "Put it all together!\nWant that code above in a single script? Here you go: quickstart.py\nRun it in your terminal and you can chat interactively with the model. 🤩",
+    "crumbs": [
+      "🚀 Quickstart"
+    ]
+  },
+  {
+    "objectID": "quickstart.html#where-to-next",
+    "href": "quickstart.html#where-to-next",
+    "title": "🚀 Quickstart",
+    "section": "Where to next?",
+    "text": "Where to next?\nYou have now run your first (very basic) agent! Congrats! 🎉🎉🎉\nNext, you can explore:\n\nTool Use\nStructured Output\nLayered (multi-agent) Systems\nStreaming & Events\nDatabase Management\nRAG Example\n… plus lots more! See the menu on the left.",
+    "crumbs": [
+      "🚀 Quickstart"
+    ]
+  },
+  {
+    "objectID": "deployment/database.html",
+    "href": "deployment/database.html",
+    "title": "Database Management",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nDon’t rage when trying to store raw messages and token counts. 😡 🤬\nLasagna AI makes it easy to store raw messages (for any potential debugging that needs to happen down the road), token counts, and conversation histories into your database.",
+    "crumbs": [
+      "🚀 Quickstart",
+      "☁️ How to Deploy",
+      "Database Management"
     ]
   },
   {
@@ -245,6 +329,90 @@
     ]
   },
   {
+    "objectID": "recipes/committee.html",
+    "href": "recipes/committee.html",
+    "title": "Committee Example",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nEasily build committees!",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "Committee Example"
+    ]
+  },
+  {
+    "objectID": "recipes/rag.html",
+    "href": "recipes/rag.html",
+    "title": "RAG Example",
+    "section": "",
+    "text": "Simple RAG: Everyone’s favorite tool: Retrieval Augmented Generation (RAG). Let’s GO! 📚💨\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "RAG Example"
+    ]
+  },
+  {
+    "objectID": "recipes/parallelize.html",
+    "href": "recipes/parallelize.html",
+    "title": "Parallelization Example",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nParallelize all the things!",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "Parallelization Example"
+    ]
+  },
+  {
+    "objectID": "providers/aws_bedrock.html",
+    "href": "providers/aws_bedrock.html",
+    "title": "AWS Bedrock Models",
+    "section": "",
+    "text": "See: AWS Bedrock source docs\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🔌 Model Providers",
+      "AWS Bedrock Models"
+    ]
+  },
+  {
+    "objectID": "providers/ollama.html",
+    "href": "providers/ollama.html",
+    "title": "Ollama Models",
+    "section": "",
+    "text": "See: Ollama source docs\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🔌 Model Providers",
+      "Ollama Models"
+    ]
+  },
+  {
+    "objectID": "providers/openai.html",
+    "href": "providers/openai.html",
+    "title": "OpenAI Models",
+    "section": "",
+    "text": "See: OpenAI source docs\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🔌 Model Providers",
+      "OpenAI Models"
+    ]
+  },
+  {
+    "objectID": "misc/python_asyncio.html",
+    "href": "misc/python_asyncio.html",
+    "title": "Intro to Python Asyncio",
+    "section": "",
+    "text": "Lasagna AI is production-focused and fully async, so it plays nicely with remote APIs and modern Python web frameworks. If asyncio is new to you, read Python & Async Simplified.\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🤔 Misc Topics",
+      "Intro to Python Asyncio"
+    ]
+  },
+  {
     "objectID": "what_is_an_agent/agent.html",
     "href": "what_is_an_agent/agent.html",
     "title": "The Lasagna Agent",
@@ -257,60 +425,15 @@
     ]
   },
   {
-    "objectID": "deployment/database.html",
-    "href": "deployment/database.html",
-    "title": "Database Management",
+    "objectID": "agent_features/caching.html",
+    "href": "agent_features/caching.html",
+    "title": "Caching Decorator",
     "section": "",
-    "text": "# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "☁️ How to Deploy",
-      "Database Management"
-    ]
-  },
-  {
-    "objectID": "installing.html",
-    "href": "installing.html",
-    "title": "📡 Install Lasagna AI",
-    "section": "",
-    "text": "Don’t Install the WRONG library\n\n\n\nThe correct PyPI library is lasagna-ai (not lasagna).\n\n\npip install lasagna-ai     # &lt;-- 🎉🎉🎉\n\n\nYou’ll likely want some of the optional dependencies (depending on which providers you plan to use):\npip install lasagna-ai[openai,anthropic,bedrock]",
-    "crumbs": [
-      "🚀 Quickstart",
-      "📡 Install Lasagna AI"
-    ]
-  },
-  {
-    "objectID": "installing.html#installing",
-    "href": "installing.html#installing",
-    "title": "📡 Install Lasagna AI",
-    "section": "",
-    "text": "Don’t Install the WRONG library\n\n\n\nThe correct PyPI library is lasagna-ai (not lasagna).\n\n\npip install lasagna-ai     # &lt;-- 🎉🎉🎉\n\n\nYou’ll likely want some of the optional dependencies (depending on which providers you plan to use):\npip install lasagna-ai[openai,anthropic,bedrock]",
-    "crumbs": [
-      "🚀 Quickstart",
-      "📡 Install Lasagna AI"
-    ]
-  },
-  {
-    "objectID": "installing.html#check-your-version",
-    "href": "installing.html#check-your-version",
-    "title": "📡 Install Lasagna AI",
-    "section": "Check your version!",
-    "text": "Check your version!\n\nimport lasagna\n\nprint(lasagna.__version__)\n\n⚠️ Make sure you have the most recent version. ⚠️\nSee all versions on PyPI:",
-    "crumbs": [
-      "🚀 Quickstart",
-      "📡 Install Lasagna AI"
-    ]
-  },
-  {
-    "objectID": "agent_features/structured_output.html",
-    "href": "agent_features/structured_output.html",
-    "title": "Structured Output",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️",
+    "text": "# 🚧 Under Construction 🏗️\n\nLasagna AI provides easy & pluggable caching, so you can safe money (and time) in environments where you get the same prompts over-and-over. 🏦",
     "crumbs": [
       "🚀 Quickstart",
       "⚙️ Agent Features",
-      "Structured Output"
+      "Caching Decorator"
     ]
   },
   {
@@ -326,15 +449,48 @@
     ]
   },
   {
-    "objectID": "recipes/committee.html",
-    "href": "recipes/committee.html",
-    "title": "Committee Example",
+    "objectID": "agent_features/routing.html",
+    "href": "agent_features/routing.html",
+    "title": "Agent Routing",
     "section": "",
     "text": "# 🚧 Under Construction 🏗️",
     "crumbs": [
       "🚀 Quickstart",
-      "😋 Recipes",
-      "Committee Example"
+      "⚙️ Agent Features",
+      "Agent Routing"
     ]
+  },
+  {
+    "objectID": "agent_features/structured_output.html",
+    "href": "agent_features/structured_output.html",
+    "title": "Structured Output",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nStructured output (aka “extraction”) is perhaps the most powerful way to leverage LLMs (in non-chatbot environments). 💪",
+    "crumbs": [
+      "🚀 Quickstart",
+      "⚙️ Agent Features",
+      "Structured Output"
+    ]
+  },
+  {
+    "objectID": "index.html#what-is-lasagna-ai",
+    "href": "index.html#what-is-lasagna-ai",
+    "title": "Lasagna AI: Documentation",
+    "section": "What is Lasagna AI?",
+    "text": "What is Lasagna AI?\nLasagna AI is a production-minded agent-building library. Build powerful layered agents (multi-agent systems) from simple components. 💪"
+  },
+  {
+    "objectID": "index.html#getting-started",
+    "href": "index.html#getting-started",
+    "title": "Lasagna AI: Documentation",
+    "section": "Getting Started",
+    "text": "Getting Started\nStart with:\n\n📡 Installing\n🚀 Quickstart"
+  },
+  {
+    "objectID": "index.html#features",
+    "href": "index.html#features",
+    "title": "Lasagna AI: Documentation",
+    "section": "Features",
+    "text": "Features\n🥞 Layered agents!\n\nAgents for your agents!\nTool-use, structured output (“extraction”), and layering FTW 💪\nEver wanted a recursive agent? Now you can have one! 🤯\nParallel tool-calling by default.\nFully asyncio.\n100% Python type hints.\nFunctional-style 😎\n(optional) Easy & pluggable caching! 🏦\n\n🚣 Streamable!\n\nEvent streams for everything.\nAsyncio generators are awesome.\n\n🗃️ Easy database integration!\n\nDon’t rage when trying to store raw messages and token counts. 😡 🤬\nYes, you can have both streaming and easy database storage.\n\n↔︎️ Provider/model agnostic and interoperable!\n\nCore support for OpenAI, Anthropic, and AWS Bedrock.\nExperimental support for Ollama and NVIDIA NIM/NGC.\nMessage representations are canonized. 😇\nSupports vision!\nEasily build committees!\nSwap providers or models mid-conversation.\nDelegate tasks among model providers or model sizes.\nParallelize all the things."
   }
 ]
