@@ -58,7 +58,12 @@ website:
           - recipes/rag.ipynb
           - recipes/committee.ipynb
       - section: "🔌 Model Providers"
-        contents: []
+        contents:
+          - providers/openai.ipynb
+          - providers/anthropic.ipynb
+          - providers/aws_bedrock.ipynb
+          - providers/ollama.ipynb
+          - providers/nvidia.ipynb
       - section: "☁️ How to Deploy"
         contents:
           - deployment/streaming.ipynb
