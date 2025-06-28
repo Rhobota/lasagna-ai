@@ -10,6 +10,7 @@ from lasagna.agent_util import (
     noop_callback,
     partial_bind_model,
     recursive_extract_messages,
+    recursive_sum_costs,
     flat_messages,
     build_extraction_agent,
     override_system_prompt,
@@ -30,6 +31,114 @@ from lasagna.mock_provider import (
 from lasagna.util import get_name
 
 from pydantic import BaseModel, ValidationError
+
+
+_AGENT_RUN: AgentRun = {
+    'agent': 'outer_agent',
+    'type': 'chain',
+    'runs': [
+        {
+            'agent': 'inner_agent_1',
+            'type': 'parallel',
+            'runs': [
+                {
+                    'agent': 'inner_agent_2',
+                    'type': 'messages',
+                    'messages': [
+                        {
+                            'role': 'system',
+                            'text': 'You are a robot.',
+                        },
+                        {
+                            'role': 'human',
+                            'text': 'What are you?',
+                        },
+                    ],
+                },
+                {
+                    'agent': 'inner_agent_3',
+                    'type': 'messages',
+                    'messages': [
+                        {
+                            'role': 'system',
+                            'text': 'You are a cat.',
+                        },
+                        {
+                            'role': 'human',
+                            'text': 'Here kitty kitty!',
+                        },
+                        {
+                            'role': 'tool_res',
+                            'tools': [
+                                {
+                                    'type': 'any',
+                                    'call_id': 'call000',
+                                    'result': 'Meow.',
+                                },
+                                {
+                                    'type': 'layered_agent',
+                                    'call_id': 'call001',
+                                    'run': {
+                                        'agent': 'inner_agent_4',
+                                        'type': 'messages',
+                                        'messages': [
+                                            {
+                                                'role': 'ai',
+                                                'text': 'Beep.',
+                                                'cost': {
+                                                    'input_tokens': 10,
+                                                    'output_tokens': 2,
+                                                    'total_tokens': 12,
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            'agent': 'inner_agent_5',
+            'type': 'extraction',
+            'messages': [
+                {
+                    'role': 'tool_call',
+                    'tools': [
+                        {
+                            'call_id': 'call002',
+                            'call_type': 'function',
+                            'function': {
+                                'name': 'foo',
+                                'arguments': '{"value": 7}',
+                            },
+                        },
+                    ],
+                },
+            ],
+            'result': {'value': 7},
+        },
+        {
+            'agent': 'inner_agent_6',
+            'type': 'messages',
+            'messages': [
+                {
+                    'role': 'system',
+                    'text': 'You aggregate other AI systems.',
+                    'cost': {
+                        'output_tokens': 3,
+                    },
+                },
+                {
+                    'role': 'human',
+                    'text': 'Summarize the previous AI conversations, please.',
+                },
+            ],
+        },
+    ],
+}
 
 
 class MyTestType(BaseModel):
@@ -224,105 +333,7 @@ async def test_model_extract_type_mismatch():
 
 
 def test_recursive_extract_messages():
-    agent_run: AgentRun = {
-        'agent': 'outer_agent',
-        'type': 'chain',
-        'runs': [
-            {
-                'agent': 'inner_agent_1',
-                'type': 'parallel',
-                'runs': [
-                    {
-                        'agent': 'inner_agent_2',
-                        'type': 'messages',
-                        'messages': [
-                            {
-                                'role': 'system',
-                                'text': 'You are a robot.',
-                            },
-                            {
-                                'role': 'human',
-                                'text': 'What are you?',
-                            },
-                        ],
-                    },
-                    {
-                        'agent': 'inner_agent_3',
-                        'type': 'messages',
-                        'messages': [
-                            {
-                                'role': 'system',
-                                'text': 'You are a cat.',
-                            },
-                            {
-                                'role': 'human',
-                                'text': 'Here kitty kitty!',
-                            },
-                            {
-                                'role': 'tool_res',
-                                'tools': [
-                                    {
-                                        'type': 'any',
-                                        'call_id': 'call000',
-                                        'result': 'Meow.',
-                                    },
-                                    {
-                                        'type': 'layered_agent',
-                                        'call_id': 'call001',
-                                        'run': {
-                                            'agent': 'inner_agent_4',
-                                            'type': 'messages',
-                                            'messages': [
-                                                {
-                                                    'role': 'ai',
-                                                    'text': 'Beep.',
-                                                },
-                                            ],
-                                        },
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                ],
-            },
-            {
-                'agent': 'inner_agent_5',
-                'type': 'extraction',
-                'messages': [
-                    {
-                        'role': 'tool_call',
-                        'tools': [
-                            {
-                                'call_id': 'call002',
-                                'call_type': 'function',
-                                'function': {
-                                    'name': 'foo',
-                                    'arguments': '{"value": 7}',
-                                },
-                            },
-                        ],
-                    },
-                ],
-                'result': {'value': 7},
-            },
-            {
-                'agent': 'inner_agent_6',
-                'type': 'messages',
-                'messages': [
-                    {
-                        'role': 'system',
-                        'text': 'You aggregate other AI systems.',
-                    },
-                    {
-                        'role': 'human',
-                        'text': 'Summarize the previous AI conversations, please.',
-                    },
-                ],
-            },
-        ],
-    }
-    assert recursive_extract_messages([agent_run], from_layered_agents=True) == [
+    assert recursive_extract_messages([_AGENT_RUN], from_layered_agents=True) == [
         {
             'role': 'system',
             'text': 'You are a robot.',
@@ -357,6 +368,11 @@ def test_recursive_extract_messages():
                             {
                                 'role': 'ai',
                                 'text': 'Beep.',
+                                'cost': {
+                                    'input_tokens': 10,
+                                    'output_tokens': 2,
+                                    'total_tokens': 12,
+                                },
                             },
                         ],
                     },
@@ -366,6 +382,11 @@ def test_recursive_extract_messages():
         {
             'role': 'ai',
             'text': 'Beep.',
+            'cost': {
+                'input_tokens': 10,
+                'output_tokens': 2,
+                'total_tokens': 12,
+            },
         },
         {
             'role': 'tool_call',
@@ -383,13 +404,16 @@ def test_recursive_extract_messages():
         {
             'role': 'system',
             'text': 'You aggregate other AI systems.',
+            'cost': {
+                'output_tokens': 3,
+            },
         },
         {
             'role': 'human',
             'text': 'Summarize the previous AI conversations, please.',
         },
     ]
-    assert recursive_extract_messages([agent_run], from_layered_agents=False) == [
+    assert recursive_extract_messages([_AGENT_RUN], from_layered_agents=False) == [
         {
             'role': 'system',
             'text': 'You are a robot.',
@@ -424,6 +448,11 @@ def test_recursive_extract_messages():
                             {
                                 'role': 'ai',
                                 'text': 'Beep.',
+                                'cost': {
+                                    'input_tokens': 10,
+                                    'output_tokens': 2,
+                                    'total_tokens': 12,
+                                },
                             },
                         ],
                     },
@@ -446,13 +475,16 @@ def test_recursive_extract_messages():
         {
             'role': 'system',
             'text': 'You aggregate other AI systems.',
+            'cost': {
+                'output_tokens': 3,
+            },
         },
         {
             'role': 'human',
             'text': 'Summarize the previous AI conversations, please.',
         },
     ]
-    assert extract_last_message(agent_run, from_layered_agents=True) == {
+    assert extract_last_message(_AGENT_RUN, from_layered_agents=True) == {
         'role': 'human',
         'text': 'Summarize the previous AI conversations, please.',
     }
@@ -602,3 +634,11 @@ def test_override_system_prompt():
             'text': 'Who are you?',
         },
     ]
+
+
+def test_recursive_sum_costs():
+    assert recursive_sum_costs(_AGENT_RUN) == {
+        'input_tokens': 10,
+        'output_tokens': 5,
+        'total_tokens': 12,
+    }
