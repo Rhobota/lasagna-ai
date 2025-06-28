@@ -50,18 +50,31 @@ website:
           - agent_features/layering.ipynb
           - agent_features/routing.ipynb
           - agent_features/parallelizing.ipynb
+          - agent_features/recursive_agent.ipynb
+          - agent_features/caching.ipynb
       - section: "😋 Recipes"
         contents:
           - recipes/rag.ipynb
           - recipes/committee.ipynb
+          - recipes/vision.ipynb
+          - recipes/swapping_providers.ipynb
+          - recipes/delegating_subtasks.ipynb
+          - recipes/parallelize.ipynb
       - section: "🔌 Model Providers"
-        contents: []
+        contents:
+          - providers/openai.ipynb
+          - providers/anthropic.ipynb
+          - providers/aws_bedrock.ipynb
+          - providers/ollama.ipynb
+          - providers/nvidia.ipynb
       - section: "☁️ How to Deploy"
         contents:
-          - deployment/streaming.ipynb
+          - deployment/streaming_and_events.ipynb
           - deployment/database.ipynb
       - section: "🤔 Misc Topics"
         contents:
+          - misc/python_asyncio.ipynb
+          - misc/python_type_hints.ipynb
           - misc/functional_programming.ipynb
       - about.ipynb
   page-footer:
