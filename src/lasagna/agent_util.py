@@ -3,6 +3,10 @@ from .agent_runner import run
 from .util import get_name
 
 from .types import (
+    AgentRunChained,
+    AgentRunExtraction,
+    AgentRunMessageList,
+    AgentRunParallel,
     AgentSpec,
     AgentRun,
     Cost,
@@ -153,11 +157,46 @@ def extract_last_message(
 def flat_messages(
     agent_name: str,
     messages: List[Message],
-) -> AgentRun:
+) -> AgentRunMessageList:
     return {
         'agent': agent_name,
         'type': 'messages',
         'messages': messages,
+    }
+
+
+def parallel_runs(
+    agent_name: str,
+    runs: List[AgentRun],
+) -> AgentRunParallel:
+    return {
+        'agent': agent_name,
+        'type': 'parallel',
+        'runs': runs,
+    }
+
+
+def chained_runs(
+    agent_name: str,
+    runs: List[AgentRun],
+) -> AgentRunChained:
+    return {
+        'agent': agent_name,
+        'type': 'chain',
+        'runs': runs,
+    }
+
+
+def extraction(
+    agent_name: str,
+    messages: List[Message],
+    result: Any,
+) -> AgentRunExtraction:
+    return {
+        'agent': agent_name,
+        'type': 'extraction',
+        'messages': messages,
+        'result': result,
     }
 
 
