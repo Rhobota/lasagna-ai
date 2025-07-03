@@ -39,7 +39,7 @@ async def my_basic_agent(
     event_callback: EventCallback,
     prev_runs: List[AgentRun],
 ) -> AgentRun:
-    messages = recursive_extract_messages(prev_runs, from_tools=False)
+    messages = recursive_extract_messages(prev_runs, from_tools=False, from_extraction=False)
     tools: List[Callable] = [
         evaluate_math_expression,
     ]

@@ -333,7 +333,11 @@ async def test_model_extract_type_mismatch():
 
 
 def test_recursive_extract_messages():
-    assert recursive_extract_messages([_AGENT_RUN], from_tools=True) == [
+    assert recursive_extract_messages(
+        _AGENT_RUN,
+        from_tools=True,
+        from_extraction=True,
+    ) == [
         {
             'role': 'system',
             'text': 'You are a robot.',
@@ -413,7 +417,11 @@ def test_recursive_extract_messages():
             'text': 'Summarize the previous AI conversations, please.',
         },
     ]
-    assert recursive_extract_messages([_AGENT_RUN], from_tools=False) == [
+    assert recursive_extract_messages(
+        _AGENT_RUN,
+        from_tools=False,
+        from_extraction=True,
+    ) == [
         {
             'role': 'system',
             'text': 'You are a robot.',
@@ -484,7 +492,69 @@ def test_recursive_extract_messages():
             'text': 'Summarize the previous AI conversations, please.',
         },
     ]
-    assert extract_last_message(_AGENT_RUN, from_tools=True) == {
+    assert recursive_extract_messages(
+        _AGENT_RUN,
+        from_tools=False,
+        from_extraction=False,
+    ) == [
+        {
+            'role': 'system',
+            'text': 'You are a robot.',
+        },
+        {
+            'role': 'human',
+            'text': 'What are you?',
+        },
+        {
+            'role': 'system',
+            'text': 'You are a cat.',
+        },
+        {
+            'role': 'human',
+            'text': 'Here kitty kitty!',
+        },
+        {
+            'role': 'tool_res',
+            'tools': [
+                {
+                    'type': 'any',
+                    'call_id': 'call000',
+                    'result': 'Meow.',
+                },
+                {
+                    'type': 'layered_agent',
+                    'call_id': 'call001',
+                    'run': {
+                        'agent': 'inner_agent_4',
+                        'type': 'messages',
+                        'messages': [
+                            {
+                                'role': 'ai',
+                                'text': 'Beep.',
+                                'cost': {
+                                    'input_tokens': 10,
+                                    'output_tokens': 2,
+                                    'total_tokens': 12,
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        {
+            'role': 'system',
+            'text': 'You aggregate other AI systems.',
+            'cost': {
+                'output_tokens': 3,
+            },
+        },
+        {
+            'role': 'human',
+            'text': 'Summarize the previous AI conversations, please.',
+        },
+    ]
+    assert extract_last_message(_AGENT_RUN, from_tools=True, from_extraction=True) == {
         'role': 'human',
         'text': 'Summarize the previous AI conversations, please.',
     }

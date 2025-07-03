@@ -442,7 +442,7 @@ def extract_tool_result_as_sting(tool_result: ToolResult) -> str:
         content = str(tool_result['result'])
 
     elif tool_result['type'] == 'layered_agent':
-        last_message = extract_last_message([tool_result['run']], from_tools=True)
+        last_message = extract_last_message([tool_result['run']], from_tools=True, from_extraction=True)
         if last_message['role'] == 'ai':
             content = last_message['text'] or ''
         elif last_message['role'] == 'tool_call':

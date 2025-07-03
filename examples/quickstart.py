@@ -22,7 +22,7 @@ async def my_basic_agent(
     event_callback: EventCallback,
     prev_runs: List[AgentRun],
 ) -> AgentRun:
-    messages = recursive_extract_messages(prev_runs, from_tools=False)
+    messages = recursive_extract_messages(prev_runs, from_tools=False, from_extraction=False)
     new_messages = await model.run(event_callback, messages, tools=[])
     this_run = flat_messages('my_basic_agent', new_messages)
     return this_run
