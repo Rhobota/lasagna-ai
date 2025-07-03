@@ -82,7 +82,7 @@ def _extract_messages_from_tool_result(
 ) -> List[Message]:
     if tool_result['type'] == 'layered_agent':
         run = tool_result['run']
-        return recursive_extract_messages([run], from_layered_agents=True)
+        return recursive_extract_messages(run, from_layered_agents=True)
     return []
 
 
@@ -99,10 +99,15 @@ def _recursive_extract_messages_from_tool_res(
 
 
 def recursive_extract_messages(
-    agent_runs: List[AgentRun],
+    agent_run_or_runs: Union[AgentRun, List[AgentRun]],
     from_layered_agents: bool,
 ) -> List[Message]:
     """DFS retrieve all messages within a list of `AgentRuns`."""
+    agent_runs: List[AgentRun]
+    if isinstance(agent_run_or_runs, list):
+        agent_runs = agent_run_or_runs
+    else:
+        agent_runs = [agent_run_or_runs]
     messages: List[Message] = []
     for run in agent_runs:
         if run['type'] == 'messages':
@@ -134,10 +139,7 @@ def extract_last_message(
     agent_run_or_runs: Union[AgentRun, List[AgentRun]],
     from_layered_agents: bool,
 ) -> Message:
-    if isinstance(agent_run_or_runs, list):
-        messages = recursive_extract_messages(agent_run_or_runs, from_layered_agents=from_layered_agents)
-    else:
-        messages = recursive_extract_messages([agent_run_or_runs], from_layered_agents=from_layered_agents)
+    messages = recursive_extract_messages(agent_run_or_runs, from_layered_agents=from_layered_agents)
     if len(messages) == 0:
         raise ValueError('no messages found')
     return messages[-1]
@@ -190,10 +192,7 @@ def strip_all_but_last_human_message(
 def recursive_sum_costs(
     agent_run_or_runs: Union[AgentRun, List[AgentRun]],
 ) -> Cost:
-    if isinstance(agent_run_or_runs, list):
-        messages = recursive_extract_messages(agent_run_or_runs, from_layered_agents=True)
-    else:
-        messages = recursive_extract_messages([agent_run_or_runs], from_layered_agents=True)
+    messages = recursive_extract_messages(agent_run_or_runs, from_layered_agents=True)
 
     input_tokens  = [m['cost']['input_tokens']  for m in messages if 'cost' in m and 'input_tokens'  in m['cost']]
     output_tokens = [m['cost']['output_tokens'] for m in messages if 'cost' in m and 'output_tokens' in m['cost']]
@@ -227,7 +226,7 @@ def build_standard_message_extractor(
 ) -> MessageExtractor:
     def extractor(prev_runs: List[AgentRun]) -> List[Message]:
         messages = recursive_extract_messages(
-            agent_runs = prev_runs,
+            prev_runs,
             from_layered_agents = extract_from_layered_agents,
         )
         if keep_only_last_human_message:
