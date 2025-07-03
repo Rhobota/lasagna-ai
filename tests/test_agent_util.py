@@ -333,7 +333,7 @@ async def test_model_extract_type_mismatch():
 
 
 def test_recursive_extract_messages():
-    assert recursive_extract_messages([_AGENT_RUN], from_layered_agents=True) == [
+    assert recursive_extract_messages([_AGENT_RUN], from_tools=True) == [
         {
             'role': 'system',
             'text': 'You are a robot.',
@@ -413,7 +413,7 @@ def test_recursive_extract_messages():
             'text': 'Summarize the previous AI conversations, please.',
         },
     ]
-    assert recursive_extract_messages([_AGENT_RUN], from_layered_agents=False) == [
+    assert recursive_extract_messages([_AGENT_RUN], from_tools=False) == [
         {
             'role': 'system',
             'text': 'You are a robot.',
@@ -484,7 +484,7 @@ def test_recursive_extract_messages():
             'text': 'Summarize the previous AI conversations, please.',
         },
     ]
-    assert extract_last_message(_AGENT_RUN, from_layered_agents=True) == {
+    assert extract_last_message(_AGENT_RUN, from_tools=True) == {
         'role': 'human',
         'text': 'Summarize the previous AI conversations, please.',
     }
