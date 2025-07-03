@@ -131,7 +131,7 @@ async def _process_tool_call_stream(
                 args.append(a_delta)
                 yield 'tool_call', 'text_event', a_delta
     if last_index is not None:
-        yield 'tool_call', 'text_event', ")"   # <-- again, assumes no index-interleave
+        yield 'tool_call', 'text_event', ")\n"   # <-- again, assumes no index-interleave
     for index in sorted(recs_by_index.keys()):
         rec = recs_by_index[index]
         rec['function']['arguments'] = ''.join(args_by_index[index])

@@ -650,7 +650,7 @@ async def test_process_output_stream__tool():
         else:
             assert False, event[1]
     text = ''.join(texts)
-    assert text == 'multiply({"a": 5, "b": 7})\nmultiply({"a": 8, "b": 101})'
+    assert text == 'multiply({"a": 5, "b": 7})\nmultiply({"a": 8, "b": 101})\n'
     assert tool_calls == CORRECT_PARSED_TOOLS
 
     stream = _process_output_stream(_extract_deltas(fake_async(SAMPLE_TOOL_STREAM[:6])))
@@ -665,7 +665,7 @@ async def test_process_output_stream__tool():
         else:
             assert False, event[1]
     text = ''.join(texts)
-    assert text == 'multiply({"a": 5, "b": 7})'
+    assert text == 'multiply({"a": 5, "b": 7})\n'
     assert tool_calls == CORRECT_PARSED_TOOLS[:1]
 
 
@@ -691,7 +691,7 @@ async def test_process_output_stream__text_and_tool():
         else:
             assert False, event[0]
     text = ''.join(texts)
-    assert text == 'Hello Ryan! 5 multiplied by 7 is 35.\n\nmultiply({"a": 5, "b": 7})\nmultiply({"a": 8, "b": 101})'
+    assert text == 'Hello Ryan! 5 multiplied by 7 is 35.\n\nmultiply({"a": 5, "b": 7})\nmultiply({"a": 8, "b": 101})\n'
     assert tool_calls == CORRECT_PARSED_TOOLS
 
 
