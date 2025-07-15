@@ -5,6 +5,7 @@ from typing import (
     Union,
     Type,
     Awaitable,
+    Optional,
 )
 import json
 
@@ -12,15 +13,15 @@ from pydantic import BaseModel
 
 from . import (
     build_simple_agent,
+    build_extraction_agent,
     AgentCallable,
     BoundAgentCallable,
-    Model,
     EventCallback,
     EventPayload,
     AgentRun,
     flat_messages,
     noop_callback,
-    recursive_extract_messages,
+    Message,
 )
 
 
@@ -33,8 +34,8 @@ def simple_text_callback_binder(simple_text_callback: Callable[[str], Awaitable[
 
 async def simple_ask(
     binder: Callable[[AgentCallable], BoundAgentCallable],
-    system_prompt: str,
-    human_prompt: str,
+    prompt: str,
+    system_prompt: Optional[str] = None,
     streaming_callback: Union[Callable[[str], Awaitable[None]], None] = None,
     tools: List[Callable] = [],
     force_tool: bool = False,
@@ -48,19 +49,21 @@ async def simple_ask(
             max_tool_iters = max_tool_iters,
         )
     )
+
+    messages: List[Message] = []
+    if system_prompt:
+        messages.append({
+            'role': 'system',
+            'text': system_prompt,
+        })
+    messages.append({
+        'role': 'human',
+        'text': prompt,
+    })
     runs: List[AgentRun] = [
         flat_messages(
             agent_name = "simple_ask",
-            messages = [
-                {
-                    'role': 'system',
-                    'text': system_prompt,
-                },
-                {
-                    'role': 'human',
-                    'text': human_prompt,
-                },
-            ],
+            messages = messages,
         )
     ]
     response: AgentRun = await agent(
@@ -83,85 +86,37 @@ async def simple_ask(
         raise RuntimeError(f"unexpected message role: {last_message['role']}")
 
 
-"""
-Strucuted output stuff:
-"""
-
-def extract_prompt_text_from_pydantic_model(
-    extraction_type: Type[BaseModel],
-) -> str:
-    """
-    Returns json-indented text that's {field: (<type>) <description>}
-
-    A schema property has (description, title, type) keys.
-    """
-    schema_properties = extraction_type.model_json_schema()['properties']
-    for k, v in schema_properties.items():
-        if "description" not in v:
-            raise ValueError(f'Description not provided for field: {k}')
-    return json.dumps(
-        {
-            k: f'({v["type"]}) {v["description"]}'
-            for k, v in schema_properties.items()
-        },
-        indent=2,
-    )
-
-
-def easy_structured_output_agent_binder(
-    extraction_type: Type[BaseModel],
-) -> AgentCallable:
-    async def easy_structured_output_agent(
-        model: Model,
-        event_callback: EventCallback,
-        prev_runs: List[AgentRun],
-    ) -> AgentRun:
-        messages = recursive_extract_messages(prev_runs, from_layered_agents=False)
-
-        message, extraction = await model.extract(
-            event_callback = event_callback,
-            messages = messages,
-            extraction_type = extraction_type,
-        )
-        assert isinstance(extraction, extraction_type)
-
-        return {
-            'agent': 'easy_structured_output_agent',
-            'type': 'extraction',
-            'messages': [message],
-            'result': extraction,
-        }
-    return easy_structured_output_agent
-
-
 async def simple_ask_with_structured_output(
     binder: Callable[[AgentCallable], BoundAgentCallable],
-    system_prompt: str,
-    human_prompt: str,
+    prompt: str,
     extraction_type: Type[BaseModel],
+    system_prompt: Optional[str] = None,
     streaming_callback: Union[Callable[[str], Awaitable[None]], None] = None,
 ) -> BaseModel:
     agent = binder(
-        easy_structured_output_agent_binder(extraction_type),
+        build_extraction_agent(
+            name = "easy_structured_output_agent",
+            extraction_type = extraction_type,
+        )
     )
+
+    messages: List[Message] = []
+    if system_prompt:
+        messages.append({
+            'role': 'system',
+            'text': system_prompt,
+        })
+    messages.append({
+        'role': 'human',
+        'text': prompt,
+    })
 
     response: AgentRun = await agent(
         simple_text_callback_binder(streaming_callback) if streaming_callback else noop_callback,
         [
             flat_messages(
                 agent_name = 'easy_structured_output_agent',
-                messages = [
-                    {
-                        'role': 'system',
-                        'text': system_prompt \
-                            + "\n\nOutput JSON with the following schema:\n" \
-                            + extract_prompt_text_from_pydantic_model(extraction_type),
-                    },
-                    {
-                        'role': 'human',
-                        'text': human_prompt,
-                    },
-                ],
+                messages = messages,
             ),
         ],
     )

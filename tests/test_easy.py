@@ -5,7 +5,6 @@ from pydantic import BaseModel, Field
 
 from lasagna.easy import (
     simple_ask,
-    extract_prompt_text_from_pydantic_model,
     simple_ask_with_structured_output,
 )
 from lasagna.mock_provider import (
@@ -18,8 +17,8 @@ from lasagna.agent_util import bind_model
 async def test_easy_simple_ask_basic():
     result: str = await simple_ask(
         binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
+        prompt = 'Hello, world!',
         system_prompt = 'Say hello world.',
-        human_prompt = 'Hello, world!',
     )
     assert len(result) > 0, \
         f'result: {result}'
@@ -36,8 +35,8 @@ async def test_easy_simple_ask_with_streaming():
 
     result: str = await simple_ask(
         binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
+        prompt = 'Hello, world!',
         system_prompt = 'Say hello world.',
-        human_prompt = 'Hello, world!',
         streaming_callback = streaming_callback,
     )
     assert len(streaming_output) > 0, \
@@ -60,40 +59,14 @@ async def test_easy_simple_ask_with_tools():
 
     result: str = await simple_ask(
         binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
+        prompt = 'Hammer the nail.',
         system_prompt = 'You are a nail hammerer.',
-        human_prompt = 'Hammer the nail.',
         tools = [hammer_the_nail],
         force_tool = True,
         max_tool_iters = 1,
     )
     assert did_call_tool, \
         'did_call_tool: {did_call_tool}'
-
-
-def test_easy_extract_prompt_text_from_pydantic_model_missing_description():
-    class MyModel(BaseModel):
-        name: str
-        age: int
-
-    with pytest.raises(ValueError):
-        extract_prompt_text_from_pydantic_model(MyModel)
-
-
-def test_easy_extract_prompt_text_from_pydantic_model():
-    class MyModel(BaseModel):
-        name: str = Field(description='The name of the person')
-        age: int = Field(description='The age of the person')
-
-    prompt_text = extract_prompt_text_from_pydantic_model(MyModel)
-    expected_text = json.dumps(
-        {
-            'name': '(string) The name of the person',
-            'age': '(integer) The age of the person',
-        },
-        indent=2,
-    )
-    assert prompt_text == expected_text, \
-        f'prompt_text: {prompt_text}'
 
 
 @pytest.mark.asyncio
@@ -104,8 +77,8 @@ async def test_easy_simple_ask_with_structured_output():
 
     result = await simple_ask_with_structured_output(
         binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
+        prompt = 'Hello, world!',
         system_prompt = 'You are making stuff up.',
-        human_prompt = 'Hello, world!',
         extraction_type = MyModel,
     )
     assert isinstance(result, MyModel), f"Expected MyModel type, got {type(result)}"
