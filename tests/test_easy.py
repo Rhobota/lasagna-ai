@@ -1,23 +1,23 @@
 import json
 
-from dotenv import load_dotenv
 import pytest
 from pydantic import BaseModel, Field
 
-load_dotenv() # FIXME: probably don't want this here.
-
-from lasagna.known_models import BIND_ANTHROPIC_claude_35_sonnet
 from lasagna.easy import (
     simple_ask,
     extract_prompt_text_from_pydantic_model,
     simple_ask_with_structured_output,
 )
+from lasagna.mock_provider import (
+    MockProvider,
+)
+from lasagna.agent_util import bind_model
 
 
 @pytest.mark.asyncio
 async def test_easy_simple_ask_basic():
     result: str = await simple_ask(
-        partially_bound_model = BIND_ANTHROPIC_claude_35_sonnet(),
+        binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
         system_prompt = 'Say hello world.',
         human_prompt = 'Hello, world!',
     )
@@ -30,12 +30,12 @@ async def test_easy_simple_ask_basic():
 @pytest.mark.asyncio
 async def test_easy_simple_ask_with_streaming():
     streaming_output: str = ""
-    async def streaming_callback(text: str):
+    async def streaming_callback(text: str) -> None:
         nonlocal streaming_output
         streaming_output += text
 
     result: str = await simple_ask(
-        partially_bound_model = BIND_ANTHROPIC_claude_35_sonnet(),
+        binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
         system_prompt = 'Say hello world.',
         human_prompt = 'Hello, world!',
         streaming_callback = streaming_callback,
@@ -59,7 +59,7 @@ async def test_easy_simple_ask_with_tools():
         return True
 
     result: str = await simple_ask(
-        partially_bound_model = BIND_ANTHROPIC_claude_35_sonnet(),
+        binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
         system_prompt = 'You are a nail hammerer.',
         human_prompt = 'Hammer the nail.',
         tools = [hammer_the_nail],
@@ -102,13 +102,10 @@ async def test_easy_simple_ask_with_structured_output():
         name: str = Field(description='Make up a name of the person')
         age: int = Field(description='Make up an age of the person')
 
-    partially_bound_model = BIND_ANTHROPIC_claude_35_sonnet()
     result = await simple_ask_with_structured_output(
-        partially_bound_model = partially_bound_model,
+        binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
         system_prompt = 'You are making stuff up.',
         human_prompt = 'Hello, world!',
         extraction_type = MyModel,
     )
-    print("\nWTF", result, "\nFTW")
     assert isinstance(result, MyModel), f"Expected MyModel type, got {type(result)}"
-
