@@ -3,19 +3,19 @@ import json
 import pytest
 from pydantic import BaseModel, Field
 
-from lasagna.easy import (
-    simple_ask,
-    simple_ask_with_structured_output,
+from lasagna import (
+    bind_model,
+    easy_ask,
+    easy_extract,
 )
 from lasagna.mock_provider import (
     MockProvider,
 )
-from lasagna.agent_util import bind_model
 
 
 @pytest.mark.asyncio
-async def test_easy_simple_ask_basic():
-    result: str = await simple_ask(
+async def test_easy_ask_basic():
+    result: str = await easy_ask(
         binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
         prompt = 'Hello, world!',
         system_prompt = 'Say hello world.',
@@ -27,13 +27,13 @@ async def test_easy_simple_ask_basic():
 
 
 @pytest.mark.asyncio
-async def test_easy_simple_ask_with_streaming():
+async def test_easy_ask_with_streaming():
     streaming_output: str = ""
     async def streaming_callback(text: str) -> None:
         nonlocal streaming_output
         streaming_output += text
 
-    result: str = await simple_ask(
+    result: str = await easy_ask(
         binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
         prompt = 'Hello, world!',
         system_prompt = 'Say hello world.',
@@ -44,7 +44,7 @@ async def test_easy_simple_ask_with_streaming():
 
 
 @pytest.mark.asyncio
-async def test_easy_simple_ask_with_tools():
+async def test_easy_ask_with_tools():
     did_call_tool = False
     async def hammer_the_nail(type_of_hammer: str, type_of_nail: str) -> bool:
         """
@@ -57,7 +57,7 @@ async def test_easy_simple_ask_with_tools():
         did_call_tool = True
         return True
 
-    result: str = await simple_ask(
+    result: str = await easy_ask(
         binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
         prompt = 'Hammer the nail.',
         system_prompt = 'You are a nail hammerer.',
@@ -70,12 +70,12 @@ async def test_easy_simple_ask_with_tools():
 
 
 @pytest.mark.asyncio
-async def test_easy_simple_ask_with_structured_output():
+async def test_easy_extract():
     class MyModel(BaseModel):
         name: str = Field(description='Make up a name of the person')
         age: int = Field(description='Make up an age of the person')
 
-    result = await simple_ask_with_structured_output(
+    result = await easy_extract(
         binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
         prompt = 'Hello, world!',
         system_prompt = 'You are making stuff up.',

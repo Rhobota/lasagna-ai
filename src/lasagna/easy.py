@@ -1,7 +1,6 @@
 from typing import (
     Callable,
     List,
-    Any,
     Union,
     Type,
     Awaitable,
@@ -23,16 +22,19 @@ from . import (
     noop_callback,
     Message,
 )
+from .tools_util import (
+    extract_tool_result_as_sting,
+)
 
 
-def simple_text_callback_binder(simple_text_callback: Callable[[str], Awaitable[None]]) -> EventCallback:
+def _build_text_event_callback(simple_text_callback: Callable[[str], Awaitable[None]]) -> EventCallback:
     async def bound_simple_text_callback(event: EventPayload) -> None:
         if event[0] == 'ai' and event[1] == 'text_event':
             await simple_text_callback(event[2])
     return bound_simple_text_callback
 
 
-async def simple_ask(
+async def easy_ask(
     binder: Callable[[AgentCallable], BoundAgentCallable],
     prompt: str,
     system_prompt: Optional[str] = None,
@@ -40,7 +42,7 @@ async def simple_ask(
     tools: List[Callable] = [],
     force_tool: bool = False,
     max_tool_iters: int = 5,
-) -> Any:
+) -> str:
     agent = binder(
         build_simple_agent(
             name = "simple_ask",
@@ -67,17 +69,19 @@ async def simple_ask(
         )
     ]
     response: AgentRun = await agent(
-        simple_text_callback_binder(streaming_callback) if streaming_callback else noop_callback,
+        _build_text_event_callback(streaming_callback) if streaming_callback else noop_callback,
         runs,
     )
     assert response['type'] == 'messages'
     last_message = response["messages"][-1]
     if last_message["role"] == "ai":
+        if "text" not in last_message or not isinstance(last_message["text"], str):
+            raise RuntimeError("expected ai message to have a text field")
         return last_message["text"]
     elif last_message["role"] == "tool_res":
         last_tool = last_message["tools"][-1]
         if last_tool["type"] == "any":
-            return last_tool["result"]
+            return extract_tool_result_as_sting(last_tool["result"])
         elif last_tool["type"] == "layered_agent":
             raise RuntimeError("layered agent tool results are not supported in simple_ask")
         else:
@@ -86,7 +90,7 @@ async def simple_ask(
         raise RuntimeError(f"unexpected message role: {last_message['role']}")
 
 
-async def simple_ask_with_structured_output(
+async def easy_extract(
     binder: Callable[[AgentCallable], BoundAgentCallable],
     prompt: str,
     extraction_type: Type[BaseModel],
@@ -112,7 +116,7 @@ async def simple_ask_with_structured_output(
     })
 
     response: AgentRun = await agent(
-        simple_text_callback_binder(streaming_callback) if streaming_callback else noop_callback,
+        _build_text_event_callback(streaming_callback) if streaming_callback else noop_callback,
         [
             flat_messages(
                 agent_name = 'easy_structured_output_agent',
