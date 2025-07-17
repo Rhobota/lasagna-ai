@@ -46,7 +46,7 @@ def build_and_validate(
     data: Any,
 ) -> ExtractionType:
     if issubclass(extraction_type, BaseModel):
-        return cast(ExtractionType, extraction_type.model_validate(data))
+        return extraction_type.model_validate(data)
     elif is_typeddict(extraction_type):
         model = create_pydantic_model_from_typeddict(extraction_type)
         obj = model.model_validate(data)
