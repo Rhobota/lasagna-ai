@@ -22,6 +22,11 @@ from .agent_util import (
     build_static_output_agent,
 )
 
+from .easy import (
+    easy_ask,
+    easy_extract,
+)
+
 __all__ = [
     'run',
     'bind_model',
@@ -41,6 +46,8 @@ __all__ = [
     'build_agent_chainer',
     'build_agent_router',
     'build_static_output_agent',
+    'easy_ask',
+    'easy_extract',
 ]
 
 __version__ = "0.15.0"
