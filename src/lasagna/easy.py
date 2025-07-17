@@ -34,6 +34,17 @@ def _build_text_event_callback(simple_text_callback: Callable[[str], Awaitable[N
     return bound_simple_text_callback
 
 
+def _extract_message_text(message: Message) -> str:
+    if message["role"] == "system" or message["role"] == "human":
+        return message["text"] or ""
+    elif message["role"] == "ai":
+        return message["text"] or ""
+    elif message["role"] == "tool_res":
+        return extract_tool_result_as_sting(message["tools"][-1])
+    else:
+        raise RuntimeError(f"unexpected message role: {message['role']}")
+
+
 async def easy_ask(
     binder: Callable[[AgentCallable], BoundAgentCallable],
     prompt: str,
@@ -73,15 +84,10 @@ async def easy_ask(
         runs,
     )
     assert response['type'] == 'messages'
-    last_message = response["messages"][-1]
-    if last_message["role"] == "ai":
-        if "text" not in last_message or not isinstance(last_message["text"], str):
-            raise RuntimeError("expected ai message to have a text field")
-        return last_message["text"]
-    elif last_message["role"] == "tool_res":
-        return extract_tool_result_as_sting(last_message["tools"][-1])
-    else:
-        raise RuntimeError(f"unexpected message role: {last_message['role']}")
+    response_text: List[str] = []
+    for message in response["messages"]:
+        response_text.append(_extract_message_text(message))
+    return "\n".join(response_text)
 
 
 async def easy_extract(
@@ -122,4 +128,3 @@ async def easy_extract(
     assert response['type'] == 'extraction'
     assert isinstance(response['result'], extraction_type)
     return response['result']
-

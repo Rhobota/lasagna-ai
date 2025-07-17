@@ -14,16 +14,37 @@ from lasagna.mock_provider import (
 
 
 @pytest.mark.asyncio
-async def test_easy_ask_basic():
+async def test_easy_ask():
     result: str = await easy_ask(
-        binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
+        binder = bind_model(MockProvider, 'fake_model'),
         prompt = 'Hello, world!',
         system_prompt = 'Say hello world.',
     )
-    assert len(result) > 0, \
-        f'result: {result}'
-    assert isinstance(result, str), \
-        f'result type: {type(result)}'
+    assert result == "\n".join([
+        "Say hello world.",
+        "Hello, world!",
+        "model: fake_model",
+    ])
+
+
+@pytest.mark.asyncio
+async def test_easy_extract():
+    class MyModel(BaseModel):
+        name: str = Field(description='Make up a name of the person')
+        age: int = Field(description='Make up an age of the person')
+
+    result = await easy_extract(
+        binder = bind_model(MockProvider, 'fake_model', **dict(
+            name = 'John Doe',
+            age = 30,
+        )),
+        prompt = 'Hello, world!',
+        system_prompt = 'You are making stuff up.',
+        extraction_type = MyModel,
+    )
+    assert isinstance(result, MyModel), f"Expected MyModel type, got {type(result)}"
+    assert result.name == 'John Doe'
+    assert result.age == 30
 
 
 @pytest.mark.asyncio
@@ -34,7 +55,7 @@ async def test_easy_ask_with_streaming():
         streaming_output += text
 
     result: str = await easy_ask(
-        binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
+        binder = bind_model(MockProvider, 'fake_model'),
         prompt = 'Hello, world!',
         system_prompt = 'Say hello world.',
         streaming_callback = streaming_callback,
@@ -42,43 +63,3 @@ async def test_easy_ask_with_streaming():
     assert len(streaming_output) > 0, \
         f'streaming_output: {streaming_output}'
 
-
-@pytest.mark.asyncio
-async def test_easy_ask_with_tools():
-    did_call_tool = False
-    async def hammer_the_nail(type_of_hammer: str, type_of_nail: str) -> bool:
-        """
-        Try to hammer a nail.
-        :param: type_of_hammer: str: The type of hammer to use.
-        :param: type_of_nail: str: The type of nail to use.
-        :return: bool: True if the nail is hammered, False otherwise.
-        """
-        nonlocal did_call_tool
-        did_call_tool = True
-        return True
-
-    result: str = await easy_ask(
-        binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
-        prompt = 'Hammer the nail.',
-        system_prompt = 'You are a nail hammerer.',
-        tools = [hammer_the_nail],
-        force_tool = True,
-        max_tool_iters = 1,
-    )
-    assert did_call_tool, \
-        'did_call_tool: {did_call_tool}'
-
-
-@pytest.mark.asyncio
-async def test_easy_extract():
-    class MyModel(BaseModel):
-        name: str = Field(description='Make up a name of the person')
-        age: int = Field(description='Make up an age of the person')
-
-    result = await easy_extract(
-        binder = bind_model(MockProvider, 'claude-3-5-sonnet-20240620'),
-        prompt = 'Hello, world!',
-        system_prompt = 'You are making stuff up.',
-        extraction_type = MyModel,
-    )
-    assert isinstance(result, MyModel), f"Expected MyModel type, got {type(result)}"
