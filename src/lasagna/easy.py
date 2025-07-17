@@ -45,7 +45,7 @@ async def easy_ask(
 ) -> str:
     agent = binder(
         build_simple_agent(
-            name = "simple_ask",
+            name = "easy_ask",
             tools = tools,
             force_tool = force_tool,
             max_tool_iters = max_tool_iters,
@@ -64,7 +64,7 @@ async def easy_ask(
     })
     runs: List[AgentRun] = [
         flat_messages(
-            agent_name = "simple_ask",
+            agent_name = "easy_ask",
             messages = messages,
         )
     ]
@@ -79,13 +79,7 @@ async def easy_ask(
             raise RuntimeError("expected ai message to have a text field")
         return last_message["text"]
     elif last_message["role"] == "tool_res":
-        last_tool = last_message["tools"][-1]
-        if last_tool["type"] == "any":
-            return extract_tool_result_as_sting(last_tool["result"])
-        elif last_tool["type"] == "layered_agent":
-            raise RuntimeError("layered agent tool results are not supported in simple_ask")
-        else:
-            raise RuntimeError(f"unknown tool result type: {last_tool['type']}")
+        return extract_tool_result_as_sting(last_message["tools"][-1])
     else:
         raise RuntimeError(f"unexpected message role: {last_message['role']}")
 
@@ -99,7 +93,7 @@ async def easy_extract(
 ) -> BaseModel:
     agent = binder(
         build_extraction_agent(
-            name = "easy_structured_output_agent",
+            name = "easy_extract",
             extraction_type = extraction_type,
         )
     )
@@ -119,7 +113,7 @@ async def easy_extract(
         _build_text_event_callback(streaming_callback) if streaming_callback else noop_callback,
         [
             flat_messages(
-                agent_name = 'easy_structured_output_agent',
+                agent_name = 'easy_extract',
                 messages = messages,
             ),
         ],
