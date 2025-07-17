@@ -1,38 +1,5 @@
 [
   {
-    "objectID": "installing.html",
-    "href": "installing.html",
-    "title": "📡 Install Lasagna AI",
-    "section": "",
-    "text": "Don’t Install the WRONG library\n\n\n\nThe correct PyPI library is lasagna-ai (not lasagna).\n\n\npip install lasagna-ai     # &lt;-- 🎉🎉🎉\n\n\nYou’ll likely want some of the optional dependencies (depending on which providers you plan to use):\npip install lasagna-ai[openai,anthropic,bedrock]",
-    "crumbs": [
-      "🚀 Quickstart",
-      "📡 Install Lasagna AI"
-    ]
-  },
-  {
-    "objectID": "installing.html#installing",
-    "href": "installing.html#installing",
-    "title": "📡 Install Lasagna AI",
-    "section": "",
-    "text": "Don’t Install the WRONG library\n\n\n\nThe correct PyPI library is lasagna-ai (not lasagna).\n\n\npip install lasagna-ai     # &lt;-- 🎉🎉🎉\n\n\nYou’ll likely want some of the optional dependencies (depending on which providers you plan to use):\npip install lasagna-ai[openai,anthropic,bedrock]",
-    "crumbs": [
-      "🚀 Quickstart",
-      "📡 Install Lasagna AI"
-    ]
-  },
-  {
-    "objectID": "installing.html#check-your-version",
-    "href": "installing.html#check-your-version",
-    "title": "📡 Install Lasagna AI",
-    "section": "Check your version!",
-    "text": "Check your version!\n\nimport lasagna\n\nprint(lasagna.__version__)\n\n⚠️ Make sure you have the most recent version. ⚠️\nSee all versions on PyPI:",
-    "crumbs": [
-      "🚀 Quickstart",
-      "📡 Install Lasagna AI"
-    ]
-  },
-  {
     "objectID": "about.html",
     "href": "about.html",
     "title": "💡 About",
@@ -99,6 +66,90 @@
     ]
   },
   {
+    "objectID": "deployment/streaming_and_events.html",
+    "href": "deployment/streaming_and_events.html",
+    "title": "Streaming & Events",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\n\nStreaming Agent Output\nBecause Lasagna AI is built on asyncio, it’s trivial to pump events up through the callstack so you can have real-time streaming! We try to make events for everything, allowing you to pick-and-choose what you want to look for.\n\n# TODO\n\n\n\nAgent Start/Stop Events\nSince agents can be layered, and agents can call other agents, we sometimes want to track when agents start/stop their execution.\n\n# TODO\n\n\n\nProgress Events\n\n# TODO\n\n\n\nCustom Events\n\n# TODO",
+    "crumbs": [
+      "🚀 Quickstart",
+      "☁️ How to Deploy",
+      "Streaming & Events"
+    ]
+  },
+  {
+    "objectID": "why_lasagna_ai/lasagna_vs_langchain.html",
+    "href": "why_lasagna_ai/lasagna_vs_langchain.html",
+    "title": "Lasagna vs LangChain",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "❤️ Why Lasagna AI?",
+      "Lasagna vs LangChain"
+    ]
+  },
+  {
+    "objectID": "recipes/parallelize.html",
+    "href": "recipes/parallelize.html",
+    "title": "Parallelization Example",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nParallelize all the things!",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "Parallelization Example"
+    ]
+  },
+  {
+    "objectID": "recipes/rag.html",
+    "href": "recipes/rag.html",
+    "title": "RAG Example",
+    "section": "",
+    "text": "Simple RAG: Everyone’s favorite tool: Retrieval Augmented Generation (RAG). Let’s GO! 📚💨\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "RAG Example"
+    ]
+  },
+  {
+    "objectID": "recipes/committee.html",
+    "href": "recipes/committee.html",
+    "title": "Committee Example",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nEasily build committees!",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "Committee Example"
+    ]
+  },
+  {
+    "objectID": "providers/ollama.html",
+    "href": "providers/ollama.html",
+    "title": "Ollama Models",
+    "section": "",
+    "text": "See: Ollama source docs\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🔌 Model Providers",
+      "Ollama Models"
+    ]
+  },
+  {
+    "objectID": "providers/aws_bedrock.html",
+    "href": "providers/aws_bedrock.html",
+    "title": "AWS Bedrock Models",
+    "section": "",
+    "text": "See: AWS Bedrock source docs\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🔌 Model Providers",
+      "AWS Bedrock Models"
+    ]
+  },
+  {
     "objectID": "agent_features/tools.html",
     "href": "agent_features/tools.html",
     "title": "Tool Use",
@@ -108,6 +159,18 @@
       "🚀 Quickstart",
       "⚙️ Agent Features",
       "Tool Use"
+    ]
+  },
+  {
+    "objectID": "agent_features/structured_output.html",
+    "href": "agent_features/structured_output.html",
+    "title": "Structured Output",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nStructured output (aka “extraction”) is perhaps the most powerful way to leverage LLMs (in non-chatbot environments). 💪",
+    "crumbs": [
+      "🚀 Quickstart",
+      "⚙️ Agent Features",
+      "Structured Output"
     ]
   },
   {
@@ -144,114 +207,6 @@
       "🚀 Quickstart",
       "🤖 What is an Agent?",
       "The `AgentRun` type"
-    ]
-  },
-  {
-    "objectID": "misc/python_type_hints.html",
-    "href": "misc/python_type_hints.html",
-    "title": "Intro to Python Type Hints",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "🤔 Misc Topics",
-      "Intro to Python Type Hints"
-    ]
-  },
-  {
-    "objectID": "misc/functional_programming.html",
-    "href": "misc/functional_programming.html",
-    "title": "Functional Programming",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "🤔 Misc Topics",
-      "Functional Programming"
-    ]
-  },
-  {
-    "objectID": "providers/anthropic.html",
-    "href": "providers/anthropic.html",
-    "title": "Anthropic Models",
-    "section": "",
-    "text": "See: Anthropic source docs\n\n# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "🔌 Model Providers",
-      "Anthropic Models"
-    ]
-  },
-  {
-    "objectID": "providers/nvidia.html",
-    "href": "providers/nvidia.html",
-    "title": "NVIDIA NIM/NGC Models",
-    "section": "",
-    "text": "See: NVIDIA source docs\n\n# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "🔌 Model Providers",
-      "NVIDIA NIM/NGC Models"
-    ]
-  },
-  {
-    "objectID": "recipes/delegating_subtasks.html",
-    "href": "recipes/delegating_subtasks.html",
-    "title": "Delegation Example",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️\n\nDelegate tasks among model providers or model sizes!",
-    "crumbs": [
-      "🚀 Quickstart",
-      "😋 Recipes",
-      "Delegation Example"
-    ]
-  },
-  {
-    "objectID": "recipes/vision.html",
-    "href": "recipes/vision.html",
-    "title": "Vision Example",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️\n\nLasagna AI supports vision! (when using a multimodal models)",
-    "crumbs": [
-      "🚀 Quickstart",
-      "😋 Recipes",
-      "Vision Example"
-    ]
-  },
-  {
-    "objectID": "recipes/swapping_providers.html",
-    "href": "recipes/swapping_providers.html",
-    "title": "Model-swap Example",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️\n\nSwap providers or models mid-conversation!",
-    "crumbs": [
-      "🚀 Quickstart",
-      "😋 Recipes",
-      "Model-swap Example"
-    ]
-  },
-  {
-    "objectID": "why_lasagna_ai/lasagna_vs_llamaindex.html",
-    "href": "why_lasagna_ai/lasagna_vs_llamaindex.html",
-    "title": "Lasagna vs LlamaIndex",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "❤️ Why Lasagna AI?",
-      "Lasagna vs LlamaIndex"
-    ]
-  },
-  {
-    "objectID": "deployment/streaming_and_events.html",
-    "href": "deployment/streaming_and_events.html",
-    "title": "Streaming & Events",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️\n\n\nStreaming Agent Output\nBecause Lasagna AI is built on asyncio, it’s trivial to pump events up through the callstack so you can have real-time streaming! We try to make events for everything, allowing you to pick-and-choose what you want to look for.\n\n# TODO\n\n\n\nAgent Start/Stop Events\nSince agents can be layered, and agents can call other agents, we sometimes want to track when agents start/stop their execution.\n\n# TODO\n\n\n\nProgress Events\n\n# TODO\n\n\n\nCustom Events\n\n# TODO",
-    "crumbs": [
-      "🚀 Quickstart",
-      "☁️ How to Deploy",
-      "Streaming & Events"
     ]
   },
   {
@@ -305,99 +260,27 @@
     ]
   },
   {
-    "objectID": "deployment/database.html",
-    "href": "deployment/database.html",
-    "title": "Database Management",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️\n\nDon’t rage when trying to store raw messages and token counts. 😡 🤬\nLasagna AI makes it easy to store raw messages (for any potential debugging that needs to happen down the road), token counts, and conversation histories into your database.",
-    "crumbs": [
-      "🚀 Quickstart",
-      "☁️ How to Deploy",
-      "Database Management"
-    ]
-  },
-  {
-    "objectID": "why_lasagna_ai/lasagna_vs_langchain.html",
-    "href": "why_lasagna_ai/lasagna_vs_langchain.html",
-    "title": "Lasagna vs LangChain",
+    "objectID": "misc/python_type_hints.html",
+    "href": "misc/python_type_hints.html",
+    "title": "Intro to Python Type Hints",
     "section": "",
     "text": "# 🚧 Under Construction 🏗️",
     "crumbs": [
       "🚀 Quickstart",
-      "❤️ Why Lasagna AI?",
-      "Lasagna vs LangChain"
+      "🤔 Misc Topics",
+      "Intro to Python Type Hints"
     ]
   },
   {
-    "objectID": "recipes/committee.html",
-    "href": "recipes/committee.html",
-    "title": "Committee Example",
+    "objectID": "misc/functional_programming.html",
+    "href": "misc/functional_programming.html",
+    "title": "Functional Programming",
     "section": "",
-    "text": "# 🚧 Under Construction 🏗️\n\nEasily build committees!",
+    "text": "# 🚧 Under Construction 🏗️",
     "crumbs": [
       "🚀 Quickstart",
-      "😋 Recipes",
-      "Committee Example"
-    ]
-  },
-  {
-    "objectID": "recipes/rag.html",
-    "href": "recipes/rag.html",
-    "title": "RAG Example",
-    "section": "",
-    "text": "Simple RAG: Everyone’s favorite tool: Retrieval Augmented Generation (RAG). Let’s GO! 📚💨\n\n# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "😋 Recipes",
-      "RAG Example"
-    ]
-  },
-  {
-    "objectID": "recipes/parallelize.html",
-    "href": "recipes/parallelize.html",
-    "title": "Parallelization Example",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️\n\nParallelize all the things!",
-    "crumbs": [
-      "🚀 Quickstart",
-      "😋 Recipes",
-      "Parallelization Example"
-    ]
-  },
-  {
-    "objectID": "providers/aws_bedrock.html",
-    "href": "providers/aws_bedrock.html",
-    "title": "AWS Bedrock Models",
-    "section": "",
-    "text": "See: AWS Bedrock source docs\n\n# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "🔌 Model Providers",
-      "AWS Bedrock Models"
-    ]
-  },
-  {
-    "objectID": "providers/ollama.html",
-    "href": "providers/ollama.html",
-    "title": "Ollama Models",
-    "section": "",
-    "text": "See: Ollama source docs\n\n# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "🔌 Model Providers",
-      "Ollama Models"
-    ]
-  },
-  {
-    "objectID": "providers/openai.html",
-    "href": "providers/openai.html",
-    "title": "OpenAI Models",
-    "section": "",
-    "text": "See: OpenAI source docs\n\n# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "🔌 Model Providers",
-      "OpenAI Models"
+      "🤔 Misc Topics",
+      "Functional Programming"
     ]
   },
   {
@@ -413,6 +296,39 @@
     ]
   },
   {
+    "objectID": "installing.html",
+    "href": "installing.html",
+    "title": "📡 Install Lasagna AI",
+    "section": "",
+    "text": "Don’t Install the WRONG library\n\n\n\nThe correct PyPI library is lasagna-ai (not lasagna).\n\n\npip install lasagna-ai     # &lt;-- 🎉🎉🎉\n\n\nYou’ll likely want some of the optional dependencies (depending on which providers you plan to use):\npip install lasagna-ai[openai,anthropic,bedrock]",
+    "crumbs": [
+      "🚀 Quickstart",
+      "📡 Install Lasagna AI"
+    ]
+  },
+  {
+    "objectID": "installing.html#installing",
+    "href": "installing.html#installing",
+    "title": "📡 Install Lasagna AI",
+    "section": "",
+    "text": "Don’t Install the WRONG library\n\n\n\nThe correct PyPI library is lasagna-ai (not lasagna).\n\n\npip install lasagna-ai     # &lt;-- 🎉🎉🎉\n\n\nYou’ll likely want some of the optional dependencies (depending on which providers you plan to use):\npip install lasagna-ai[openai,anthropic,bedrock]",
+    "crumbs": [
+      "🚀 Quickstart",
+      "📡 Install Lasagna AI"
+    ]
+  },
+  {
+    "objectID": "installing.html#check-your-version",
+    "href": "installing.html#check-your-version",
+    "title": "📡 Install Lasagna AI",
+    "section": "Check your version!",
+    "text": "Check your version!\n\nimport lasagna\n\nprint(lasagna.__version__)\n\n⚠️ Make sure you have the most recent version. ⚠️\nSee all versions on PyPI:",
+    "crumbs": [
+      "🚀 Quickstart",
+      "📡 Install Lasagna AI"
+    ]
+  },
+  {
     "objectID": "what_is_an_agent/agent.html",
     "href": "what_is_an_agent/agent.html",
     "title": "The Lasagna Agent",
@@ -422,54 +338,6 @@
       "🚀 Quickstart",
       "🤖 What is an Agent?",
       "The Lasagna `Agent`"
-    ]
-  },
-  {
-    "objectID": "agent_features/caching.html",
-    "href": "agent_features/caching.html",
-    "title": "Caching Decorator",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️\n\nLasagna AI provides easy & pluggable caching, so you can safe money (and time) in environments where you get the same prompts over-and-over. 🏦",
-    "crumbs": [
-      "🚀 Quickstart",
-      "⚙️ Agent Features",
-      "Caching Decorator"
-    ]
-  },
-  {
-    "objectID": "agent_features/parallelizing.html",
-    "href": "agent_features/parallelizing.html",
-    "title": "Parallelizing",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "⚙️ Agent Features",
-      "Parallelizing"
-    ]
-  },
-  {
-    "objectID": "agent_features/routing.html",
-    "href": "agent_features/routing.html",
-    "title": "Agent Routing",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️",
-    "crumbs": [
-      "🚀 Quickstart",
-      "⚙️ Agent Features",
-      "Agent Routing"
-    ]
-  },
-  {
-    "objectID": "agent_features/structured_output.html",
-    "href": "agent_features/structured_output.html",
-    "title": "Structured Output",
-    "section": "",
-    "text": "# 🚧 Under Construction 🏗️\n\nStructured output (aka “extraction”) is perhaps the most powerful way to leverage LLMs (in non-chatbot environments). 💪",
-    "crumbs": [
-      "🚀 Quickstart",
-      "⚙️ Agent Features",
-      "Structured Output"
     ]
   },
   {
@@ -492,5 +360,137 @@
     "title": "Lasagna AI: Documentation",
     "section": "Features",
     "text": "Features\n🥞 Layered agents!\n\nAgents for your agents!\nTool-use, structured output (“extraction”), and layering FTW 💪\nEver wanted a recursive agent? Now you can have one! 🤯\nParallel tool-calling by default.\nFully asyncio.\n100% Python type hints.\nFunctional-style 😎\n(optional) Easy & pluggable caching! 🏦\n\n🚣 Streamable!\n\nEvent streams for everything.\nAsyncio generators are awesome.\n\n🗃️ Easy database integration!\n\nDon’t rage when trying to store raw messages and token counts. 😡 🤬\nYes, you can have both streaming and easy database storage.\n\n↔︎️ Provider/model agnostic and interoperable!\n\nCore support for OpenAI, Anthropic, and AWS Bedrock.\nExperimental support for Ollama and NVIDIA NIM/NGC.\nMessage representations are canonized. 😇\nSupports vision!\nEasily build committees!\nSwap providers or models mid-conversation.\nDelegate tasks among model providers or model sizes.\nParallelize all the things."
+  },
+  {
+    "objectID": "agent_features/parallelizing.html",
+    "href": "agent_features/parallelizing.html",
+    "title": "Parallelizing",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "⚙️ Agent Features",
+      "Parallelizing"
+    ]
+  },
+  {
+    "objectID": "agent_features/caching.html",
+    "href": "agent_features/caching.html",
+    "title": "Caching Decorator",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nLasagna AI provides easy & pluggable caching, so you can safe money (and time) in environments where you get the same prompts over-and-over. 🏦",
+    "crumbs": [
+      "🚀 Quickstart",
+      "⚙️ Agent Features",
+      "Caching Decorator"
+    ]
+  },
+  {
+    "objectID": "agent_features/routing.html",
+    "href": "agent_features/routing.html",
+    "title": "Agent Routing",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "⚙️ Agent Features",
+      "Agent Routing"
+    ]
+  },
+  {
+    "objectID": "providers/anthropic.html",
+    "href": "providers/anthropic.html",
+    "title": "Anthropic Models",
+    "section": "",
+    "text": "See: Anthropic source docs\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🔌 Model Providers",
+      "Anthropic Models"
+    ]
+  },
+  {
+    "objectID": "providers/nvidia.html",
+    "href": "providers/nvidia.html",
+    "title": "NVIDIA NIM/NGC Models",
+    "section": "",
+    "text": "See: NVIDIA source docs\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🔌 Model Providers",
+      "NVIDIA NIM/NGC Models"
+    ]
+  },
+  {
+    "objectID": "providers/openai.html",
+    "href": "providers/openai.html",
+    "title": "OpenAI Models",
+    "section": "",
+    "text": "See: OpenAI source docs\n\n# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "🔌 Model Providers",
+      "OpenAI Models"
+    ]
+  },
+  {
+    "objectID": "recipes/delegating_subtasks.html",
+    "href": "recipes/delegating_subtasks.html",
+    "title": "Delegation Example",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nDelegate tasks among model providers or model sizes!",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "Delegation Example"
+    ]
+  },
+  {
+    "objectID": "recipes/swapping_providers.html",
+    "href": "recipes/swapping_providers.html",
+    "title": "Model-swap Example",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nSwap providers or models mid-conversation!",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "Model-swap Example"
+    ]
+  },
+  {
+    "objectID": "recipes/vision.html",
+    "href": "recipes/vision.html",
+    "title": "Vision Example",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nLasagna AI supports vision! (when using a multimodal models)",
+    "crumbs": [
+      "🚀 Quickstart",
+      "😋 Recipes",
+      "Vision Example"
+    ]
+  },
+  {
+    "objectID": "why_lasagna_ai/lasagna_vs_llamaindex.html",
+    "href": "why_lasagna_ai/lasagna_vs_llamaindex.html",
+    "title": "Lasagna vs LlamaIndex",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️",
+    "crumbs": [
+      "🚀 Quickstart",
+      "❤️ Why Lasagna AI?",
+      "Lasagna vs LlamaIndex"
+    ]
+  },
+  {
+    "objectID": "deployment/database.html",
+    "href": "deployment/database.html",
+    "title": "Database Management",
+    "section": "",
+    "text": "# 🚧 Under Construction 🏗️\n\nDon’t rage when trying to store raw messages and token counts. 😡 🤬\nLasagna AI makes it easy to store raw messages (for any potential debugging that needs to happen down the road), token counts, and conversation histories into your database.",
+    "crumbs": [
+      "🚀 Quickstart",
+      "☁️ How to Deploy",
+      "Database Management"
+    ]
   }
 ]
