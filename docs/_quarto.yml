@@ -55,6 +55,9 @@ website:
       - section: "😋 Recipes"
         contents:
           - recipes/rag.ipynb
+          - recipes/internet_research.ipynb
+          - recipes/sms.ipynb
+          - recipes/layered_agents.ipynb
           - recipes/committee.ipynb
           - recipes/vision.ipynb
           - recipes/swapping_providers.ipynb
