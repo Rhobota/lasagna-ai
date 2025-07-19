@@ -650,7 +650,7 @@ async def test_process_output_stream__tool():
         else:
             assert False, event[1]
     text = ''.join(texts)
-    assert text == 'multiply({"a": 5, "b": 7})\nmultiply({"a": 8, "b": 101})'
+    assert text == 'multiply({"a": 5, "b": 7})\nmultiply({"a": 8, "b": 101})\n'
     assert tool_calls == CORRECT_PARSED_TOOLS
 
     stream = _process_output_stream(_extract_deltas(fake_async(SAMPLE_TOOL_STREAM[:6])))
@@ -665,7 +665,7 @@ async def test_process_output_stream__tool():
         else:
             assert False, event[1]
     text = ''.join(texts)
-    assert text == 'multiply({"a": 5, "b": 7})'
+    assert text == 'multiply({"a": 5, "b": 7})\n'
     assert tool_calls == CORRECT_PARSED_TOOLS[:1]
 
 
@@ -691,7 +691,7 @@ async def test_process_output_stream__text_and_tool():
         else:
             assert False, event[0]
     text = ''.join(texts)
-    assert text == 'Hello Ryan! 5 multiplied by 7 is 35.\n\nmultiply({"a": 5, "b": 7})\nmultiply({"a": 8, "b": 101})'
+    assert text == 'Hello Ryan! 5 multiplied by 7 is 35.\n\nmultiply({"a": 5, "b": 7})\nmultiply({"a": 8, "b": 101})\n'
     assert tool_calls == CORRECT_PARSED_TOOLS
 
 
@@ -799,7 +799,6 @@ async def test_convert_to_openai_messages():
         {
             'role': 'INVALID', # type: ignore
             'text': 'bla',
-            'cost': None,
             'raw': None,
         },
     ]
@@ -807,13 +806,13 @@ async def test_convert_to_openai_messages():
         await _convert_to_openai_messages(messages)
 
     messages: List[Message] = [
-        {'role': 'system', 'text': 'be nice', 'cost': None, 'raw': None},
-        {'role': 'human', 'text': 'hi', 'cost': None, 'raw': None},
-        {'role': 'ai', 'text': 'oh hi', 'cost': None, 'raw': None},
-        {'role': 'human', 'text': 'here is a picture', 'media': [{'type': 'image', 'image': 'http://example.com/img.png'}], 'cost': None, 'raw': None},
-        {'role': 'ai', 'text': 'thanks!', 'cost': None, 'raw': None},
-        {'role': 'human', 'text': 'here are two', 'media': [{'type': 'image', 'image': 'http://example.com/img.png'}, {'type': 'image', 'image': 'http://example.com/img2.png'}], 'cost': None, 'raw': None},
-        {'role': 'ai', 'text': 'double thanks!', 'cost': None, 'raw': None},
+        {'role': 'system', 'text': 'be nice', 'raw': None},
+        {'role': 'human', 'text': 'hi', 'raw': None},
+        {'role': 'ai', 'text': 'oh hi', 'raw': None},
+        {'role': 'human', 'text': 'here is a picture', 'media': [{'type': 'image', 'image': 'http://example.com/img.png'}], 'raw': None},
+        {'role': 'ai', 'text': 'thanks!', 'raw': None},
+        {'role': 'human', 'text': 'here are two', 'media': [{'type': 'image', 'image': 'http://example.com/img.png'}, {'type': 'image', 'image': 'http://example.com/img2.png'}], 'raw': None},
+        {'role': 'ai', 'text': 'double thanks!', 'raw': None},
     ]
     ms = await _convert_to_openai_messages(messages)
     assert ms == [
@@ -832,7 +831,6 @@ async def test_convert_to_openai_messages():
             {'call_id': 'call_x7zmzwKI0LrwDF2xVMcfzXzN', 'function': {'arguments': '{"a": 5, "b": 7}', 'name': 'multiply'}, 'call_type': 'function'},
             {'call_id': 'call_33vMBGeVd96A9BhW6H3r8jHb', 'function': {'arguments': '{"a": 8, "b": 101}', 'name': 'multiply'}, 'call_type': 'function'},
         ],
-        'cost': None,
         'raw': None,
     }]
     ms = await _convert_to_openai_messages(messages)
@@ -851,7 +849,6 @@ async def test_convert_to_openai_messages():
             {'type': 'any', 'call_id': '1002', 'result': 10.8 },
             {'type': 'any', 'call_id': '1003', 'result': "hihi" },
         ],
-        'cost': None,
         'raw': None,
     }]
     ms = await _convert_to_openai_messages(messages)
@@ -872,7 +869,6 @@ async def test_convert_to_openai_messages():
         {
             'role': 'ai',
             'text': "I'll use my tools!",
-            'cost': None,
             'raw': None,
         },
         {
@@ -881,7 +877,6 @@ async def test_convert_to_openai_messages():
                 {'call_id': 'call_x7zmzwKI0LrwDF2xVMcfzXzN', 'function': {'arguments': '{"a": 5, "b": 7}', 'name': 'multiply'}, 'call_type': 'function'},
                 {'call_id': 'call_33vMBGeVd96A9BhW6H3r8jHb', 'function': {'arguments': '{"a": 8, "b": 101}', 'name': 'multiply'}, 'call_type': 'function'},
             ],
-            'cost': None,
             'raw': None,
         },
     ]
@@ -905,7 +900,6 @@ def test_build_messages_from_openai_payload():
     assert messages == [{
         'role': 'ai',
         'text': 'Hello Ryan',
-        'cost': None,
         'raw': [],
     }]
 
@@ -936,7 +930,6 @@ def test_build_messages_from_openai_payload():
             {'call_id': 'call_x7zmzwKI0LrwDF2xVMcfzXzN', 'function': {'arguments': '{"a": 5, "b": 7}', 'name': 'multiply'}, 'call_type': 'function'},
             {'call_id': 'call_33vMBGeVd96A9BhW6H3r8jHb', 'function': {'arguments': '{"a": 8, "b": 101}', 'name': 'multiply'}, 'call_type': 'function'},
         ],
-        'cost': None,
         'raw': [],
     }]
 
@@ -967,7 +960,6 @@ def test_build_messages_from_openai_payload():
         {
             'role': 'ai',
             'text': 'Hello Ryan',
-            'cost': None,
             'raw': None,
         },
         {

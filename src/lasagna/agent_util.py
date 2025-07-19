@@ -3,8 +3,13 @@ from .agent_runner import run
 from .util import get_name
 
 from .types import (
+    AgentRunChained,
+    AgentRunExtraction,
+    AgentRunMessageList,
+    AgentRunParallel,
     AgentSpec,
     AgentRun,
+    Cost,
     ModelFactory,
     ModelRecord,
     AgentCallable,
@@ -78,52 +83,61 @@ def partial_bind_model(
 
 def _extract_messages_from_tool_result(
     tool_result: ToolResult,
+    from_extraction: bool,
 ) -> List[Message]:
     if tool_result['type'] == 'layered_agent':
         run = tool_result['run']
-        return recursive_extract_messages([run], from_layered_agents=True)
+        return recursive_extract_messages(run, from_tools=True, from_extraction=from_extraction)
     return []
 
 
 def _recursive_extract_messages_from_tool_res(
     messages: List[Message],
+    from_extraction: bool,
 ) -> List[Message]:
     ms: List[Message] = []
     for m in messages:
         ms.append(m)
         if m['role'] == 'tool_res':
             for t in m['tools']:
-                ms.extend(_extract_messages_from_tool_result(t))
+                ms.extend(_extract_messages_from_tool_result(t, from_extraction=from_extraction))
     return ms
 
 
 def recursive_extract_messages(
-    agent_runs: List[AgentRun],
-    from_layered_agents: bool,
+    agent_run_or_runs: Union[AgentRun, List[AgentRun]],
+    from_tools: bool,
+    from_extraction: bool,
 ) -> List[Message]:
     """DFS retrieve all messages within a list of `AgentRuns`."""
+    agent_runs: List[AgentRun]
+    if isinstance(agent_run_or_runs, list):
+        agent_runs = agent_run_or_runs
+    else:
+        agent_runs = [agent_run_or_runs]
     messages: List[Message] = []
     for run in agent_runs:
         if run['type'] == 'messages':
             messages.extend(
                 (
-                    _recursive_extract_messages_from_tool_res(run['messages'])
-                    if from_layered_agents else
+                    _recursive_extract_messages_from_tool_res(run['messages'], from_extraction=from_extraction)
+                    if from_tools else
                     run['messages']
                 ),
             )
         elif run['type'] == 'chain' or run['type'] == 'parallel':
             messages.extend(
-                recursive_extract_messages(run['runs'], from_layered_agents=from_layered_agents),
+                recursive_extract_messages(run['runs'], from_tools=from_tools, from_extraction=from_extraction),
             )
         elif run['type'] == 'extraction':
-            messages.extend(
-                (
-                    _recursive_extract_messages_from_tool_res(run['messages'])
-                    if from_layered_agents else
-                    run['messages']
-                ),
-            )
+            if from_extraction:
+                messages.extend(
+                    (
+                        _recursive_extract_messages_from_tool_res(run['messages'], from_extraction=from_extraction)
+                        if from_tools else
+                        run['messages']
+                    ),
+                )
         else:
             raise RuntimeError('unreachable')
     return messages
@@ -131,12 +145,10 @@ def recursive_extract_messages(
 
 def extract_last_message(
     agent_run_or_runs: Union[AgentRun, List[AgentRun]],
-    from_layered_agents: bool,
+    from_tools: bool,
+    from_extraction: bool,
 ) -> Message:
-    if isinstance(agent_run_or_runs, list):
-        messages = recursive_extract_messages(agent_run_or_runs, from_layered_agents=from_layered_agents)
-    else:
-        messages = recursive_extract_messages([agent_run_or_runs], from_layered_agents=from_layered_agents)
+    messages = recursive_extract_messages(agent_run_or_runs, from_tools=from_tools, from_extraction=from_extraction)
     if len(messages) == 0:
         raise ValueError('no messages found')
     return messages[-1]
@@ -145,11 +157,46 @@ def extract_last_message(
 def flat_messages(
     agent_name: str,
     messages: List[Message],
-) -> AgentRun:
+) -> AgentRunMessageList:
     return {
         'agent': agent_name,
         'type': 'messages',
         'messages': messages,
+    }
+
+
+def parallel_runs(
+    agent_name: str,
+    runs: List[AgentRun],
+) -> AgentRunParallel:
+    return {
+        'agent': agent_name,
+        'type': 'parallel',
+        'runs': runs,
+    }
+
+
+def chained_runs(
+    agent_name: str,
+    runs: List[AgentRun],
+) -> AgentRunChained:
+    return {
+        'agent': agent_name,
+        'type': 'chain',
+        'runs': runs,
+    }
+
+
+def extraction(
+    agent_name: str,
+    messages: List[Message],
+    result: Any,
+) -> AgentRunExtraction:
+    return {
+        'agent': agent_name,
+        'type': 'extraction',
+        'messages': messages,
+        'result': result,
     }
 
 
@@ -186,6 +233,27 @@ def strip_all_but_last_human_message(
     return []
 
 
+def recursive_sum_costs(
+    agent_run_or_runs: Union[AgentRun, List[AgentRun]],
+) -> Cost:
+    messages = recursive_extract_messages(agent_run_or_runs, from_tools=True, from_extraction=True)
+
+    input_tokens  = [m['cost']['input_tokens']  for m in messages if 'cost' in m and 'input_tokens'  in m['cost']]
+    output_tokens = [m['cost']['output_tokens'] for m in messages if 'cost' in m and 'output_tokens' in m['cost']]
+    total_tokens  = [m['cost']['total_tokens']  for m in messages if 'cost' in m and 'total_tokens'  in m['cost']]
+
+    cost: Cost = {}
+
+    if input_tokens:
+        cost['input_tokens'] = sum(input_tokens)
+    if output_tokens:
+        cost['output_tokens'] = sum(output_tokens)
+    if total_tokens:
+        cost['total_tokens'] = sum(total_tokens)
+
+    return cost
+
+
 async def noop_callback(event: EventPayload) -> None:
     # "noop" mean "no operation" means DON'T DO ANYTHING!
     assert event
@@ -195,15 +263,17 @@ MessageExtractor = Callable[[List[AgentRun]], List[Message]]
 
 
 def build_standard_message_extractor(
-    extract_from_layered_agents: bool = False,
+    extract_from_tools: bool = False,
+    extract_from_extraction: bool = False,
     keep_only_last_human_message: bool = False,
     strip_tool_messages: bool = False,
     system_prompt_override: Union[str, None] = None,
 ) -> MessageExtractor:
     def extractor(prev_runs: List[AgentRun]) -> List[Message]:
         messages = recursive_extract_messages(
-            agent_runs = prev_runs,
-            from_layered_agents = extract_from_layered_agents,
+            prev_runs,
+            from_tools = extract_from_tools,
+            from_extraction = extract_from_extraction,
         )
         if keep_only_last_human_message:
             messages = strip_all_but_last_human_message(messages)

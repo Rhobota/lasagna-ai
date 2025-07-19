@@ -166,19 +166,15 @@ async def _event_stream(
 
 
 def _set_cost_raw(message: Message, raw: List[Dict]) -> Message:
-    cost: Cost = {
-        'input_tokens': None,
-        'output_tokens': None,
-        'total_tokens': None,
-    }
+    cost: Cost = {}
     for event in raw:
         if 'prompt_eval_count' in event:
-            cost['input_tokens'] = (cost['input_tokens'] or 0) + event['prompt_eval_count']
+            cost['input_tokens'] = cost.get('input_tokens', 0) + event['prompt_eval_count']
         if 'eval_count' in event:
-            cost['output_tokens'] = (cost['output_tokens'] or 0) + event['eval_count']
-    cost['total_tokens'] = (cost['input_tokens'] or 0) + (cost['output_tokens'] or 0)
+            cost['output_tokens'] = cost.get('output_tokens', 0) + event['eval_count']
+    cost['total_tokens'] = cost.get('input_tokens', 0) + cost.get('output_tokens', 0)
     new_message: Message = copy.copy(message)
-    if (cost['total_tokens'] or 0) > 0:
+    if cost['total_tokens'] > 0:
         new_message['cost'] = cost
     new_message['raw'] = raw
     return new_message
