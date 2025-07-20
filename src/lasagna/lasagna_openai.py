@@ -131,7 +131,7 @@ async def _process_tool_call_stream(
                 args.append(a_delta)
                 yield 'tool_call', 'text_event', a_delta
     if last_index is not None:
-        yield 'tool_call', 'text_event', ")"   # <-- again, assumes no index-interleave
+        yield 'tool_call', 'text_event', ")\n"   # <-- again, assumes no index-interleave
     for index in sorted(recs_by_index.keys()):
         rec = recs_by_index[index]
         rec['function']['arguments'] = ''.join(args_by_index[index])
@@ -326,17 +326,20 @@ def _build_messages_from_openai_payload(
     ai_message: Optional[Message] = {
         'role': 'ai',
         'text': ''.join([e[2] for e in ai_events if e[1] == 'text_event']),
-        'cost': cost,
         'raw': raw,
     } if len(ai_events) > 0 else None
     tool_message: Optional[MessageToolCall] = {
         'role': 'tool_call',
         'tools': [e[2] for e in tool_events if e[1] == 'tool_call_event'],
-        'cost': cost,
         'raw': raw,
     } if len(tool_events) > 0 else None
+    if ai_message and cost:
+        ai_message['cost'] = cost
+    if tool_message and cost:
+        tool_message['cost'] = cost
     if ai_message and tool_message:
-        ai_message['cost'] = None  # <-- we don't want to double-count this
+        if 'cost' in ai_message:
+            del ai_message['cost']  # <-- we don't want to double-count this
         ai_message['raw'] = None
         return [ai_message, tool_message]
     elif ai_message:

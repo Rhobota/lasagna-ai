@@ -473,7 +473,6 @@ async def test_handle_tools_standard_functions():
             {'call_id': '1018', 'function': {'arguments': '{"a": 5}', 'name': 'tool_object'}, 'call_type': 'function'},
             {'call_id': '1019', 'function': {'arguments': '{"a": 5}', 'name': 'tool_async_object'}, 'call_type': 'function'},
         ],
-        'cost': None,
         'raw': None,
     }
     tool_results = await handle_tools(

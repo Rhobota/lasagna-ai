@@ -8,6 +8,7 @@ from lasagna.tui import tui_event_callback
 
 from typing import List
 
+from lasagna.types import AgentRun
 from pydantic import BaseModel
 
 import asyncio
@@ -46,7 +47,7 @@ async def main() -> None:
             extraction_type = ExtractionModel,
         ),
     )
-    prev_runs = [
+    prev_runs: List[AgentRun] = [
         flat_messages(
             'input',
             [
