@@ -20,41 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -109,6 +74,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <link rel="stylesheet" href="../styles.css">
 <meta property="og:title" content="Lasagna vs LlamaIndex – Lasagna AI: Documentation">
+<meta property="og:description" content="">
 <meta property="og:site_name" content="Lasagna AI: Documentation">
 </head>
 
@@ -220,7 +186,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../what_is_an_agent/agent.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">The Lasagna <code>Agent</code></span></a>
+ <span class="menu-text">The Lasagna Agent</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -297,6 +263,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../recipes/rag.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">RAG Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/internet_research.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Internet Research Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/sms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Twilio SMS Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/layered_agents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Layered Agents Example</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -435,8 +419,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#quick-comparison" id="toc-quick-comparison" class="nav-link active" data-scroll-target="#quick-comparison">Quick Comparison</a></li>
+  <li><a href="#architectural-philosophy" id="toc-architectural-philosophy" class="nav-link" data-scroll-target="#architectural-philosophy">Architectural Philosophy</a></li>
+  <li><a href="#core-abstractions" id="toc-core-abstractions" class="nav-link" data-scroll-target="#core-abstractions">Core Abstractions</a></li>
+  <li><a href="#design-patterns" id="toc-design-patterns" class="nav-link" data-scroll-target="#design-patterns">Design Patterns</a></li>
+  <li><a href="#production-readiness" id="toc-production-readiness" class="nav-link" data-scroll-target="#production-readiness">Production Readiness</a></li>
+  <li><a href="#use-case-optimization" id="toc-use-case-optimization" class="nav-link" data-scroll-target="#use-case-optimization">Use Case Optimization</a></li>
+  <li><a href="#trade-offs" id="toc-trade-offs" class="nav-link" data-scroll-target="#trade-offs">Trade-offs</a>
+  <ul class="collapse">
+  <li><a href="#lasagna-ai-advantages" id="toc-lasagna-ai-advantages" class="nav-link" data-scroll-target="#lasagna-ai-advantages">Lasagna AI Advantages</a></li>
+  <li><a href="#lasagna-ai-disadvantages" id="toc-lasagna-ai-disadvantages" class="nav-link" data-scroll-target="#lasagna-ai-disadvantages">Lasagna AI Disadvantages</a></li>
+  <li><a href="#llamaindex-advantages" id="toc-llamaindex-advantages" class="nav-link" data-scroll-target="#llamaindex-advantages">LlamaIndex Advantages</a></li>
+  <li><a href="#llamaindex-disadvantages" id="toc-llamaindex-disadvantages" class="nav-link" data-scroll-target="#llamaindex-disadvantages">LlamaIndex Disadvantages</a></li>
+  </ul></li>
+  <li><a href="#when-to-choose-each" id="toc-when-to-choose-each" class="nav-link" data-scroll-target="#when-to-choose-each">When to Choose Each</a>
+  <ul class="collapse">
+  <li><a href="#choose-lasagna-ai-when" id="toc-choose-lasagna-ai-when" class="nav-link" data-scroll-target="#choose-lasagna-ai-when">Choose Lasagna AI When:</a></li>
+  <li><a href="#choose-llamaindex-when" id="toc-choose-llamaindex-when" class="nav-link" data-scroll-target="#choose-llamaindex-when">Choose LlamaIndex When:</a></li>
+  </ul></li>
+  <li><a href="#the-bottom-line" id="toc-the-bottom-line" class="nav-link" data-scroll-target="#the-bottom-line">The Bottom Line</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/why_lasagna_ai/lasagna_vs_llamaindex.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/why_lasagna_ai/lasagna_vs_llamaindex.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -460,11 +468,249 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div id="077aa792-4a9b-4b5c-bcd5-c1b43a05c22b" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 🚧 Under Construction 🏗️</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<section id="quick-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="quick-comparison">Quick Comparison</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 36%">
+<col style="width: 39%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Aspect</th>
+<th>Lasagna AI</th>
+<th>LlamaIndex</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Paradigm</strong></td>
+<td>Functional-first</td>
+<td>OOP-first</td>
+</tr>
+<tr class="even">
+<td><strong>Data Flow</strong></td>
+<td>Immutable <code>AgentRun</code> structures</td>
+<td>Mutable indexes and engines</td>
+</tr>
+<tr class="odd">
+<td><strong>Composition</strong></td>
+<td>Agent layering</td>
+<td>Query engine chaining</td>
+</tr>
+<tr class="even">
+<td><strong>Type Safety</strong></td>
+<td>100% type hinted</td>
+<td>Mixed type coverage</td>
+</tr>
+<tr class="odd">
+<td><strong>Async Support</strong></td>
+<td>Async-first architecture</td>
+<td>Added async support over time</td>
+</tr>
+<tr class="even">
+<td><strong>Production Focus</strong></td>
+<td>Designed for production</td>
+<td>Added production features later</td>
+</tr>
+<tr class="odd">
+<td><strong>Ecosystem Size</strong></td>
+<td>Smaller, focused</td>
+<td>Large, comprehensive</td>
+</tr>
+<tr class="even">
+<td><strong>Core Focus</strong></td>
+<td>Agent composition</td>
+<td>Data orchestration</td>
+</tr>
+<tr class="odd">
+<td><strong>Primary Use Case</strong></td>
+<td>Multi-agent workflows</td>
+<td>RAG and knowledge retrieval</td>
+</tr>
+<tr class="even">
+<td><strong>Core Abstraction</strong></td>
+<td><code>Agent</code> (composable callable)</td>
+<td><code>Index</code> + <code>QueryEngine</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Mental Model</strong></td>
+<td>“Compose agents like functions”</td>
+<td>“Connect LLMs to data sources”</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="architectural-philosophy" class="level2">
+<h2 class="anchored" data-anchor-id="architectural-philosophy">Architectural Philosophy</h2>
+<p><strong>Lasagna AI: Agent-Centric + Functional</strong></p>
+<ul>
+<li>Designed around <strong>agent composition</strong> - building simple agents and layering them into complex systems</li>
+<li>Functional programming approach with immutable data structures</li>
+<li>Everything flows through standardized <code>AgentRun</code> types</li>
+<li>“Build focused agents, compose them into multi-agent systems”</li>
+</ul>
+<p><strong>LlamaIndex: Data-Centric + Object-Oriented</strong></p>
+<ul>
+<li>Designed around <strong>data orchestration</strong> - connecting LLMs to data sources efficiently</li>
+<li>Object-oriented approach with inheritance hierarchies</li>
+<li>Focus on indexing, retrieval, and query patterns</li>
+<li>“Index your data, query it intelligently”</li>
+</ul>
+</section>
+<section id="core-abstractions" class="level2">
+<h2 class="anchored" data-anchor-id="core-abstractions">Core Abstractions</h2>
+<p><strong>Lasagna AI:</strong></p>
+<ul>
+<li><strong>Agent</strong>: Composable callable with standard signature <code>(model, callback, prev_runs) -&gt; AgentRun</code></li>
+<li><strong>AgentRun</strong>: Immutable, recursive data structure capturing execution results</li>
+<li><strong>Model binding</strong>: Separates agent logic from model choice</li>
+<li>Agent routing, delegation, and specialization patterns</li>
+</ul>
+<p><strong>LlamaIndex:</strong></p>
+<ul>
+<li><strong>Index</strong>: Data structure for organizing and retrieving information</li>
+<li><strong>QueryEngine</strong>: Interface for answering questions over indexed data</li>
+<li><strong>ChatEngine</strong>: Conversational interface with memory</li>
+<li>Document processing, embedding, and retrieval pipelines</li>
+</ul>
+</section>
+<section id="design-patterns" class="level2">
+<h2 class="anchored" data-anchor-id="design-patterns">Design Patterns</h2>
+<p><strong>Lasagna AI:</strong></p>
+<ul>
+<li><strong>Functional composition</strong> - agents as pure functions</li>
+<li><strong>Immutable data flow</strong> - <code>AgentRun</code> structures never change</li>
+<li><strong>Type-first design</strong> - static analysis catches integration errors</li>
+<li><strong>Recursive execution tracking</strong> - full visibility into agent call trees</li>
+</ul>
+<p><strong>LlamaIndex:</strong></p>
+<ul>
+<li><strong>Service-oriented architecture</strong> - indexes and engines as services</li>
+<li><strong>Inheritance hierarchies</strong> - different index types extend base classes</li>
+<li><strong>Mutable state management</strong> - indexes and engines maintain state</li>
+<li><strong>Pipeline patterns</strong> - data flows through processing stages</li>
+</ul>
+</section>
+<section id="production-readiness" class="level2">
+<h2 class="anchored" data-anchor-id="production-readiness">Production Readiness</h2>
+<p><strong>Lasagna AI:</strong></p>
+<ul>
+<li><strong>Async-first</strong> architecture designed for production scalability</li>
+<li><strong>Comprehensive type safety</strong> (100% type hinted)</li>
+<li><strong>Built-in cost tracking</strong> with token usage preservation</li>
+<li><strong>Immutable design</strong> prevents race conditions in concurrent environments</li>
+<li><strong>JSON-serializable</strong> data structures for easy storage/transmission</li>
+</ul>
+<p><strong>LlamaIndex:</strong></p>
+<ul>
+<li><strong>Async support</strong> added over time, not always consistent</li>
+<li><strong>Mixed type coverage</strong> - some components well-typed, others not</li>
+<li><strong>Cost tracking</strong> available but not as integrated</li>
+<li><strong>Mature ecosystem</strong> with battle-tested components</li>
+<li><strong>Extensive integrations</strong> for production data sources</li>
+</ul>
+</section>
+<section id="use-case-optimization" class="level2">
+<h2 class="anchored" data-anchor-id="use-case-optimization">Use Case Optimization</h2>
+<p><strong>Lasagna AI:</strong></p>
+<ul>
+<li>Complex <strong>multi-agent workflows</strong> where different agents specialize</li>
+<li>Agent <strong>routing and delegation</strong> based on intent or context</li>
+<li>Systems requiring <strong>cost tracking</strong> across agent interactions</li>
+<li><strong>Production deployments</strong> with reliability and observability needs</li>
+<li>Scenarios where agents need to coordinate, split tasks, or work in parallel</li>
+</ul>
+<p><strong>LlamaIndex:</strong></p>
+<ul>
+<li><strong>RAG (Retrieval Augmented Generation)</strong> over document collections</li>
+<li><strong>Knowledge base</strong> question-answering systems</li>
+<li><strong>Document processing</strong> and indexing pipelines</li>
+<li><strong>Data ingestion</strong> from various sources (PDFs, databases, APIs)</li>
+<li>Query-response patterns over structured and unstructured data</li>
+</ul>
+</section>
+<section id="trade-offs" class="level2">
+<h2 class="anchored" data-anchor-id="trade-offs">Trade-offs</h2>
+<section id="lasagna-ai-advantages" class="level3">
+<h3 class="anchored" data-anchor-id="lasagna-ai-advantages">Lasagna AI Advantages</h3>
+<ul>
+<li>✅ <strong>Superior multi-agent coordination</strong> - natural composition patterns</li>
+<li>✅ <strong>Type safety</strong> catches errors at development time</li>
+<li>✅ <strong>Clean functional architecture</strong> - easier to reason about complex flows</li>
+<li>✅ <strong>Built-in observability</strong> - comprehensive cost and execution tracking</li>
+<li>✅ <strong>Production-first design</strong> - async, immutable, reliable</li>
+<li>✅ <strong>Model flexibility</strong> - easy to swap providers without changing agent logic</li>
+</ul>
+</section>
+<section id="lasagna-ai-disadvantages" class="level3">
+<h3 class="anchored" data-anchor-id="lasagna-ai-disadvantages">Lasagna AI Disadvantages</h3>
+<ul>
+<li>❌ <strong>Smaller ecosystem</strong> for data connectors and integrations</li>
+<li>❌ <strong>Learning curve</strong> for functional programming paradigm</li>
+<li>❌ <strong>Limited RAG tooling</strong> compared to LlamaIndex’s specialized features</li>
+<li>❌ <strong>Less mature</strong> document processing and indexing capabilities</li>
+</ul>
+</section>
+<section id="llamaindex-advantages" class="level3">
+<h3 class="anchored" data-anchor-id="llamaindex-advantages">LlamaIndex Advantages</h3>
+<ul>
+<li>✅ <strong>Specialized for RAG</strong> - best-in-class retrieval and indexing</li>
+<li>✅ <strong>Rich data ecosystem</strong> - connectors for every data source imaginable</li>
+<li>✅ <strong>Mature document processing</strong> - PDFs, tables, images, structured data</li>
+<li>✅ <strong>Advanced retrieval</strong> - hybrid search, re-ranking, query transformations</li>
+<li>✅ <strong>Large community</strong> and extensive documentation</li>
+<li>✅ <strong>Familiar patterns</strong> for developers with OOP background</li>
+</ul>
+</section>
+<section id="llamaindex-disadvantages" class="level3">
+<h3 class="anchored" data-anchor-id="llamaindex-disadvantages">LlamaIndex Disadvantages</h3>
+<ul>
+<li>❌ <strong>Complex multi-agent coordination</strong> - not the primary design focus</li>
+<li>❌ <strong>Mutable state issues</strong> in complex concurrent scenarios</li>
+<li>❌ <strong>Inconsistent async patterns</strong> across the large codebase</li>
+<li>❌ <strong>Less type safety</strong> - more runtime errors possible</li>
+</ul>
+</section>
+</section>
+<section id="when-to-choose-each" class="level2">
+<h2 class="anchored" data-anchor-id="when-to-choose-each">When to Choose Each</h2>
+<section id="choose-lasagna-ai-when" class="level3">
+<h3 class="anchored" data-anchor-id="choose-lasagna-ai-when">Choose Lasagna AI When:</h3>
+<p>🤖 <strong>Multi-Agent Systems</strong>: You need different AI agents to specialize, coordinate, and delegate tasks</p>
+<p>🏗️ <strong>Complex Workflows</strong>: Your system involves routing, parallel processing, or sophisticated agent interactions</p>
+<p>🏢 <strong>Production Reliability</strong>: You’re building enterprise systems that need predictable behavior and observability</p>
+<p>💰 <strong>Cost Visibility</strong>: You need detailed tracking of AI usage costs across complex agent hierarchies</p>
+<p>🔧 <strong>Type Safety</strong>: You want to catch integration errors at development time, not runtime</p>
+<p>⚡ <strong>High Concurrency</strong>: Your system needs to handle many simultaneous agent operations safely</p>
+</section>
+<section id="choose-llamaindex-when" class="level3">
+<h3 class="anchored" data-anchor-id="choose-llamaindex-when">Choose LlamaIndex When:</h3>
+<p>📚 <strong>RAG is Primary Use Case</strong>: You’re building question-answering systems over document collections</p>
+<p>🗂️ <strong>Rich Data Sources</strong>: You need to index data from many different formats and systems</p>
+<p>🔍 <strong>Advanced Retrieval</strong>: You need sophisticated search, re-ranking, or query transformation capabilities</p>
+<p>📄 <strong>Document Processing</strong>: Your system heavily involves PDFs, tables, images, or structured documents</p>
+<p>🚀 <strong>Rapid Prototyping</strong>: You want to quickly build and test RAG applications</p>
+<p>🌐 <strong>Ecosystem Breadth</strong>: You need pre-built integrations with vector databases, embedding models, etc.</p>
+</section>
+</section>
+<section id="the-bottom-line" class="level2">
+<h2 class="anchored" data-anchor-id="the-bottom-line">The Bottom Line</h2>
+<p><strong>Lasagna AI</strong> was designed for the multi-agent future - where you have specialized AI agents that need to coordinate complex workflows. It prioritizes clean composition patterns and production reliability.</p>
+<p><strong>LlamaIndex</strong> was designed for the RAG present - where you need to connect LLMs to your data sources efficiently. It prioritizes rich data integrations and retrieval sophistication.</p>
+<p><strong>The fundamental question is what you’re building:</strong></p>
+<ul>
+<li><strong>Building a multi-agent system</strong> where agents route, delegate, and coordinate? → <strong>Lasagna AI</strong></li>
+<li><strong>Building a knowledge retrieval system</strong> over documents and data sources? → <strong>LlamaIndex</strong></li>
+</ul>
+<p><strong>Note</strong>: There is overlap in the RAG space where both could work, but: - LlamaIndex will give you more sophisticated retrieval out-of-the-box - Lasagna AI will give you cleaner patterns if your RAG system needs complex agent coordination</p>
+<p>Both are excellent tools that solve different problems well. The choice depends on whether your primary complexity is in <strong>agent coordination</strong> (Lasagna) or <strong>data orchestration</strong> (LlamaIndex).</p>
+<p>__</p>
+<p><strong>Disclaimer:</strong> This comparison was AI-generated based on the documentation of both libraries, then modified slightly to fix formatting.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -873,8 +1119,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../what_is_an_agent/agent.html" class="pagination-link" aria-label="The Lasagna `Agent`">
-        <span class="nav-page-text">The Lasagna <code>Agent</code></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../what_is_an_agent/agent.html" class="pagination-link" aria-label="The Lasagna Agent">
+        <span class="nav-page-text">The Lasagna Agent</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
@@ -886,7 +1132,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>   
     <div class="nav-footer-center">
 <p>Copyright © 2025 (<a href="https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt">MIT License</a>)</p>
-<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/why_lasagna_ai/lasagna_vs_llamaindex.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/why_lasagna_ai/lasagna_vs_llamaindex.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/why_lasagna_ai/lasagna_vs_llamaindex.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/why_lasagna_ai/lasagna_vs_llamaindex.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

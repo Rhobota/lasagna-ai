@@ -20,41 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -109,6 +74,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <link rel="stylesheet" href="../styles.css">
 <meta property="og:title" content="Lasagna vs LangChain – Lasagna AI: Documentation">
+<meta property="og:description" content="">
 <meta property="og:site_name" content="Lasagna AI: Documentation">
 </head>
 
@@ -220,7 +186,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../what_is_an_agent/agent.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">The Lasagna <code>Agent</code></span></a>
+ <span class="menu-text">The Lasagna Agent</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -297,6 +263,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../recipes/rag.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">RAG Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/internet_research.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Internet Research Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/sms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Twilio SMS Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/layered_agents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Layered Agents Example</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -435,8 +419,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#quick-comparison" id="toc-quick-comparison" class="nav-link active" data-scroll-target="#quick-comparison">Quick Comparison</a></li>
+  <li><a href="#architectural-philosophy" id="toc-architectural-philosophy" class="nav-link" data-scroll-target="#architectural-philosophy">Architectural Philosophy</a></li>
+  <li><a href="#data-structure-design" id="toc-data-structure-design" class="nav-link" data-scroll-target="#data-structure-design">Data Structure Design</a></li>
+  <li><a href="#production-readiness" id="toc-production-readiness" class="nav-link" data-scroll-target="#production-readiness">Production Readiness</a></li>
+  <li><a href="#agent-composition" id="toc-agent-composition" class="nav-link" data-scroll-target="#agent-composition">Agent Composition</a></li>
+  <li><a href="#complexity-management" id="toc-complexity-management" class="nav-link" data-scroll-target="#complexity-management">Complexity Management</a></li>
+  <li><a href="#trade-offs" id="toc-trade-offs" class="nav-link" data-scroll-target="#trade-offs">Trade-offs</a>
+  <ul class="collapse">
+  <li><a href="#lasagna-ai-advantages" id="toc-lasagna-ai-advantages" class="nav-link" data-scroll-target="#lasagna-ai-advantages">Lasagna AI Advantages</a></li>
+  <li><a href="#lasagna-ai-disadvantages" id="toc-lasagna-ai-disadvantages" class="nav-link" data-scroll-target="#lasagna-ai-disadvantages">Lasagna AI Disadvantages</a></li>
+  <li><a href="#langchain-advantages" id="toc-langchain-advantages" class="nav-link" data-scroll-target="#langchain-advantages">LangChain Advantages</a></li>
+  <li><a href="#langchain-disadvantages" id="toc-langchain-disadvantages" class="nav-link" data-scroll-target="#langchain-disadvantages">LangChain Disadvantages</a></li>
+  </ul></li>
+  <li><a href="#when-to-choose-each" id="toc-when-to-choose-each" class="nav-link" data-scroll-target="#when-to-choose-each">When to Choose Each</a>
+  <ul class="collapse">
+  <li><a href="#choose-lasagna-ai-when" id="toc-choose-lasagna-ai-when" class="nav-link" data-scroll-target="#choose-lasagna-ai-when">Choose Lasagna AI When:</a></li>
+  <li><a href="#choose-langchain-when" id="toc-choose-langchain-when" class="nav-link" data-scroll-target="#choose-langchain-when">Choose LangChain When:</a></li>
+  </ul></li>
+  <li><a href="#the-bottom-line" id="toc-the-bottom-line" class="nav-link" data-scroll-target="#the-bottom-line">The Bottom Line</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/why_lasagna_ai/lasagna_vs_langchain.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/why_lasagna_ai/lasagna_vs_langchain.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -460,11 +468,245 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div id="18e4f136-3251-4ab3-be23-2f6addb49dea" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 🚧 Under Construction 🏗️</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<section id="quick-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="quick-comparison">Quick Comparison</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 38%">
+<col style="width: 35%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Aspect</th>
+<th>Lasagna AI</th>
+<th>LangChain</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Paradigm</strong></td>
+<td>Functional-first</td>
+<td>OOP-first</td>
+</tr>
+<tr class="even">
+<td><strong>Data Flow</strong></td>
+<td>Immutable <code>AgentRun</code> structures</td>
+<td>Mutable objects and state</td>
+</tr>
+<tr class="odd">
+<td><strong>Composition</strong></td>
+<td>Agent layering</td>
+<td>Chain building</td>
+</tr>
+<tr class="even">
+<td><strong>Type Safety</strong></td>
+<td>100% type hinted</td>
+<td>Mixed type coverage</td>
+</tr>
+<tr class="odd">
+<td><strong>Async Support</strong></td>
+<td>Async-first architecture</td>
+<td>Added later, inconsistent</td>
+</tr>
+<tr class="even">
+<td><strong>Production Focus</strong></td>
+<td>Designed for production</td>
+<td>Research-first, production added</td>
+</tr>
+<tr class="odd">
+<td><strong>Ecosystem Size</strong></td>
+<td>Smaller, focused</td>
+<td>Large, comprehensive</td>
+</tr>
+<tr class="even">
+<td><strong>Core Focus</strong></td>
+<td>Agent composition</td>
+<td>Chain/pipeline orchestration</td>
+</tr>
+<tr class="odd">
+<td><strong>Primary Use Case</strong></td>
+<td>Multi-agent workflows</td>
+<td>Conversational AI &amp; RAG systems</td>
+</tr>
+<tr class="even">
+<td><strong>Core Abstraction</strong></td>
+<td><code>Agent</code> (composable callable)</td>
+<td><code>Chain</code>/<code>Runnable</code> (sequential execution)</td>
+</tr>
+<tr class="odd">
+<td><strong>Mental Model</strong></td>
+<td>“Compose agents like functions”</td>
+<td>“Chain components into pipelines”</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="architectural-philosophy" class="level2">
+<h2 class="anchored" data-anchor-id="architectural-philosophy">Architectural Philosophy</h2>
+<p><strong>Lasagna AI: Functional + Layered</strong></p>
+<ul>
+<li>Pure functional programming approach with immutable data structures</li>
+<li>Agents are composable functions that can be layered like building blocks</li>
+<li>Explicit, predictable data flow through <code>AgentRun</code> structures</li>
+<li>“Build simple agents, compose them into complex systems”</li>
+</ul>
+<p><strong>LangChain: Object-Oriented + Chains</strong></p>
+<ul>
+<li>More traditional OOP approach with classes and inheritance</li>
+<li>Focuses on chaining components in linear sequences</li>
+<li>Implicit state management through object properties</li>
+<li>“Build complex chains from component building blocks”</li>
+</ul>
+</section>
+<section id="data-structure-design" class="level2">
+<h2 class="anchored" data-anchor-id="data-structure-design">Data Structure Design</h2>
+<p><strong>Lasagna AI:</strong></p>
+<ul>
+<li>Everything flows through the <code>AgentRun</code> TypedDict - a canonical, immutable format</li>
+<li>Recursive data structure that preserves the entire execution tree</li>
+<li>JSON-serializable by design for easy storage/transmission</li>
+<li>Cost tracking built into every message/operation</li>
+</ul>
+<p><strong>LangChain:</strong></p>
+<ul>
+<li>Various data formats throughout the system (Documents, Messages, etc.)</li>
+<li>More flexibility but less consistency in data representation</li>
+<li>Serialization often requires additional work</li>
+<li>Cost tracking added as an afterthought</li>
+</ul>
+</section>
+<section id="production-readiness" class="level2">
+<h2 class="anchored" data-anchor-id="production-readiness">Production Readiness</h2>
+<p><strong>Lasagna AI:</strong></p>
+<ul>
+<li>Built async-first from the ground up</li>
+<li>Rigorous type safety (100% type hinted)</li>
+<li>Immutable design prevents race conditions</li>
+<li>Explicit focus on production deployment</li>
+</ul>
+<p><strong>LangChain:</strong></p>
+<ul>
+<li>Started sync, async support added later</li>
+<li>Mixed type safety - some components well-typed, others not</li>
+<li>More permissive about state mutation</li>
+<li>Originally research/prototype focused, production features added incrementally</li>
+</ul>
+</section>
+<section id="agent-composition" class="level2">
+<h2 class="anchored" data-anchor-id="agent-composition">Agent Composition</h2>
+<p><strong>Lasagna AI:</strong></p>
+<ul>
+<li>Agents are pure functions - same signature, predictable behavior</li>
+<li>True composability - any agent can call any other agent</li>
+<li>Model binding separates business logic from model choice</li>
+<li>“Agents as tools” - can pass agents as tools to other agents</li>
+</ul>
+<p><strong>LangChain:</strong></p>
+<ul>
+<li>Chains have different interfaces and behaviors</li>
+<li>Composition often requires specific adapters/wrappers</li>
+<li>Tighter coupling between business logic and model configuration</li>
+<li>More complex inheritance hierarchies</li>
+</ul>
+</section>
+<section id="complexity-management" class="level2">
+<h2 class="anchored" data-anchor-id="complexity-management">Complexity Management</h2>
+<p><strong>Lasagna AI:</strong></p>
+<ul>
+<li>Start simple, add complexity through composition</li>
+<li>Each layer is independently testable and replaceable</li>
+<li>Explicit about what happened at each step (via recursive AgentRun)</li>
+<li>Forced consistency through the Agent interface</li>
+</ul>
+<p><strong>LangChain:</strong></p>
+<ul>
+<li>Rich ecosystem but can become complex quickly</li>
+<li>Many ways to accomplish the same task</li>
+<li>Harder to track execution flow in complex chains</li>
+<li>More flexibility but less guidance on best practices</li>
+</ul>
+</section>
+<section id="trade-offs" class="level2">
+<h2 class="anchored" data-anchor-id="trade-offs">Trade-offs</h2>
+<section id="lasagna-ai-advantages" class="level3">
+<h3 class="anchored" data-anchor-id="lasagna-ai-advantages">Lasagna AI Advantages</h3>
+<ul>
+<li>✅ Cleaner architecture for complex multi-agent systems</li>
+<li>✅ Better for production environments requiring reliability</li>
+<li>✅ Easier debugging and testing due to immutability</li>
+<li>✅ Type safety catches errors at development time</li>
+<li>✅ Consistent data flow and agent interfaces</li>
+<li>✅ Built-in cost tracking and observability</li>
+</ul>
+</section>
+<section id="lasagna-ai-disadvantages" class="level3">
+<h3 class="anchored" data-anchor-id="lasagna-ai-disadvantages">Lasagna AI Disadvantages</h3>
+<ul>
+<li>❌ Smaller ecosystem and community</li>
+<li>❌ Steeper learning curve if unfamiliar with functional programming</li>
+<li>❌ More opinionated - less flexibility in how you structure things</li>
+<li>❌ Fewer pre-built integrations and examples</li>
+</ul>
+</section>
+<section id="langchain-advantages" class="level3">
+<h3 class="anchored" data-anchor-id="langchain-advantages">LangChain Advantages</h3>
+<ul>
+<li>✅ Massive ecosystem with integrations for everything</li>
+<li>✅ Large community and extensive documentation/examples<br>
+</li>
+<li>✅ More familiar OOP patterns for most developers</li>
+<li>✅ Rapid prototyping and experimentation</li>
+<li>✅ Rich set of pre-built components</li>
+</ul>
+</section>
+<section id="langchain-disadvantages" class="level3">
+<h3 class="anchored" data-anchor-id="langchain-disadvantages">LangChain Disadvantages</h3>
+<ul>
+<li>❌ Can become unwieldy in complex production systems</li>
+<li>❌ Inconsistent patterns across the large codebase</li>
+<li>❌ State management issues in concurrent environments</li>
+<li>❌ Technical debt from rapid growth and feature additions</li>
+<li>❌ Mixed async support and type safety</li>
+</ul>
+</section>
+</section>
+<section id="when-to-choose-each" class="level2">
+<h2 class="anchored" data-anchor-id="when-to-choose-each">When to Choose Each</h2>
+<section id="choose-lasagna-ai-when" class="level3">
+<h3 class="anchored" data-anchor-id="choose-lasagna-ai-when">Choose Lasagna AI When:</h3>
+<p>🏢 <strong>Production Systems</strong>: You’re building enterprise-grade AI systems that need reliability, observability, and maintainability</p>
+<p>🧪 <strong>Type Safety Matters</strong>: You want to catch integration errors at development time rather than runtime</p>
+<p>🏗️ <strong>Complex Multi-Agent Systems</strong>: You’re building sophisticated workflows with many interacting agents</p>
+<p>⚡ <strong>High Concurrency</strong>: Your system needs to handle many simultaneous operations safely</p>
+<p>📊 <strong>Cost Visibility</strong>: You need detailed tracking of AI usage and costs across complex workflows</p>
+<p>🔧 <strong>Long-term Maintenance</strong>: You’re building systems that will be maintained by teams over years</p>
+</section>
+<section id="choose-langchain-when" class="level3">
+<h3 class="anchored" data-anchor-id="choose-langchain-when">Choose LangChain When:</h3>
+<p>🚀 <strong>Rapid Prototyping</strong>: You need to quickly test AI concepts and build proof-of-concepts</p>
+<p>🌐 <strong>Rich Integrations</strong>: You need pre-built connectors to many different services and APIs</p>
+<p>👥 <strong>Team Familiarity</strong>: Your team is more comfortable with traditional OOP patterns</p>
+<p>📚 <strong>Learning/Education</strong>: You’re learning about AI systems and want extensive examples</p>
+<p>🔄 <strong>Flexible Experimentation</strong>: You need to try many different approaches quickly</p>
+<p>🏃 <strong>Short-term Projects</strong>: You’re building demos or short-lived experimental systems</p>
+</section>
+</section>
+<section id="the-bottom-line" class="level2">
+<h2 class="anchored" data-anchor-id="the-bottom-line">The Bottom Line</h2>
+<p>Lasagna AI feels like it was designed by someone who built production AI systems and got frustrated with the chaos, then decided to build something with better architectural principles. It trades ecosystem size for architectural cleanliness.</p>
+<p>LangChain feels like it grew organically from research/experimentation needs and accumulated features over time. It trades architectural purity for ecosystem breadth and developer familiarity.</p>
+<p><strong>The choice often comes down to this:</strong></p>
+<ul>
+<li>Choose <strong>Lasagna AI</strong> for production systems where you value predictability, type safety, and clean composition</li>
+<li>Choose <strong>LangChain</strong> for rapid prototyping, extensive integrations, and when you need the broader ecosystem</li>
+</ul>
+<p>Both are excellent tools for their intended use cases - the key is matching the tool to your specific needs and constraints.</p>
+<p>__</p>
+<p><strong>Disclaimer:</strong> This comparison was AI-generated based on the documentation of both libraries, then modified slightly to fix formatting.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -886,7 +1128,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>   
     <div class="nav-footer-center">
 <p>Copyright © 2025 (<a href="https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt">MIT License</a>)</p>
-<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/why_lasagna_ai/lasagna_vs_langchain.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/why_lasagna_ai/lasagna_vs_langchain.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/why_lasagna_ai/lasagna_vs_langchain.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/why_lasagna_ai/lasagna_vs_langchain.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

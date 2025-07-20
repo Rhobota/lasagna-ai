@@ -110,6 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="../styles.css">
 <meta property="og:title" content="Structured Output – Lasagna AI: Documentation">
 <meta property="og:description" content="">
+<meta property="og:image" content="https://lasagna-ai.rhobota.com/assets/Set Diagram.svg">
 <meta property="og:site_name" content="Lasagna AI: Documentation">
 </head>
 
@@ -221,7 +222,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../what_is_an_agent/agent.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">The Lasagna <code>Agent</code></span></a>
+ <span class="menu-text">The Lasagna Agent</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -298,6 +299,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../recipes/rag.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">RAG Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/internet_research.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Internet Research Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/sms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Twilio SMS Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/layered_agents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Layered Agents Example</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -436,8 +455,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-power-of-structured-output" id="toc-the-power-of-structured-output" class="nav-link active" data-scroll-target="#the-power-of-structured-output">The Power of Structured Output</a></li>
+  <li><a href="#about-grammars" id="toc-about-grammars" class="nav-link" data-scroll-target="#about-grammars">About Grammars</a></li>
+  <li><a href="#structured-output-in-lasagna-ai" id="toc-structured-output-in-lasagna-ai" class="nav-link" data-scroll-target="#structured-output-in-lasagna-ai">Structured Output in Lasagna AI</a></li>
+  <li><a href="#easy-extraction" id="toc-easy-extraction" class="nav-link" data-scroll-target="#easy-extraction">Easy Extraction</a></li>
+  <li><a href="#more-opining-on-structured-output" id="toc-more-opining-on-structured-output" class="nav-link" data-scroll-target="#more-opining-on-structured-output">More Opining on Structured Output</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/agent_features/structured_output.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/agent_features/structured_output.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -461,12 +490,184 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div id="60be0d2a-25cd-42e6-9ff0-9752a7f795e7" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 🚧 Under Construction 🏗️</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Structured output (aka “extraction”) is the <strong>most powerful</strong> way to leverage generative AI. 💪</p>
+<div id="d54e0b1a-eb2c-4c4d-9f6b-5af5797ad883" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This page will use the following imports:</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> Model, EventCallback, AgentRun</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> (</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    extract_last_message,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    extraction,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    flat_messages,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    noop_callback,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> known_models</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna.tui <span class="im">import</span> tui_input_loop</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel, Field</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Structured output (aka “extraction”) is perhaps the most powerful way to leverage LLMs (in non-chatbot environments). 💪</p>
+<p>We need to set up our “binder” (see the <a href="../quickstart.html">quickstart guide</a> for what this is).</p>
+<div id="55353a41-2c4a-48a9-83b9-27cd6edb9964" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.environ.get(<span class="st">'OPENAI_API_KEY'</span>):</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using OpenAI'</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> known_models.BIND_OPENAI_gpt_4o()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> os.environ.get(<span class="st">'ANTHROPIC_API_KEY'</span>):</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using Anthropic'</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> known_models.BIND_ANTHROPIC_claude_sonnet_4()</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="va">False</span>, <span class="st">"Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is set! We need at least one to do this demo."</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Using OpenAI</code></pre>
+</div>
+</div>
+<section id="the-power-of-structured-output" class="level2">
+<h2 class="anchored" data-anchor-id="the-power-of-structured-output">The Power of Structured Output</h2>
+<p>Consider this…</p>
+<ul>
+<li>The most popular <em>agentic</em> use-case right now is <em>Retrieval Augmented Generation</em> (RAG).</li>
+<li><em>RAG</em> is just an example of <em>tool calling</em>.</li>
+<li><em>Tool calling</em> is just an example of <em>structured output</em>.</li>
+</ul>
+<p><strong>Structured output is the real hero behind the <em>agentic</em> revolution that is to come.</strong> 🤯🤯🤯</p>
+<p><img src="../assets/Set Diagram.svg" style="max-width: 300px"></p>
+</section>
+<section id="about-grammars" class="level2">
+<h2 class="anchored" data-anchor-id="about-grammars">About Grammars</h2>
+<p>Generative models that support grammar-restricted generation are the <strong>best</strong> at doing structured output. Such models <em>guarantee</em> that your specified output schema* will be adhered to.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+* Schema != Content
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>While <a href="https://en.wikipedia.org/wiki/Formal_grammar">formal grammars</a> guarantee that output schemas are followed, that should not be confused with <em>correct</em> output.</p>
+<p>For example, if the schema says that <code>age</code> should be extracted as an integer, then you can be sure you’ll get an <code>age</code> as an integer. But it may not be the correct <em>value</em>!</p>
+<p>Still, grammars are much better than no grammars, so you’ll want to favor generative AI models that can follow a grammar.</p>
+</div>
+</div>
+</section>
+<section id="structured-output-in-lasagna-ai" class="level2">
+<h2 class="anchored" data-anchor-id="structured-output-in-lasagna-ai">Structured Output in Lasagna AI</h2>
+<p>In Lasagna AI, you specify your desired output schema as a combination of Pydantic types and <code>TypedDict</code> types.</p>
+<p>Here’s an example, using Pydantic types:</p>
+<div id="eb8583d8-3815-4abc-b5a7-dec324ac9c6e" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LinguisticConstruction(BaseModel):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    subject: <span class="bu">str</span> <span class="op">=</span> Field(description<span class="op">=</span><span class="st">'the linguistic subject of the construction'</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    verb: <span class="bu">str</span>    <span class="op">=</span> Field(description<span class="op">=</span><span class="st">'the linguistic verb of the construction'</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">object</span>: <span class="bu">str</span>  <span class="op">=</span> Field(description<span class="op">=</span><span class="st">'the linguistic object of the construction'</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ExtractionModel(BaseModel):</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    summary: <span class="bu">str</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    constructions: <span class="bu">list</span>[LinguisticConstruction]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+We Recommend Pydantic
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Pydantic types are preferred over <code>TypedDict</code>, because they let you pass string descriptions to each parameter (which, in turn, go into the model’s prompt).</p>
+</div>
+</div>
+<p>Then, inside your agent, you pass your desired output type to <code>model.extract(...)</code>.</p>
+<p>See an example agent below:</p>
+<div id="3c0e1a12-fa30-484b-8e7f-56420b0401d6" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> linguistic_extraction_agent(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    prev_runs: <span class="bu">list</span>[AgentRun],</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> AgentRun:</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get **ONLY** the last message from the user:</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    last_message <span class="op">=</span> extract_last_message(prev_runs, from_tools<span class="op">=</span><span class="va">False</span>, from_extraction<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> last_message[<span class="st">'role'</span>] <span class="op">==</span> <span class="st">'human'</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Do structured output over the user's message:</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    new_message, result <span class="op">=</span> <span class="cf">await</span> model.extract(</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        event_callback,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        messages <span class="op">=</span> [last_message],</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        extraction_type <span class="op">=</span> ExtractionModel,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="bu">isinstance</span>(result, ExtractionModel)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Wrap the new messages into an `AgentRun` result:</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> extraction(<span class="st">'linguistic_extraction_agent'</span>, [new_message], result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="a317d432-15e2-4a60-84ef-464a378435e3" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>PROMPT <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="st">Hey diddle diddle,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="st">The cat and the fiddle,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="st">The cow jumped over the moon;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="st">The little dog laughed</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="st">To see such sport,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="st">And the dish ran away with the spoon.</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>.strip()</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>prev_runs: <span class="bu">list</span>[AgentRun] <span class="op">=</span> [</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    flat_messages(</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">'input'</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>            {</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>                <span class="st">'role'</span>: <span class="st">'human'</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                <span class="st">'text'</span>: PROMPT,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>            },</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>bound_agent <span class="op">=</span> binder(linguistic_extraction_agent)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>agent_run <span class="op">=</span> <span class="cf">await</span> bound_agent(noop_callback, prev_runs)  <span class="co"># type: ignore[top-level-await]</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> agent_run[<span class="st">'type'</span>] <span class="op">==</span> <span class="st">'extraction'</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> agent_run[<span class="st">'result'</span>]</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">isinstance</span>(result, ExtractionModel)</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">type</span>(result))</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(result.summary)</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> construction <span class="kw">in</span> result.constructions:</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'   '</span>, construction)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class '__main__.ExtractionModel'&gt;
+A whimsical poem describing a cat with a fiddle, a cow jumping over the moon, a laughing dog, and a dish running away with a spoon.
+    subject='The cow' verb='jumped' object='over the moon'
+    subject='The little dog' verb='laughed' object='To see such sport'
+    subject='The dish' verb='ran away' object='with the spoon'</code></pre>
+</div>
+</div>
+</section>
+<section id="easy-extraction" class="level2">
+<h2 class="anchored" data-anchor-id="easy-extraction">Easy Extraction</h2>
+<p>The steps above are designed such that you can <em>layer</em> agents. There’s a lot of “wrapping” and “unwrapping” that goes on.</p>
+<p>However, that can be overkill if you only want a <em>simple</em> (“easy”) extraction method.</p>
+<p>Here’s an “easy” way to do it, if you don’t care about building complex layered agents:</p>
+<div id="bd84a28c-4377-463d-b68b-8d187fe3552a" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TODO</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="more-opining-on-structured-output" class="level2">
+<h2 class="anchored" data-anchor-id="more-opining-on-structured-output">More Opining on Structured Output</h2>
+<p>Robust software often starts with sane data formats, from which logic flows naturally. Think SQL schemas. Think <a href="https://en.wikipedia.org/wiki/Algebraic_data_type">algebraic data types</a>.</p>
+<p>Structured output is similar in spirit. You begin with the output schema, and you build your prompt around that.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -888,7 +1089,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>   
     <div class="nav-footer-center">
 <p>Copyright © 2025 (<a href="https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt">MIT License</a>)</p>
-<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/agent_features/structured_output.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/agent_features/structured_output.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/agent_features/structured_output.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/agent_features/structured_output.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>
