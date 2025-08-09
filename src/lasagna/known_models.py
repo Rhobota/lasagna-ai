@@ -2,7 +2,7 @@ from typing import List
 
 from .types import ModelRecord
 
-from .agent_util import partial_bind_model
+from .agent_util import make_model_binder
 
 
 OPENAI_KNOWN_MODELS: List[ModelRecord] = [
@@ -40,9 +40,9 @@ OPENAI_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
-BIND_OPENAI_gpt_41       = partial_bind_model('openai', 'gpt-4.1-2025-04-14')
-BIND_OPENAI_gpt_4o_mini  = partial_bind_model('openai', 'gpt-4o-mini-2024-07-18')
-BIND_OPENAI_gpt_4o       = partial_bind_model('openai', 'gpt-4o-2024-11-20')
+openai_gpt_41_binder       = make_model_binder('openai', 'gpt-4.1-2025-04-14')
+openai_gpt_4o_mini_binder  = make_model_binder('openai', 'gpt-4o-mini-2024-07-18')
+openai_gpt_4o_binder       = make_model_binder('openai', 'gpt-4o-2024-11-20')
 
 
 ANTHROPIC_KNOWN_MODELS: List[ModelRecord] = [
@@ -84,10 +84,10 @@ ANTHROPIC_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
-BIND_ANTHROPIC_claude_opus_4    = partial_bind_model('anthropic', 'claude-opus-4-20250514')
-BIND_ANTHROPIC_claude_sonnet_4  = partial_bind_model('anthropic', 'claude-sonnet-4-20250514')
-BIND_ANTHROPIC_claude_sonnet_37 = partial_bind_model('anthropic', 'claude-3-7-sonnet-20250219')
-BIND_ANTHROPIC_claude_haiku_35  = partial_bind_model('anthropic', 'claude-3-5-haiku-20241022')
+anthropic_claude_opus_4_binder    = make_model_binder('anthropic', 'claude-opus-4-20250514')
+anthropic_claude_sonnet_4_binder  = make_model_binder('anthropic', 'claude-sonnet-4-20250514')
+anthropic_claude_sonnet_37_binder = make_model_binder('anthropic', 'claude-3-7-sonnet-20250219')
+anthropic_claude_haiku_35_binder  = make_model_binder('anthropic', 'claude-3-5-haiku-20241022')
 
 
 OLLAMA_KNOWN_MODELS: List[ModelRecord] = [
@@ -109,9 +109,9 @@ OLLAMA_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
-BIND_OLLAMA_llama3_2 = partial_bind_model('ollama', 'llama3.2')
-BIND_OLLAMA_mistral_small = partial_bind_model('ollama', 'mistral-small')
-BIND_OLLAMA_mistral_large = partial_bind_model('ollama', 'mistral-large')
+ollama_llama3_2_binder = make_model_binder('ollama', 'llama3.2')
+ollama_mistral_small_binder = make_model_binder('ollama', 'mistral-small')
+ollama_mistral_large_binder = make_model_binder('ollama', 'mistral-large')
 
 
 BEDROCK_KNOWN_MODELS: List[ModelRecord] = [
@@ -145,13 +145,13 @@ BEDROCK_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
-BIND_BEDROCK_Claude_3_Haiku       = partial_bind_model('bedrock', 'us.anthropic.claude-3-haiku-20240307-v1:0')
-BIND_BEDROCK_Claude_3_Sonnet      = partial_bind_model('bedrock', 'us.anthropic.claude-3-sonnet-20240229-v1:0')
-BIND_BEDROCK_Claude_3_Opus        = partial_bind_model('bedrock', 'us.anthropic.claude-3-opus-20240229-v1:0')
-BIND_BEDROCK_Claude_3_5_Haiku     = partial_bind_model('bedrock', 'us.anthropic.claude-3-5-haiku-20241022-v1:0')
-BIND_BEDROCK_Claude_3_5_Sonnet    = partial_bind_model('bedrock', 'us.anthropic.claude-3-5-sonnet-20240620-v1:0')
-BIND_BEDROCK_Claude_3_5_Sonnet_v2 = partial_bind_model('bedrock', 'us.anthropic.claude-3-5-sonnet-20241022-v2:0')
-BIND_BEDROCK_Claude_3_7_Sonnet    = partial_bind_model('bedrock', 'us.anthropic.claude-3-7-sonnet-20250219-v1:0')
+bedrock_claude_3_haiku_binder       = make_model_binder('bedrock', 'us.anthropic.claude-3-haiku-20240307-v1:0')
+bedrock_claude_3_sonnet_binder      = make_model_binder('bedrock', 'us.anthropic.claude-3-sonnet-20240229-v1:0')
+bedrock_claude_3_opus_binder        = make_model_binder('bedrock', 'us.anthropic.claude-3-opus-20240229-v1:0')
+bedrock_claude_3_5_haiku_binder     = make_model_binder('bedrock', 'us.anthropic.claude-3-5-haiku-20241022-v1:0')
+bedrock_claude_3_5_sonnet_binder    = make_model_binder('bedrock', 'us.anthropic.claude-3-5-sonnet-20240620-v1:0')
+bedrock_claude_3_5_sonnet_v2_binder = make_model_binder('bedrock', 'us.anthropic.claude-3-5-sonnet-20241022-v2:0')
+bedrock_claude_3_7_sonnet_binder    = make_model_binder('bedrock', 'us.anthropic.claude-3-7-sonnet-20250219-v1:0')
 
 
 NVIDIA_KNOWN_MODELS: List[ModelRecord] = [
@@ -221,22 +221,22 @@ NVIDIA_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
-BIND_NVIDIA_meta_llama3_70b_instruct           = partial_bind_model('nvidia', 'meta/llama3-70b-instruct')
-BIND_NVIDIA_meta_llama3_8b_instruct            = partial_bind_model('nvidia', 'meta/llama3-8b-instruct')
-BIND_NVIDIA_meta_llama3_1_8b_instruct          = partial_bind_model('nvidia', 'meta/llama-3.1-8b-instruct')
-BIND_NVIDIA_meta_llama3_1_70b_instruct         = partial_bind_model('nvidia', 'meta/llama-3.1-70b-instruct')
-BIND_NVIDIA_meta_llama3_1_405b_instruct        = partial_bind_model('nvidia', 'meta/llama-3.1-405b-instruct')
-BIND_NVIDIA_meta_llama3_2_1b_instruct          = partial_bind_model('nvidia', 'meta/llama-3.2-1b-instruct')
-BIND_NVIDIA_meta_llama3_2_3b_instruct          = partial_bind_model('nvidia', 'meta/llama-3.2-3b-instruct')
-BIND_NVIDIA_meta_llama3_2_11b_vision_instruct  = partial_bind_model('nvidia', 'meta/llama-3.2-11b-vision-instruct')
-BIND_NVIDIA_meta_llama3_2_90b_vision_instruct  = partial_bind_model('nvidia', 'meta/llama-3.2-90b-vision-instruct')
+nvidia_meta_llama3_70b_instruct_binder           = make_model_binder('nvidia', 'meta/llama3-70b-instruct')
+nvidia_meta_llama3_8b_instruct_binder            = make_model_binder('nvidia', 'meta/llama3-8b-instruct')
+nvidia_meta_llama3_1_8b_instruct_binder          = make_model_binder('nvidia', 'meta/llama-3.1-8b-instruct')
+nvidia_meta_llama3_1_70b_instruct_binder         = make_model_binder('nvidia', 'meta/llama-3.1-70b-instruct')
+nvidia_meta_llama3_1_405b_instruct_binder        = make_model_binder('nvidia', 'meta/llama-3.1-405b-instruct')
+nvidia_meta_llama3_2_1b_instruct_binder          = make_model_binder('nvidia', 'meta/llama-3.2-1b-instruct')
+nvidia_meta_llama3_2_3b_instruct_binder          = make_model_binder('nvidia', 'meta/llama-3.2-3b-instruct')
+nvidia_meta_llama3_2_11b_vision_instruct_binder  = make_model_binder('nvidia', 'meta/llama-3.2-11b-vision-instruct')
+nvidia_meta_llama3_2_90b_vision_instruct_binder  = make_model_binder('nvidia', 'meta/llama-3.2-90b-vision-instruct')
 
-BIND_NVIDIA_mistralai_mistral_large            = partial_bind_model('nvidia', 'mistralai/mistral-large')
-BIND_NVIDIA_mistralai_codestral_22b_instruct   = partial_bind_model('nvidia', 'mistralai/codestral-22b-instruct-v0.1')
-BIND_NVIDIA_mistralai_mixtral_8x22b_instruct   = partial_bind_model('nvidia', 'mistralai/mixtral-8x22b-instruct-v0.1')
-BIND_NVIDIA_mistralai_mixtral_8x7b_instruct    = partial_bind_model('nvidia', 'mistralai/mixtral-8x7b-instruct-v0.1')
+nvidia_mistralai_mistral_large_binder            = make_model_binder('nvidia', 'mistralai/mistral-large')
+nvidia_mistralai_codestral_22b_instruct_binder   = make_model_binder('nvidia', 'mistralai/codestral-22b-instruct-v0.1')
+nvidia_mistralai_mixtral_8x22b_instruct_binder   = make_model_binder('nvidia', 'mistralai/mixtral-8x22b-instruct-v0.1')
+nvidia_mistralai_mixtral_8x7b_instruct_binder    = make_model_binder('nvidia', 'mistralai/mixtral-8x7b-instruct-v0.1')
 
-BIND_NVIDIA_google_gemma_7b                    = partial_bind_model('nvidia', 'google/gemma-7b')
-BIND_NVIDIA_google_recurrentgemma_2b           = partial_bind_model('nvidia', 'google/recurrentgemma-2b')
+nvidia_google_gemma_7b_binder                    = make_model_binder('nvidia', 'google/gemma-7b')
+nvidia_google_recurrentgemma_2b_binder           = make_model_binder('nvidia', 'google/recurrentgemma-2b')
 
-BIND_NVIDIA_microsoft_phi_3_mini_128k_instruct = partial_bind_model('nvidia', 'microsoft/phi-3-mini-128k-instruct')
+nvidia_microsoft_phi_3_mini_128k_instruct_binder = make_model_binder('nvidia', 'microsoft/phi-3-mini-128k-instruct')
