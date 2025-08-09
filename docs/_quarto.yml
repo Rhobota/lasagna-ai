@@ -56,7 +56,7 @@ website:
           - recipes/rag.ipynb
           - recipes/internet_research.ipynb
           - recipes/sms.ipynb
-          - recipes/layered_agents.ipynb
+          - recipes/agents_as_tools.ipynb
           - recipes/routing_agent.ipynb
           - recipes/committee.ipynb
           - recipes/vision.ipynb
