@@ -6,9 +6,6 @@ from typing import (
     Awaitable,
     Optional,
 )
-import json
-
-from pydantic import BaseModel
 
 from . import (
     build_simple_agent,
@@ -25,6 +22,7 @@ from . import (
 from .tools_util import (
     extract_tool_result_as_sting,
 )
+from .types import ExtractionType
 
 
 def _build_text_event_callback(simple_text_callback: Callable[[str], Awaitable[None]]) -> EventCallback:
@@ -93,10 +91,10 @@ async def easy_ask(
 async def easy_extract(
     binder: Callable[[AgentCallable], BoundAgentCallable],
     prompt: str,
-    extraction_type: Type[BaseModel],
+    extraction_type: Type[ExtractionType],
     system_prompt: Optional[str] = None,
     streaming_callback: Union[Callable[[str], Awaitable[None]], None] = None,
-) -> BaseModel:
+) -> ExtractionType:
     agent = binder(
         build_extraction_agent(
             name = "easy_extract",
