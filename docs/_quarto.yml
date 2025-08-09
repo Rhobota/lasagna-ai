@@ -48,7 +48,6 @@ website:
           - agent_features/tools.ipynb
           - agent_features/structured_output.ipynb
           - agent_features/layering.ipynb
-          - agent_features/routing.ipynb
           - agent_features/parallelizing.ipynb
           - agent_features/recursive_agent.ipynb
           - agent_features/caching.ipynb
@@ -58,6 +57,7 @@ website:
           - recipes/internet_research.ipynb
           - recipes/sms.ipynb
           - recipes/layered_agents.ipynb
+          - recipes/routing_agent.ipynb
           - recipes/committee.ipynb
           - recipes/vision.ipynb
           - recipes/swapping_providers.ipynb
