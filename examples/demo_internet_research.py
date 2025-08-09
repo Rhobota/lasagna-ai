@@ -17,7 +17,7 @@ import os
 from datetime import datetime
 
 
-MODEL_BINDER = known_models.BIND_OPENAI_gpt_4o_mini()
+MODEL_BINDER = known_models.openai_gpt_4o_mini_binder
 
 
 async def perform_research(query: str) -> str:

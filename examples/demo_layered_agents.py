@@ -42,7 +42,7 @@ async def main() -> None:
         ),
         doc = "Use this tool if the user asks a math question.",
     )
-    health_agent = known_models.BIND_ANTHROPIC_claude_sonnet_4()(
+    health_agent = known_models.anthropic_claude_sonnet_4_binder(
         build_simple_agent(
             name = 'health_agent',
             tools = [],
@@ -53,7 +53,7 @@ async def main() -> None:
             doc = "Use this tool if the user asks a health question.",
         ),
     )
-    my_bound_agent = known_models.BIND_OPENAI_gpt_4o_mini()(
+    my_bound_agent = known_models.openai_gpt_4o_mini_binder(
         build_simple_agent(
             name = 'root_agent',
             tools = [

@@ -227,9 +227,9 @@ async def main() -> None:
     model: str = args.model
 
     if model == 'gpt41':
-        model_binder = known_models.BIND_OPENAI_gpt_41()
+        model_binder = known_models.openai_gpt_41_binder
     elif model == 'gpt4omini':
-        model_binder = known_models.BIND_OPENAI_gpt_4o_mini()
+        model_binder = known_models.openai_gpt_4o_mini_binder
     else:
         parser.error(f"invalid model: {model}")
 
