@@ -3,7 +3,7 @@ import copy
 import sys
 
 from lasagna.agent_util import (
-    bind_model,
+    make_model_binder,
     build_simple_agent,
     flat_messages,
     noop_callback,
@@ -529,7 +529,7 @@ async def test_handle_tools_layered_agents():
         name = 'agent_1',
         doc = doc,
     )
-    my_binder = bind_model(
+    my_binder = make_model_binder(
         provider = inner_model_spec['provider'],
         model = inner_model_spec['model'],
         **inner_model_spec['model_kwargs'],
@@ -879,7 +879,7 @@ def test_is_callable_of_type():
 
 
 def test_is_callable_of_type_agent_callables():
-    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
+    my_binder = make_model_binder(MockProvider, 'some_model', a = 'yes', b = 6)
     my_agent = build_simple_agent(name = 'agent')
     my_bound_agent = my_binder(my_agent)
 
@@ -1223,7 +1223,7 @@ def test_get_tool_params_async_callable_object():
 
 
 def test_get_tool_params_layered_agents():
-    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
+    my_binder = make_model_binder(MockProvider, 'some_model', a = 'yes', b = 6)
     my_agent = build_simple_agent(
         name = 'my_layered_agent',
         doc = 'Use this for everything.',
@@ -1238,7 +1238,7 @@ def test_get_tool_params_layered_agents():
     assert description == 'Use this for everything.'
     assert params == []
 
-    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
+    my_binder = make_model_binder(MockProvider, 'some_model', a = 'yes', b = 6)
     my_agent = build_simple_agent(
         name = 'my_layered_agent',
         doc = """
@@ -1268,7 +1268,7 @@ def test_get_tool_params_layered_agents():
         },
     ]
 
-    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
+    my_binder = make_model_binder(MockProvider, 'some_model', a = 'yes', b = 6)
     my_agent = build_simple_agent(
         name = 'my_layered_agent',
         doc = """
@@ -1298,7 +1298,7 @@ def test_get_tool_params_layered_agents():
         },
     ]
 
-    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
+    my_binder = make_model_binder(MockProvider, 'some_model', a = 'yes', b = 6)
     my_agent = build_simple_agent(
         name = 'my_layered_agent',
         doc = """

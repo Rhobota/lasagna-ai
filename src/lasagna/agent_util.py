@@ -28,7 +28,7 @@ from typing import (
 )
 
 
-def bind_model(
+def make_model_binder(
     provider: Union[str, ModelFactory],
     model: Union[str, ModelRecord],
     **model_kwargs: Any,
@@ -63,7 +63,7 @@ class PartiallyBoundAgentCallable(Protocol):
     ) -> Callable[[AgentCallable], BoundAgentCallable]: ...
 
 
-def partial_bind_model(
+def make_partial_model_binder(
     provider: Union[str, ModelFactory],
     model: Union[str, ModelRecord],
 ) -> PartiallyBoundAgentCallable:
@@ -72,7 +72,7 @@ def partial_bind_model(
             self,
             **model_kwargs: Any,
         ) -> Callable[[AgentCallable], BoundAgentCallable]:
-            return bind_model(provider, model, **model_kwargs)
+            return make_model_binder(provider, model, **model_kwargs)
 
         def __str__(self) -> str:
             info = (provider, model)

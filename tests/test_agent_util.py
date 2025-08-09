@@ -3,12 +3,12 @@ import pytest
 from typing import Callable, List
 
 from lasagna.agent_util import (
-    bind_model,
+    make_model_binder,
     build_simple_agent,
     build_standard_message_extractor,
     extract_last_message,
     noop_callback,
-    partial_bind_model,
+    make_partial_model_binder,
     recursive_extract_messages,
     recursive_sum_costs,
     flat_messages,
@@ -187,22 +187,22 @@ async def _agent_common_test(
 
 
 @pytest.mark.asyncio
-async def test_bind_model():
-    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
+async def test_make_model_binder():
+    my_binder = make_model_binder(MockProvider, 'some_model', a = 'yes', b = 6)
     my_agent = build_simple_agent(name = 'simple_agent')
     await _agent_common_test(my_binder, my_agent)
 
 
 @pytest.mark.asyncio
-async def test_partial_bind_model():
-    my_binder = partial_bind_model(MockProvider, 'some_model')(a = 'yes', b = 6)
+async def test_make_partial_model_binder():
+    my_binder = make_partial_model_binder(MockProvider, 'some_model')(a = 'yes', b = 6)
     my_agent = build_simple_agent(name = 'simple_agent')
     await _agent_common_test(my_binder, my_agent)
 
 
 @pytest.mark.asyncio
 async def test_build_layered_agent():
-    my_binder = bind_model(MockProvider, 'a_model')
+    my_binder = make_model_binder(MockProvider, 'a_model')
     my_agent = build_simple_agent(
         name = 'a_layered_agent',
         tools = [],
@@ -255,7 +255,7 @@ async def test_build_layered_agent():
 
 @pytest.mark.asyncio
 async def test_model_extract():
-    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 6)
+    my_binder = make_model_binder(MockProvider, 'some_model', a = 'yes', b = 6)
     events = []
     async def event_callback(event: EventPayload) -> None:
         events.append(event)
@@ -321,7 +321,7 @@ async def test_model_extract():
 
 @pytest.mark.asyncio
 async def test_model_extract_type_mismatch():
-    my_binder = bind_model(MockProvider, 'some_model', a = 'yes', b = 'BAD VALUE')
+    my_binder = make_model_binder(MockProvider, 'some_model', a = 'yes', b = 'BAD VALUE')
     prev_runs: List[AgentRun] = []
     with pytest.raises(ValidationError):
         await my_binder(
