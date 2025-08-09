@@ -3,8 +3,8 @@ from .types import *
 from .agent_runner import run
 
 from .agent_util import (
-    bind_model,
-    partial_bind_model,
+    make_model_binder,
+    make_partial_model_binder,
     recursive_extract_messages,
     extract_last_message,
     flat_messages,
@@ -33,8 +33,8 @@ from .easy import (
 
 __all__ = [
     'run',
-    'bind_model',
-    'partial_bind_model',
+    'make_model_binder',
+    'make_partial_model_binder',
     'recursive_extract_messages',
     'extract_last_message',
     'flat_messages',
