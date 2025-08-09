@@ -16,7 +16,7 @@ import asyncio
 from dotenv import load_dotenv; load_dotenv()
 
 
-MODEL_BINDER = known_models.BIND_OLLAMA_mistral_small()
+MODEL_BINDER = known_models.ollama_mistral_small_binder
 
 
 PROMPT = """

@@ -10,7 +10,7 @@ from lasagna.caching import (
 
 from lasagna.types import AgentRun, Model, EventCallback, Message
 
-from lasagna.agent_util import bind_model
+from lasagna.agent_util import make_model_binder
 
 from lasagna import __version__
 
@@ -35,7 +35,7 @@ _PREV_RUNS: List[AgentRun] = [
 
 def _make_agent():
     # We need this factory so we can make as many separately-cached agents as we want.
-    @bind_model(MockProvider, 'some_model')
+    @make_model_binder(MockProvider, 'some_model')
     @in_memory_cached_agent
     async def my_agent(
         model: Model,

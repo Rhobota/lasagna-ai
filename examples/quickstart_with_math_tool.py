@@ -33,7 +33,7 @@ def evaluate_math_expression(expression: str) -> float:
     return result
 
 
-@known_models.BIND_OPENAI_gpt_4o()
+@known_models.openai_gpt_4o_binder
 async def my_basic_agent(
     model: Model,
     event_callback: EventCallback,

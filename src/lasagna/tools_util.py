@@ -10,7 +10,7 @@ from typing import (
 )
 from typing_extensions import is_typeddict
 
-from .agent_util import bind_model, extract_last_message, flat_messages
+from .agent_util import make_model_binder, extract_last_message, flat_messages
 
 from .util import (
     parse_docstring,
@@ -362,7 +362,7 @@ async def _run_single_tool(
             if is_agent_callable:
                 assert model_spec is not None
                 agent = cast(AgentCallable, func)
-                binder = bind_model(
+                binder = make_model_binder(
                     provider = model_spec['provider'],
                     model = model_spec['model'],
                     **model_spec.get('model_kwargs', {}),

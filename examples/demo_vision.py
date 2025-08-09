@@ -17,7 +17,7 @@ from dotenv import load_dotenv; load_dotenv()
 import asyncio
 
 
-MODEL_BINDER = known_models.BIND_ANTHROPIC_claude_sonnet_4()
+MODEL_BINDER = known_models.anthropic_claude_sonnet_4_binder
 
 
 async def main() -> None:

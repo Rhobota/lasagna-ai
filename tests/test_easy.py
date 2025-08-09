@@ -1,10 +1,8 @@
-import json
-
 import pytest
 from pydantic import BaseModel, Field
 
 from lasagna import (
-    bind_model,
+    make_model_binder,
     easy_ask,
     easy_extract,
 )
@@ -16,7 +14,7 @@ from lasagna.mock_provider import (
 @pytest.mark.asyncio
 async def test_easy_ask():
     result: str = await easy_ask(
-        binder = bind_model(MockProvider, 'fake_model'),
+        binder = make_model_binder(MockProvider, 'fake_model'),
         prompt = 'Hello, world!',
         system_prompt = 'Say hello world.',
     )
@@ -34,7 +32,7 @@ async def test_easy_extract():
         age: int = Field(description='Make up an age of the person')
 
     result = await easy_extract(
-        binder = bind_model(MockProvider, 'fake_model', **dict(
+        binder = make_model_binder(MockProvider, 'fake_model', **dict(
             name = 'John Doe',
             age = 30,
         )),
@@ -55,7 +53,7 @@ async def test_easy_ask_with_streaming():
         streaming_output += text
 
     result: str = await easy_ask(
-        binder = bind_model(MockProvider, 'fake_model'),
+        binder = make_model_binder(MockProvider, 'fake_model'),
         prompt = 'Hello, world!',
         system_prompt = 'Say hello world.',
         streaming_callback = streaming_callback,

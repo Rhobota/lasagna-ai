@@ -18,20 +18,20 @@ THE_AGENT = build_simple_agent(name='agent')
 
 
 COMMITTEE_SPEC = [
-    known_models.BIND_OPENAI_gpt_4o(),
-    known_models.BIND_OPENAI_gpt_4o_mini(),
+    known_models.openai_gpt_4o_binder,
+    known_models.openai_gpt_4o_mini_binder,
 
-    known_models.BIND_ANTHROPIC_claude_opus_4(),
-    known_models.BIND_ANTHROPIC_claude_sonnet_4(),
-    known_models.BIND_ANTHROPIC_claude_haiku_35(),
+    known_models.anthropic_claude_opus_4_binder,
+    known_models.anthropic_claude_sonnet_4_binder,
+    known_models.anthropic_claude_haiku_35_binder,
 
-    known_models.BIND_NVIDIA_meta_llama3_8b_instruct(),
-    known_models.BIND_NVIDIA_meta_llama3_1_8b_instruct(),
-    known_models.BIND_NVIDIA_meta_llama3_2_3b_instruct(),
-    known_models.BIND_NVIDIA_mistralai_mistral_large(),
-    known_models.BIND_NVIDIA_mistralai_mixtral_8x7b_instruct(),
-    known_models.BIND_NVIDIA_google_recurrentgemma_2b(),
-    known_models.BIND_NVIDIA_microsoft_phi_3_mini_128k_instruct(),
+    known_models.nvidia_meta_llama3_8b_instruct_binder,
+    known_models.nvidia_meta_llama3_1_8b_instruct_binder,
+    known_models.nvidia_meta_llama3_2_3b_instruct_binder,
+    known_models.nvidia_mistralai_mistral_large_binder,
+    known_models.nvidia_mistralai_mixtral_8x7b_instruct_binder,
+    known_models.nvidia_google_recurrentgemma_2b_binder,
+    known_models.nvidia_microsoft_phi_3_mini_128k_instruct_binder,
 ]
 
 
