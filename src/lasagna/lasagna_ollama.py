@@ -429,7 +429,7 @@ class LasagnaOllama(Model):
             format         = format,
         )
 
-        assert len(new_messages) == 1
+        assert len(new_messages) == 1, f'got {len(new_messages)} messages!'
         new_message = new_messages[0]
 
         assert new_message['role'] == 'ai'  # Ollama generates structured output just like it does normal text, so at this point it is just text.
