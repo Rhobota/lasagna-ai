@@ -51,6 +51,7 @@ website:
           - agent_features/parallelizing.ipynb
           - agent_features/recursive_agent.ipynb
           - agent_features/caching.ipynb
+          - agent_features/functional_agents.ipynb
       - section: "😋 Recipes"
         contents:
           - recipes/rag.ipynb
