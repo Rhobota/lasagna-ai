@@ -16,7 +16,7 @@ import aiohttp
 import os
 
 
-MODEL_BINDER = known_models.openai_gpt_4o_mini_binder
+MODEL_BINDER = known_models.openai_gpt_5_mini_binder
 
 
 # LLMs can hallucinate phone numbers, so you should be very cautious

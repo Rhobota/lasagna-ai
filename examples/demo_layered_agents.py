@@ -53,7 +53,7 @@ async def main() -> None:
             doc = "Use this tool if the user asks a health question.",
         ),
     )
-    my_bound_agent = known_models.openai_gpt_4o_mini_binder(
+    my_bound_agent = known_models.openai_gpt_5_mini_binder(
         build_simple_agent(
             name = 'root_agent',
             tools = [

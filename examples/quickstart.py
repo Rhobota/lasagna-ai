@@ -16,7 +16,7 @@ import asyncio
 from dotenv import load_dotenv; load_dotenv()
 
 
-@known_models.openai_gpt_4o_binder
+@known_models.openai_gpt_5_mini_binder
 async def my_basic_agent(
     model: Model,
     event_callback: EventCallback,

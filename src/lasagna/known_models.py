@@ -7,16 +7,30 @@ from .agent_util import make_model_binder
 
 OPENAI_KNOWN_MODELS: List[ModelRecord] = [
     {
+        'formal_name': 'gpt-5-2025-08-07',
+        'display_name': 'GPT-5',
+    },
+    {
+        'formal_name': 'gpt-5-mini-2025-08-07',
+        'display_name': 'GPT-5 mini',
+    },
+    {
+        'formal_name': 'gpt-5-nano-2025-08-07',
+        'display_name': 'GPT-5 nano',
+    },
+    {
         'formal_name': 'gpt-4.1-2025-04-14',
         'display_name': 'GPT-4.1',
     },
     {
         'formal_name': 'gpt-4o-mini-2024-07-18',
         'display_name': 'GPT-4o mini',
+        'outdated': True,
     },
     {
         'formal_name': 'gpt-4o-2024-11-20',
         'display_name': 'GPT-4o',
+        'outdated': True,
     },
     {
         'formal_name': 'gpt-4o-2024-08-06',
@@ -40,27 +54,34 @@ OPENAI_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
-openai_gpt_41_binder       = make_model_binder('openai', 'gpt-4.1-2025-04-14')
-openai_gpt_4o_mini_binder  = make_model_binder('openai', 'gpt-4o-mini-2024-07-18')
-openai_gpt_4o_binder       = make_model_binder('openai', 'gpt-4o-2024-11-20')
+openai_gpt_5_binder        = make_model_binder('openai', 'gpt-5-2025-08-07')
+openai_gpt_5_mini_binder   = make_model_binder('openai', 'gpt-5-mini-2025-08-07')
+openai_gpt_5_nano_binder   = make_model_binder('openai', 'gpt-5-nano-2025-08-07')
+openai_gpt_4_1_binder      = make_model_binder('openai', 'gpt-4.1-2025-04-14')
 
 
 ANTHROPIC_KNOWN_MODELS: List[ModelRecord] = [
     {
-        'formal_name': 'claude-opus-4-20250514',
-        'display_name': 'Claude Opus 4',
+        'formal_name': 'claude-opus-4-1-20250805',
+        'display_name': 'Claude Opus 4.1',
     },
     {
         'formal_name': 'claude-sonnet-4-20250514',
         'display_name': 'Claude Sonnet 4',
     },
     {
-        'formal_name': 'claude-3-7-sonnet-20250219',
-        'display_name': 'Claude Sonnet 3.7',
-    },
-    {
         'formal_name': 'claude-3-5-haiku-20241022',
         'display_name': 'Claude Haiku 3.5',
+    },
+    {
+        'formal_name': 'claude-opus-4-20250514',
+        'display_name': 'Claude Opus 4',
+        'outdated': True,
+    },
+    {
+        'formal_name': 'claude-3-7-sonnet-20250219',
+        'display_name': 'Claude Sonnet 3.7',
+        'outdated': True,
     },
     {
         'formal_name': 'claude-3-5-sonnet-20240620',
@@ -84,10 +105,9 @@ ANTHROPIC_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
-anthropic_claude_opus_4_binder    = make_model_binder('anthropic', 'claude-opus-4-20250514')
+anthropic_claude_opus_4_1_binder  = make_model_binder('anthropic', 'claude-opus-4-1-20250805')
 anthropic_claude_sonnet_4_binder  = make_model_binder('anthropic', 'claude-sonnet-4-20250514')
-anthropic_claude_sonnet_37_binder = make_model_binder('anthropic', 'claude-3-7-sonnet-20250219')
-anthropic_claude_haiku_35_binder  = make_model_binder('anthropic', 'claude-3-5-haiku-20241022')
+anthropic_claude_haiku_3_5_binder = make_model_binder('anthropic', 'claude-3-5-haiku-20241022')
 
 
 OLLAMA_KNOWN_MODELS: List[ModelRecord] = [
@@ -116,42 +136,57 @@ ollama_mistral_large_binder = make_model_binder('ollama', 'mistral-large')
 
 BEDROCK_KNOWN_MODELS: List[ModelRecord] = [
     {
-        'formal_name': 'us.anthropic.claude-3-haiku-20240307-v1:0',
-        'display_name': 'Claude 3 Haiku',
+        'formal_name': 'us.anthropic.claude-opus-4-1-20250805-v1:0',
+        'display_name': 'Claude Opus 4.1',
     },
     {
-        'formal_name': 'us.anthropic.claude-3-sonnet-20240229-v1:0',
-        'display_name': 'Claude 3 Sonnet',
-    },
-    {
-        'formal_name': 'us.anthropic.claude-3-opus-20240229-v1:0',
-        'display_name': 'Claude 3 Opus',
+        'formal_name': 'us.anthropic.claude-sonnet-4-20250514-v1:0',
+        'display_name': 'Claude Sonnet 4',
     },
     {
         'formal_name': 'us.anthropic.claude-3-5-haiku-20241022-v1:0',
-        'display_name': 'Claude 3.5 Haiku',
+        'display_name': 'Claude Haiku 3.5',
     },
     {
-        'formal_name': 'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
-        'display_name': 'Claude 3.5 Sonnet',
-    },
-    {
-        'formal_name': 'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
-        'display_name': 'Claude 3.5 Sonnet v2',
+        'formal_name': 'us.anthropic.claude-opus-4-20250514-v1:0',
+        'display_name': 'Claude Opus 4',
+        'outdated': True,
     },
     {
         'formal_name': 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
-        'display_name': 'Claude 3.7 Sonnet',
+        'display_name': 'Claude Sonnet 3.7',
+        'outdated': True,
+    },
+    {
+        'formal_name': 'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
+        'display_name': 'Claude Sonnet 3.5',
+        'outdated': True,
+    },
+    {
+        'formal_name': 'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
+        'display_name': 'Claude Sonnet 3.5 (v2)',
+        'outdated': True,
+    },
+    {
+        'formal_name': 'us.anthropic.claude-3-opus-20240229-v1:0',
+        'display_name': 'Claude Opus 3',
+        'outdated': True,
+    },
+    {
+        'formal_name': 'us.anthropic.claude-3-sonnet-20240229-v1:0',
+        'display_name': 'Claude Sonnet 3',
+        'outdated': True,
+    },
+    {
+        'formal_name': 'us.anthropic.claude-3-haiku-20240307-v1:0',
+        'display_name': 'Claude Haiku 3',
+        'outdated': True,
     },
 ]
 
-bedrock_claude_3_haiku_binder       = make_model_binder('bedrock', 'us.anthropic.claude-3-haiku-20240307-v1:0')
-bedrock_claude_3_sonnet_binder      = make_model_binder('bedrock', 'us.anthropic.claude-3-sonnet-20240229-v1:0')
-bedrock_claude_3_opus_binder        = make_model_binder('bedrock', 'us.anthropic.claude-3-opus-20240229-v1:0')
-bedrock_claude_3_5_haiku_binder     = make_model_binder('bedrock', 'us.anthropic.claude-3-5-haiku-20241022-v1:0')
-bedrock_claude_3_5_sonnet_binder    = make_model_binder('bedrock', 'us.anthropic.claude-3-5-sonnet-20240620-v1:0')
-bedrock_claude_3_5_sonnet_v2_binder = make_model_binder('bedrock', 'us.anthropic.claude-3-5-sonnet-20241022-v2:0')
-bedrock_claude_3_7_sonnet_binder    = make_model_binder('bedrock', 'us.anthropic.claude-3-7-sonnet-20250219-v1:0')
+bedrock_claude_opus_4_1_binder = make_model_binder('bedrock', 'us.anthropic.claude-opus-4-1-20250805-v1:0')
+bedrock_claude_sonnet_4_binder = make_model_binder('bedrock', 'us.anthropic.claude-sonnet-4-20250514-v1:0')
+bedrock_claude_haiku_3_5_binder = make_model_binder('bedrock', 'us.anthropic.claude-3-5-haiku-20241022-v1:0')
 
 
 NVIDIA_KNOWN_MODELS: List[ModelRecord] = [
