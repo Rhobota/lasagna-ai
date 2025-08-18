@@ -16,7 +16,7 @@ from dotenv import load_dotenv; load_dotenv()
 import svs
 
 
-MODEL_BINDER = known_models.openai_gpt_4o_mini_binder
+MODEL_BINDER = known_models.openai_gpt_5_mini_binder
 
 
 class DadJokeTool:

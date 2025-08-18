@@ -220,16 +220,16 @@ async def main() -> None:
         '--model', '-m',
         required=True,
         type=str,
-        help='Which model? (you may pass "gpt3.5turbo" or "gpt4omini")',
+        help='Which model? (you may pass "gpt41" or "gpt5mini")',
     )
     args = parser.parse_args()
     level: int = args.level
     model: str = args.model
 
     if model == 'gpt41':
-        model_binder = known_models.openai_gpt_41_binder
-    elif model == 'gpt4omini':
-        model_binder = known_models.openai_gpt_4o_mini_binder
+        model_binder = known_models.openai_gpt_4_1_binder
+    elif model == 'gpt5mini':
+        model_binder = known_models.openai_gpt_5_mini_binder
     else:
         parser.error(f"invalid model: {model}")
 
