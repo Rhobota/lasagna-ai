@@ -261,12 +261,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../agent_features/routing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Agent Routing</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../agent_features/parallelizing.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Parallelizing</span></a>
   </div>
@@ -281,6 +275,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../agent_features/caching.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Caching Decorator</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent_features/functional_agents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functional Agents</span></a>
   </div>
 </li>
       </ul>
@@ -314,8 +314,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../recipes/layered_agents.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Layered Agents Example</span></a>
+  <a href="../recipes/agents_as_tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agents as Tools Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/routing_agent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agent Routing Example</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -720,18 +726,18 @@ This is a critical step!
 <div id="24107132-fa62-4eef-b641-359a4e0b1704" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.environ.get(<span class="st">'OPENAI_API_KEY'</span>):</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using OpenAI'</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> known_models.openai_gpt_4o_binder</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.environ.get(<span class="st">'ANTHROPIC_API_KEY'</span>):</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using Anthropic'</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> known_models.anthropic_claude_sonnet_4_binder</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> os.environ.get(<span class="st">'ANTHROPIC_API_KEY'</span>):</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using Anthropic'</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> known_models.anthropic_claude_sonnet_4_binder</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> os.environ.get(<span class="st">'OPENAI_API_KEY'</span>):</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using OpenAI'</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> known_models.openai_gpt_5_mini_binder</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="va">False</span>, <span class="st">"Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is set! We need at least one to do this demo."</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Using OpenAI</code></pre>
+<pre><code>Using Anthropic</code></pre>
 </div>
 </div>
 </section>
@@ -757,13 +763,13 @@ This is a critical step!
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> tui_input_loop(binder(chat_agent))   <span class="co"># type: ignore[top-level-await]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdin">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-green-fg ansi-bold">&gt;  Hi, my name is Ryan.
+<pre><span class="ansi-green-fg ansi-bold">&gt;  Hi, I'm Ryan.
 </span></pre>
 </div>
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre>Hi Ryan! Nice to meet you. How can I help you today?
+<pre>Hi Ryan! Nice to meet you. How are you doing today?
 </pre>
 </div>
 </div>
@@ -775,7 +781,7 @@ This is a critical step!
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre>Your name is Ryan! 😊
+<pre>Your name is Ryan - you introduced yourself to me at the start of our conversation.
 </pre>
 </div>
 </div>
@@ -795,14 +801,15 @@ This is a critical step!
 <section id="the-specialist-agent" class="level3">
 <h3 class="anchored" data-anchor-id="the-specialist-agent">The Specialist Agent</h3>
 <p>Agents can be specialized for particular tasks. Here’s an agent that focuses on providing helpful coding advice:</p>
-<div id="fcb6728e-f852-4f5e-b533-1873a052a5a3" class="cell" data-execution_count="6">
+<div id="fcb6728e-f852-4f5e-b533-1873a052a5a3" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>CODING_SYSTEM_PROMPT <span class="op">=</span> <span class="st">"""</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="st">You are a helpful coding assistant.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="st">You are a helpful coding assistant named Bob.</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="st">Provide clear, practical advice with code examples when appropriate.</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="st">Focus on best practices and explain your reasoning.</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>.strip()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="st">Answer all prompts in one sentence!</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>.strip()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="ac767793-50bf-4ecb-9267-233a51e0e480" class="cell" data-execution_count="7">
+<div id="ac767793-50bf-4ecb-9267-233a51e0e480" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> coding_advisor(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
@@ -818,29 +825,29 @@ This is a critical step!
 <span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Wrap the new messages into an `AgentRun` result:</span></span>
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> flat_messages(<span class="st">'coding_advisor'</span>, new_messages)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="offgo6balkj" class="cell" data-execution_count="8">
+<div id="offgo6balkj" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> tui_input_loop(binder(coding_advisor))   <span class="co"># type: ignore[top-level-await]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdin">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-green-fg ansi-bold">&gt;  Who are you? (answer briefly)
+<pre><span class="ansi-green-fg ansi-bold">&gt;  Who are you?
 </span></pre>
 </div>
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre>I’m a coding assistant here to help you with programming questions, code problems, and learning best practices. How can I help?
+<pre>I'm Bob, a helpful coding assistant designed to provide clear, practical programming advice with code examples and best practices explanations.
 </pre>
 </div>
 </div>
 <div class="cell-output cell-output-stdin">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-green-fg ansi-bold">&gt;  How do I add numbers in Python? (answer in 1 sentence)
+<pre><span class="ansi-green-fg ansi-bold">&gt;  How do I add numbers in Python?
 </span></pre>
 </div>
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre>To add numbers in Python, use the `+` operator, like `result = num1 + num2`.
+<pre>You can add numbers in Python using the `+` operator like `result = 5 + 3` for integers/floats, or use the `sum()` function for lists like `total = sum([1, 2, 3, 4])` which is best practice for adding multiple numbers efficiently.
 </pre>
 </div>
 </div>
@@ -860,7 +867,7 @@ This is a critical step!
 <section id="the-information-extractor" class="level3">
 <h3 class="anchored" data-anchor-id="the-information-extractor">The Information Extractor</h3>
 <p>Let’s make an agent that does <strong>structured output</strong> to <em>extract</em> information from the user’s message. In particular, we’ll have this agent classify the user’s message (i.e.&nbsp;it is “extracting” the classification, if you will).</p>
-<div id="cf224901-b74f-49a5-95e2-074c14b6f2ce" class="cell" data-execution_count="9">
+<div id="cf224901-b74f-49a5-95e2-074c14b6f2ce" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>INTENT_CLASSIFIER_SYSTEM_PROMPT <span class="op">=</span> <span class="st">"""</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="st">Your job is to classify the user's message into one of the following categories:</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="st"> - `small_talk`: Comments like "hi", "how are you?", etc.</span></span>
@@ -880,7 +887,7 @@ This is a critical step!
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    thoughts: <span class="bu">str</span></span>
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    category: Category</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="94b9bee6-9795-43c4-8375-5b00ae442c2e" class="cell" data-execution_count="10">
+<div id="94b9bee6-9795-43c4-8375-5b00ae442c2e" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> intent_classifier(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
@@ -900,7 +907,7 @@ This is a critical step!
 <span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Wrap the new messages into an `AgentRun` result:</span></span>
 <span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> extraction(<span class="st">'intent_classifier'</span>, [new_message], result)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="b8843b12-5cb7-4ed3-acef-cbf16ae087f0" class="cell" data-execution_count="11">
+<div id="b8843b12-5cb7-4ed3-acef-cbf16ae087f0" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> tui_input_loop(binder(intent_classifier))   <span class="co"># type: ignore[top-level-await]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdin">
 <div class="ansi-escaped-output">
@@ -910,7 +917,7 @@ This is a critical step!
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"</span><span class="ansi-red-fg">thought</span><span class="ansi-red-fg">s</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">The</span><span class="ansi-red-fg"> user</span><span class="ansi-red-fg"> is</span><span class="ansi-red-fg"> greeting</span><span class="ansi-red-fg"> with</span><span class="ansi-red-fg"> a</span><span class="ansi-red-fg"> simple</span><span class="ansi-red-fg"> '</span><span class="ansi-red-fg">Hi</span><span class="ansi-red-fg">!',</span><span class="ansi-red-fg"> which</span><span class="ansi-red-fg"> is</span><span class="ansi-red-fg"> small</span><span class="ansi-red-fg"> talk</span><span class="ansi-red-fg">.","</span><span class="ansi-red-fg">category</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">small</span><span class="ansi-red-fg">_t</span><span class="ansi-red-fg">alk</span><span class="ansi-red-fg">"}</span><span class="ansi-red-fg">)
+<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"thought</span><span class="ansi-red-fg">s": </span><span class="ansi-red-fg">"This i</span><span class="ansi-red-fg">s a simple</span><span class="ansi-red-fg"> greeting</span><span class="ansi-red-fg"> \"Hi!\</span><span class="ansi-red-fg">" which</span><span class="ansi-red-fg"> is a classi</span><span class="ansi-red-fg">c exampl</span><span class="ansi-red-fg">e of s</span><span class="ansi-red-fg">mall</span><span class="ansi-red-fg"> talk -</span><span class="ansi-red-fg"> a cas</span><span class="ansi-red-fg">ual, friend</span><span class="ansi-red-fg">ly gre</span><span class="ansi-red-fg">eting </span><span class="ansi-red-fg">us</span><span class="ansi-red-fg">ed to </span><span class="ansi-red-fg">init</span><span class="ansi-red-fg">iate c</span><span class="ansi-red-fg">onversati</span><span class="ansi-red-fg">on."</span><span class="ansi-red-fg">, "category"</span><span class="ansi-red-fg">: "smal</span><span class="ansi-red-fg">l_ta</span><span class="ansi-red-fg">lk"}</span><span class="ansi-red-fg">)
 
 </span>
 </pre>
@@ -924,7 +931,7 @@ This is a critical step!
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"</span><span class="ansi-red-fg">thought</span><span class="ansi-red-fg">s</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">The</span><span class="ansi-red-fg"> message</span><span class="ansi-red-fg"> is</span><span class="ansi-red-fg"> a</span><span class="ansi-red-fg"> casual</span><span class="ansi-red-fg"> greeting</span><span class="ansi-red-fg">.","</span><span class="ansi-red-fg">category</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">small</span><span class="ansi-red-fg">_t</span><span class="ansi-red-fg">alk</span><span class="ansi-red-fg">"}</span><span class="ansi-red-fg">)
+<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"thou</span><span class="ansi-red-fg">ghts"</span><span class="ansi-red-fg">: "T</span><span class="ansi-red-fg">his is </span><span class="ansi-red-fg">a casual gre</span><span class="ansi-red-fg">eti</span><span class="ansi-red-fg">ng s</span><span class="ansi-red-fg">imil</span><span class="ansi-red-fg">ar to \"</span><span class="ansi-red-fg">what's up\"</span><span class="ansi-red-fg"> or \"hi</span><span class="ansi-red-fg">\"</span><span class="ansi-red-fg">. This f</span><span class="ansi-red-fg">alls u</span><span class="ansi-red-fg">nder small</span><span class="ansi-red-fg"> talk a</span><span class="ansi-red-fg">s it's an</span><span class="ansi-red-fg"> infor</span><span class="ansi-red-fg">mal way to</span><span class="ansi-red-fg"> s</span><span class="ansi-red-fg">ay hello.</span><span class="ansi-red-fg">"</span><span class="ansi-red-fg">, </span><span class="ansi-red-fg">"category":</span><span class="ansi-red-fg"> "smal</span><span class="ansi-red-fg">l_talk"}</span><span class="ansi-red-fg">)
 
 </span>
 </pre>
@@ -938,7 +945,7 @@ This is a critical step!
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"</span><span class="ansi-red-fg">thought</span><span class="ansi-red-fg">s</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">The</span><span class="ansi-red-fg"> user</span><span class="ansi-red-fg"> is</span><span class="ansi-red-fg"> asking</span><span class="ansi-red-fg"> about</span><span class="ansi-red-fg"> Python</span><span class="ansi-red-fg">,</span><span class="ansi-red-fg"> which</span><span class="ansi-red-fg"> is</span><span class="ansi-red-fg"> a</span><span class="ansi-red-fg"> programming</span><span class="ansi-red-fg"> language</span><span class="ansi-red-fg">.","</span><span class="ansi-red-fg">category</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">program</span><span class="ansi-red-fg">ming</span><span class="ansi-red-fg">"}</span><span class="ansi-red-fg">)
+<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"thoug</span><span class="ansi-red-fg">hts": "</span><span class="ansi-red-fg">The</span><span class="ansi-red-fg"> user i</span><span class="ansi-red-fg">s asking \</span><span class="ansi-red-fg">"What is </span><span class="ansi-red-fg">Python?\" </span><span class="ansi-red-fg">whic</span><span class="ansi-red-fg">h is clearly</span><span class="ansi-red-fg"> a ques</span><span class="ansi-red-fg">tion abo</span><span class="ansi-red-fg">ut a pro</span><span class="ansi-red-fg">gramm</span><span class="ansi-red-fg">ing</span><span class="ansi-red-fg"> langua</span><span class="ansi-red-fg">ge. Pytho</span><span class="ansi-red-fg">n is a popu</span><span class="ansi-red-fg">lar pro</span><span class="ansi-red-fg">gr</span><span class="ansi-red-fg">amming langu</span><span class="ansi-red-fg">age, s</span><span class="ansi-red-fg">o t</span><span class="ansi-red-fg">his fall</span><span class="ansi-red-fg">s u</span><span class="ansi-red-fg">nder the</span><span class="ansi-red-fg"> programmi</span><span class="ansi-red-fg">ng cate</span><span class="ansi-red-fg">gory</span><span class="ansi-red-fg">."</span><span class="ansi-red-fg">, "cat</span><span class="ansi-red-fg">egory"</span><span class="ansi-red-fg">: "pr</span><span class="ansi-red-fg">ogram</span><span class="ansi-red-fg">ming"}</span><span class="ansi-red-fg">)
 
 </span>
 </pre>
@@ -952,7 +959,7 @@ This is a critical step!
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"</span><span class="ansi-red-fg">thought</span><span class="ansi-red-fg">s</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">The</span><span class="ansi-red-fg"> user</span><span class="ansi-red-fg"> is</span><span class="ansi-red-fg"> asking</span><span class="ansi-red-fg"> a</span><span class="ansi-red-fg"> basic</span><span class="ansi-red-fg"> math</span><span class="ansi-red-fg"> question</span><span class="ansi-red-fg">.","</span><span class="ansi-red-fg">category</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">other</span><span class="ansi-red-fg">"}</span><span class="ansi-red-fg">)
+<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"</span><span class="ansi-red-fg">though</span><span class="ansi-red-fg">ts": "</span><span class="ansi-red-fg">Th</span><span class="ansi-red-fg">e user is </span><span class="ansi-red-fg">askin</span><span class="ansi-red-fg">g a basic m</span><span class="ansi-red-fg">ath question</span><span class="ansi-red-fg"> \</span><span class="ansi-red-fg">"What i</span><span class="ansi-red-fg">s 2+2?\". T</span><span class="ansi-red-fg">his is a </span><span class="ansi-red-fg">simple a</span><span class="ansi-red-fg">rith</span><span class="ansi-red-fg">me</span><span class="ansi-red-fg">tic qu</span><span class="ansi-red-fg">estion</span><span class="ansi-red-fg"> that doe</span><span class="ansi-red-fg">sn't fall </span><span class="ansi-red-fg">under s</span><span class="ansi-red-fg">mall t</span><span class="ansi-red-fg">alk (lik</span><span class="ansi-red-fg">e greetings)</span><span class="ansi-red-fg"> or </span><span class="ansi-red-fg">prog</span><span class="ansi-red-fg">rammi</span><span class="ansi-red-fg">ng (que</span><span class="ansi-red-fg">stions about</span><span class="ansi-red-fg"> code, la</span><span class="ansi-red-fg">ng</span><span class="ansi-red-fg">uages,</span><span class="ansi-red-fg"> libra</span><span class="ansi-red-fg">ries).</span><span class="ansi-red-fg"> This i</span><span class="ansi-red-fg">s a ma</span><span class="ansi-red-fg">thematical q</span><span class="ansi-red-fg">uestion, </span><span class="ansi-red-fg">so it belo</span><span class="ansi-red-fg">ng</span><span class="ansi-red-fg">s in t</span><span class="ansi-red-fg">he \"o</span><span class="ansi-red-fg">ther\" c</span><span class="ansi-red-fg">ateg</span><span class="ansi-red-fg">or</span><span class="ansi-red-fg">y."</span><span class="ansi-red-fg">, </span><span class="ansi-red-fg">"c</span><span class="ansi-red-fg">ategory</span><span class="ansi-red-fg">": "oth</span><span class="ansi-red-fg">er"}</span><span class="ansi-red-fg">)
 
 </span>
 </pre>
@@ -974,7 +981,7 @@ This is a critical step!
 <section id="the-back-on-track-agent" class="level3">
 <h3 class="anchored" data-anchor-id="the-back-on-track-agent">The ‘Back on Track’ Agent</h3>
 <p>This agent is pretty useless on its own, but you’ll see soon why we’re creating it. It just tells the user to get back on track!</p>
-<div id="5caf5a42-f514-4b34-80e3-55caa4dac78c" class="cell" data-execution_count="12">
+<div id="5caf5a42-f514-4b34-80e3-55caa4dac78c" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>BACK_ON_TRACK_SYSTEM_PROMPT <span class="op">=</span> <span class="st">"""</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="st">The user's message has been deemed to be off-topic.</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="st">Please politely tell them that their message is off-topic.</span></span>
@@ -983,7 +990,7 @@ This is a critical step!
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="st">at-hand.</span></span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>.strip()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="430071f2-60b4-4d0d-a3d1-6e952b46633e" class="cell" data-execution_count="13">
+<div id="430071f2-60b4-4d0d-a3d1-6e952b46633e" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> back_on_track(</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
@@ -999,7 +1006,7 @@ This is a critical step!
 <span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">await</span> model.run(event_callback, messages, tools<span class="op">=</span>[]),</span>
 <span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="8cfa7ba1-ac85-45a1-9952-4d4c96c5183b" class="cell" data-execution_count="14">
+<div id="8cfa7ba1-ac85-45a1-9952-4d4c96c5183b" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> tui_input_loop(binder(back_on_track))   <span class="co"># type: ignore[top-level-await]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdin">
 <div class="ansi-escaped-output">
@@ -1009,7 +1016,7 @@ This is a critical step!
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre>Hello! It seems your message is off-topic. Let's return to the topic at hand. How can I assist you with that?
+<pre>Hello! I'd be happy to help you, but it seems like your message might be off-topic for our current discussion. Could you please share what specific topic or question you'd like to discuss so we can have a focused conversation? I'm here to assist once we establish what you'd like to talk about.
 </pre>
 </div>
 </div>
@@ -1029,7 +1036,7 @@ This is a critical step!
 <section id="the-routing-agent" class="level3">
 <h3 class="anchored" data-anchor-id="the-routing-agent">The Routing Agent</h3>
 <p>Now, we’ll put all the pieces together by making a <strong>routing agent</strong> that uses <strong>all four</strong> agents above!</p>
-<div id="bdb0e673-a73c-477c-8e5b-07f842c34baf" class="cell" data-execution_count="15">
+<div id="bdb0e673-a73c-477c-8e5b-07f842c34baf" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> router(</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
@@ -1054,7 +1061,7 @@ This is a critical step!
 <span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Wrap *everything* that happened above into the return:</span></span>
 <span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> chained_runs(<span class="st">'router'</span>, [classification_run, downstream_run])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cbd2ba67-1c00-4ce5-be97-b62bdc4db220" class="cell" data-execution_count="16">
+<div id="cbd2ba67-1c00-4ce5-be97-b62bdc4db220" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> tui_input_loop(binder(router))   <span class="co"># type: ignore[top-level-await]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdin">
 <div class="ansi-escaped-output">
@@ -1064,9 +1071,9 @@ This is a critical step!
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"</span><span class="ansi-red-fg">thought</span><span class="ansi-red-fg">s</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">The</span><span class="ansi-red-fg"> user</span><span class="ansi-red-fg"> just</span><span class="ansi-red-fg"> greeted</span><span class="ansi-red-fg"> me</span><span class="ansi-red-fg">,</span><span class="ansi-red-fg"> which</span><span class="ansi-red-fg"> is</span><span class="ansi-red-fg"> considered</span><span class="ansi-red-fg"> small</span><span class="ansi-red-fg"> talk</span><span class="ansi-red-fg">.","</span><span class="ansi-red-fg">category</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">small</span><span class="ansi-red-fg">_t</span><span class="ansi-red-fg">alk</span><span class="ansi-red-fg">"}</span><span class="ansi-red-fg">)
+<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"</span><span class="ansi-red-fg">th</span><span class="ansi-red-fg">ough</span><span class="ansi-red-fg">ts":</span><span class="ansi-red-fg"> "The us</span><span class="ansi-red-fg">er</span><span class="ansi-red-fg"> simpl</span><span class="ansi-red-fg">y said \"Hi!</span><span class="ansi-red-fg">\" which</span><span class="ansi-red-fg"> is a bas</span><span class="ansi-red-fg">ic greetin</span><span class="ansi-red-fg">g </span><span class="ansi-red-fg">and falls </span><span class="ansi-red-fg">under</span><span class="ansi-red-fg"> casual </span><span class="ansi-red-fg">conversati</span><span class="ansi-red-fg">on or </span><span class="ansi-red-fg">small tal</span><span class="ansi-red-fg">k."</span><span class="ansi-red-fg">, "category"</span><span class="ansi-red-fg">: "small_</span><span class="ansi-red-fg">ta</span><span class="ansi-red-fg">lk"}</span><span class="ansi-red-fg">)
 
-</span>Hello! 😊 How can I assist you today?
+</span>Hello! How are you doing today? Is there anything I can help you with?
 </pre>
 </div>
 </div>
@@ -1078,9 +1085,9 @@ This is a critical step!
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"</span><span class="ansi-red-fg">thought</span><span class="ansi-red-fg">s</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">The</span><span class="ansi-red-fg"> question</span><span class="ansi-red-fg"> is</span><span class="ansi-red-fg"> directly</span><span class="ansi-red-fg"> about</span><span class="ansi-red-fg"> Python</span><span class="ansi-red-fg">,</span><span class="ansi-red-fg"> a</span><span class="ansi-red-fg"> programming</span><span class="ansi-red-fg"> language</span><span class="ansi-red-fg">,</span><span class="ansi-red-fg"> so</span><span class="ansi-red-fg"> it</span><span class="ansi-red-fg"> fits</span><span class="ansi-red-fg"> the</span><span class="ansi-red-fg"> programming</span><span class="ansi-red-fg"> category</span><span class="ansi-red-fg">.","</span><span class="ansi-red-fg">category</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">program</span><span class="ansi-red-fg">ming</span><span class="ansi-red-fg">"}</span><span class="ansi-red-fg">)
+<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"th</span><span class="ansi-red-fg">ought</span><span class="ansi-red-fg">s": </span><span class="ansi-red-fg">"The user </span><span class="ansi-red-fg">is </span><span class="ansi-red-fg">asking \"Wh</span><span class="ansi-red-fg">at is</span><span class="ansi-red-fg"> Python?</span><span class="ansi-red-fg">\" which</span><span class="ansi-red-fg"> is clearl</span><span class="ansi-red-fg">y a question</span><span class="ansi-red-fg"> about a pro</span><span class="ansi-red-fg">gramming </span><span class="ansi-red-fg">language. Th</span><span class="ansi-red-fg">is falls </span><span class="ansi-red-fg">under the pr</span><span class="ansi-red-fg">ogramming ca</span><span class="ansi-red-fg">tegor</span><span class="ansi-red-fg">y as</span><span class="ansi-red-fg"> they'r</span><span class="ansi-red-fg">e aski</span><span class="ansi-red-fg">ng abou</span><span class="ansi-red-fg">t Pyth</span><span class="ansi-red-fg">on, </span><span class="ansi-red-fg">which is a w</span><span class="ansi-red-fg">ell-kn</span><span class="ansi-red-fg">own program</span><span class="ansi-red-fg">ming lang</span><span class="ansi-red-fg">uage."</span><span class="ansi-red-fg">, "ca</span><span class="ansi-red-fg">tegory": "p</span><span class="ansi-red-fg">rogramming"}</span><span class="ansi-red-fg">)
 
-</span>Python is a high-level, general-purpose programming language known for its simplicity, readability, and versatility. It supports multiple programming paradigms, including procedural, object-oriented, and functional programming. Python is widely used for web development, data science, artificial intelligence, automation, and much more, thanks to its extensive standard library and vibrant ecosystem of third-party packages.
+</span>Python is a high-level, interpreted programming language known for its simple syntax and versatility, making it popular for web development, data science, automation, and many other applications.
 </pre>
 </div>
 </div>
@@ -1092,9 +1099,9 @@ This is a critical step!
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"</span><span class="ansi-red-fg">thought</span><span class="ansi-red-fg">s</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">The</span><span class="ansi-red-fg"> message</span><span class="ansi-red-fg"> is</span><span class="ansi-red-fg"> a</span><span class="ansi-red-fg"> general</span><span class="ansi-red-fg">,</span><span class="ansi-red-fg"> non</span><span class="ansi-red-fg">-program</span><span class="ansi-red-fg">ming</span><span class="ansi-red-fg"> question</span><span class="ansi-red-fg"> related</span><span class="ansi-red-fg"> to</span><span class="ansi-red-fg"> arithmetic</span><span class="ansi-red-fg">.","</span><span class="ansi-red-fg">category</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">other</span><span class="ansi-red-fg">"}</span><span class="ansi-red-fg">)
+<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"thou</span><span class="ansi-red-fg">ghts": "Thi</span><span class="ansi-red-fg">s is a </span><span class="ansi-red-fg">ba</span><span class="ansi-red-fg">sic </span><span class="ansi-red-fg">arithmetic</span><span class="ansi-red-fg"> q</span><span class="ansi-red-fg">uestion </span><span class="ansi-red-fg">as</span><span class="ansi-red-fg">king </span><span class="ansi-red-fg">for t</span><span class="ansi-red-fg">he sum of 2</span><span class="ansi-red-fg">+2. It's </span><span class="ansi-red-fg">not</span><span class="ansi-red-fg"> small tal</span><span class="ansi-red-fg">k (l</span><span class="ansi-red-fg">ike greetin</span><span class="ansi-red-fg">gs or cas</span><span class="ansi-red-fg">ual </span><span class="ansi-red-fg">conversati</span><span class="ansi-red-fg">on), </span><span class="ansi-red-fg">and it's not</span><span class="ansi-red-fg"> a</span><span class="ansi-red-fg">bout pr</span><span class="ansi-red-fg">ogramm</span><span class="ansi-red-fg">ing (no me</span><span class="ansi-red-fg">nti</span><span class="ansi-red-fg">on of code</span><span class="ansi-red-fg">, la</span><span class="ansi-red-fg">nguages, l</span><span class="ansi-red-fg">ibraries, </span><span class="ansi-red-fg">etc.). This</span><span class="ansi-red-fg"> falls i</span><span class="ansi-red-fg">nt</span><span class="ansi-red-fg">o the \"othe</span><span class="ansi-red-fg">r\" categor</span><span class="ansi-red-fg">y as </span><span class="ansi-red-fg">it's a </span><span class="ansi-red-fg">mat</span><span class="ansi-red-fg">hematical</span><span class="ansi-red-fg"> question.</span><span class="ansi-red-fg">"</span><span class="ansi-red-fg">, </span><span class="ansi-red-fg">"cate</span><span class="ansi-red-fg">gory": </span><span class="ansi-red-fg">"othe</span><span class="ansi-red-fg">r"}</span><span class="ansi-red-fg">)
 
-</span>I'm sorry, but your message is off-topic. Please return to the topic at hand.
+</span>I appreciate your question, but it appears to be off-topic for our current conversation. We should focus on staying on the subject we were discussing. Please feel free to redirect your question or comment back to the main topic at hand.
 </pre>
 </div>
 </div>
@@ -1106,11 +1113,13 @@ This is a critical step!
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"</span><span class="ansi-red-fg">thought</span><span class="ansi-red-fg">s</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">The</span><span class="ansi-red-fg"> message</span><span class="ansi-red-fg"> contains</span><span class="ansi-red-fg"> a</span><span class="ansi-red-fg"> small</span><span class="ansi-red-fg"> talk</span><span class="ansi-red-fg"> element</span><span class="ansi-red-fg"> but</span><span class="ansi-red-fg"> also</span><span class="ansi-red-fg"> includes</span><span class="ansi-red-fg"> a</span><span class="ansi-red-fg"> simple</span><span class="ansi-red-fg"> math</span><span class="ansi-red-fg"> question</span><span class="ansi-red-fg"> which</span><span class="ansi-red-fg"> doesn't</span><span class="ansi-red-fg"> relate</span><span class="ansi-red-fg"> to</span><span class="ansi-red-fg"> programming</span><span class="ansi-red-fg">.","</span><span class="ansi-red-fg">category</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">small</span><span class="ansi-red-fg">_t</span><span class="ansi-red-fg">alk</span><span class="ansi-red-fg">"}</span><span class="ansi-red-fg">)
+<pre><span class="ansi-red-fg">CategoryOutput(</span><span class="ansi-red-fg">{"thoug</span><span class="ansi-red-fg">hts"</span><span class="ansi-red-fg">: "This me</span><span class="ansi-red-fg">ssag</span><span class="ansi-red-fg">e contains</span><span class="ansi-red-fg"> both smal</span><span class="ansi-red-fg">l talk </span><span class="ansi-red-fg">(\"Ho</span><span class="ansi-red-fg">w are</span><span class="ansi-red-fg"> you today</span><span class="ansi-red-fg">?\") and a </span><span class="ansi-red-fg">basic mat</span><span class="ansi-red-fg">h </span><span class="ansi-red-fg">questi</span><span class="ansi-red-fg">on</span><span class="ansi-red-fg"> (\"wh</span><span class="ansi-red-fg">at is 2+</span><span class="ansi-red-fg">2\"). W</span><span class="ansi-red-fg">hil</span><span class="ansi-red-fg">e the mat</span><span class="ansi-red-fg">h questio</span><span class="ansi-red-fg">n </span><span class="ansi-red-fg">could be co</span><span class="ansi-red-fg">nside</span><span class="ansi-red-fg">red e</span><span class="ansi-red-fg">ducation</span><span class="ansi-red-fg">al, it's </span><span class="ansi-red-fg">very simple </span><span class="ansi-red-fg">arith</span><span class="ansi-red-fg">metic ra</span><span class="ansi-red-fg">ther t</span><span class="ansi-red-fg">han p</span><span class="ansi-red-fg">rogrammin</span><span class="ansi-red-fg">g-spe</span><span class="ansi-red-fg">cif</span><span class="ansi-red-fg">ic content</span><span class="ansi-red-fg">. The </span><span class="ansi-red-fg">primary gre</span><span class="ansi-red-fg">eting </span><span class="ansi-red-fg">natu</span><span class="ansi-red-fg">re of </span><span class="ansi-red-fg">the me</span><span class="ansi-red-fg">ssag</span><span class="ansi-red-fg">e and the c</span><span class="ansi-red-fg">asual </span><span class="ansi-red-fg">wa</span><span class="ansi-red-fg">y both part</span><span class="ansi-red-fg">s are </span><span class="ansi-red-fg">presented su</span><span class="ansi-red-fg">gg</span><span class="ansi-red-fg">es</span><span class="ansi-red-fg">ts this</span><span class="ansi-red-fg"> is pri</span><span class="ansi-red-fg">ma</span><span class="ansi-red-fg">ril</span><span class="ansi-red-fg">y small t</span><span class="ansi-red-fg">alk with</span><span class="ansi-red-fg"> a casu</span><span class="ansi-red-fg">al ques</span><span class="ansi-red-fg">tion added</span><span class="ansi-red-fg">."</span><span class="ansi-red-fg">, "categ</span><span class="ansi-red-fg">or</span><span class="ansi-red-fg">y": "</span><span class="ansi-red-fg">small_t</span><span class="ansi-red-fg">alk"}</span><span class="ansi-red-fg">)
 
-</span>I'm just a program, so I don’t have feelings, but thank you for asking! 😊 As for your question:  
+</span>I'm doing well, thank you for asking! I'm here and ready to help with whatever you need.
 
-**2 + 2 = 4**! 🎉 Let me know if you have more questions!
+
+
+And 2+2 = 4.
 </pre>
 </div>
 </div>
@@ -1146,7 +1155,7 @@ This is a critical step!
 <h3 class="anchored" data-anchor-id="the-task-splitter">The Task Splitter</h3>
 <p>Another common task is for an agent to split work and delegate to multiple downstream agents. Let’s do that next!</p>
 <p>We’ll use a silly example, for simplicity and brevity, where we’ll split the user’s message into individual sentences, then prompt an AI <code>model</code> one-at-a-time on each individual sentence. While this is a silly example, it shows how you can split up a problem for multiple downstream subagents.</p>
-<div id="f1721848-54a8-4ffd-b9a7-7887b1e13a57" class="cell" data-execution_count="17">
+<div id="f1721848-54a8-4ffd-b9a7-7887b1e13a57" class="cell" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> splitter(</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
@@ -1179,7 +1188,7 @@ This is a critical step!
 <span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Wrap *everything* that happened above into the return:</span></span>
 <span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> parallel_runs(<span class="st">'splitter'</span>, downstream_runs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="974bc078-75fd-4958-ade4-d46b14cf0ae7" class="cell" data-execution_count="18">
+<div id="974bc078-75fd-4958-ade4-d46b14cf0ae7" class="cell" data-execution_count="21">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> tui_input_loop(binder(splitter))   <span class="co"># type: ignore[top-level-await]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdin">
 <div class="ansi-escaped-output">
@@ -1189,7 +1198,7 @@ This is a critical step!
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre>Hello! How can I assist you today? 😊Not much, just here and ready to help! What's on your mind? 😊I'm just a virtual assistant, so I don't have feelings, but thanks for asking! How can I assist you today?2 + 2 = 4
+<pre>Hello! How are you doing today? Is there anything I can help you with?Hello! Not much going on here - just ready to chat and help with whatever you'd like to talk about or work on. How are you doing today? What's on your mind?I'm doing well, thank you for asking! I'm here and ready to help with whatever you'd like to discuss or work on. How are you doing today?2 + 2 = 4
 </pre>
 </div>
 </div>
@@ -1201,7 +1210,11 @@ This is a critical step!
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre>You're welcome! Do you need help with anything? 😊I can't recall or access past interactions in this chat. Could you please repeat or clarify what you said?
+<pre>You're welcome! Feel free to ask if you need help with anything else.I don't have any record of previous messages from you in our conversation. Your message "What did I just say?" appears to be the first thing you've said to me in this chat session. 
+
+
+
+If you meant to reference something you said earlier, could you please repeat it or provide more context? I'm happy to help once I understand what you're referring to.
 </pre>
 </div>
 </div>

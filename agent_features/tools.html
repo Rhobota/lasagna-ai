@@ -261,12 +261,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../agent_features/routing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Agent Routing</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../agent_features/parallelizing.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Parallelizing</span></a>
   </div>
@@ -281,6 +275,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../agent_features/caching.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Caching Decorator</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent_features/functional_agents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functional Agents</span></a>
   </div>
 </li>
       </ul>
@@ -314,8 +314,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../recipes/layered_agents.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Layered Agents Example</span></a>
+  <a href="../recipes/agents_as_tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agents as Tools Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/routing_agent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agent Routing Example</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -473,6 +479,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#layered-agents" id="toc-layered-agents" class="nav-link" data-scroll-target="#layered-agents">Layered Agents</a>
   <ul class="collapse">
   <li><a href="#agents-as-tools" id="toc-agents-as-tools" class="nav-link" data-scroll-target="#agents-as-tools">Agents as Tools</a></li>
+  <li><a href="#agent-routing" id="toc-agent-routing" class="nav-link" data-scroll-target="#agent-routing">Agent Routing</a></li>
   </ul></li>
   <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next Steps</a></li>
   </ul>
@@ -532,7 +539,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.environ.get(<span class="st">'OPENAI_API_KEY'</span>):</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using OpenAI'</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> known_models.openai_gpt_4o_binder</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> known_models.openai_gpt_5_mini_binder</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> os.environ.get(<span class="st">'ANTHROPIC_API_KEY'</span>):</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using Anthropic'</span>)</span>
@@ -580,14 +587,14 @@ Docstring Format
 <section id="pass-the-tool-to-the-ai-model" class="level3">
 <h3 class="anchored" data-anchor-id="pass-the-tool-to-the-ai-model">Pass the Tool to the AI Model</h3>
 <p>It is your agent’s job to decide which tools the AI has access to. When your agent does <code>model.run(...)</code>, it passes zero or more tools to the AI model. Here’s a quick demo!</p>
-<div id="fb10c8ea-f433-4744-a6f9-fab2bc999922" class="cell" data-execution_count="4">
+<div id="fb10c8ea-f433-4744-a6f9-fab2bc999922" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> math_agent(</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    prev_runs: <span class="bu">list</span>[AgentRun],</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> AgentRun:</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> recursive_extract_messages(prev_runs, from_tools<span class="op">=</span><span class="va">False</span>, from_extraction<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> override_system_prompt(messages, <span class="st">'You are a math assistant.'</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> override_system_prompt(messages, <span class="st">'You are a math assistant. Your name is Bob. Answer all prompts briefly.'</span>)</span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    new_messages <span class="op">=</span> <span class="cf">await</span> model.run(</span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        event_callback,</span>
@@ -599,7 +606,7 @@ Docstring Format
 <span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> flat_messages(<span class="st">'math_agent'</span>, new_messages)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="4e82de9c-c30a-4530-b31b-9b978a124604" class="cell" data-execution_count="5">
+<div id="4e82de9c-c30a-4530-b31b-9b978a124604" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> tui_input_loop(binder(math_agent))   <span class="co"># type: ignore[top-level-await]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdin">
 <div class="ansi-escaped-output">
@@ -609,7 +616,7 @@ Docstring Format
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre>Hello! How can I assist you today?
+<pre>Hi — I'm Bob. How can I help with math today?
 </pre>
 </div>
 </div>
@@ -621,23 +628,23 @@ Docstring Format
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre>I'm your math assistant, here to help you with calculations, solve math problems, evaluate expressions, and more! Let me know how I can assist. 😊
+<pre>I'm Bob, an AI math assistant. I can help solve problems, explain concepts, check work, and show steps. What math do you need help with?
 </pre>
 </div>
 </div>
 <div class="cell-output cell-output-stdin">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-green-fg ansi-bold">&gt;  What is pi to the pi? (no latex)
+<pre><span class="ansi-green-fg ansi-bold">&gt;  What is pi to the pi?
 </span></pre>
 </div>
 </div>
 <div class="cell-output cell-output-stdout">
 <div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg">evaluate_math_expression(</span><span class="ansi-red-fg">{"</span><span class="ansi-red-fg">expression</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">pi</span><span class="ansi-red-fg"> **</span><span class="ansi-red-fg"> pi</span><span class="ansi-red-fg">"}</span><span class="ansi-red-fg">)
+<pre><span class="ansi-red-fg">evaluate_math_expression(</span><span class="ansi-red-fg">{"</span><span class="ansi-red-fg">expression</span><span class="ansi-red-fg">":"</span><span class="ansi-red-fg">pi</span><span class="ansi-red-fg">**</span><span class="ansi-red-fg">pi</span><span class="ansi-red-fg">"}</span><span class="ansi-red-fg">)
 
 </span><span class="ansi-blue-fg"> -&gt; 36.46215960720791
 
-</span>Pi raised to the power of pi is approximately 36.4622.
+</span>π^π = π^π ≈ 36.46215960720791.
 </pre>
 </div>
 </div>
@@ -772,7 +779,12 @@ Lasagna will Validate Your Tool’s Parameters
 <section id="agents-as-tools" class="level3">
 <h3 class="anchored" data-anchor-id="agents-as-tools">Agents as Tools</h3>
 <p>A similar founding idea was that you should be able to layer agents by passing agents as tools to other agents. So, you can!</p>
-<p>See the <a href="../recipes/layered_agents.html">Layered Agents</a> recipe for a working example.</p>
+<p>See the <a href="../recipes/agents_as_tools.html">Agents as Tools</a> recipe for a working example.</p>
+</section>
+<section id="agent-routing" class="level3">
+<h3 class="anchored" data-anchor-id="agent-routing">Agent Routing</h3>
+<p>Creating an agent whose purpose is to route to one (or many) downstream agents is also a key concept for any “layered” system.</p>
+<p>See the <a href="../recipes/routing_agent.html">Agent Routing</a> recipe for a working example.</p>
 </section>
 </section>
 <section id="next-steps" class="level2">

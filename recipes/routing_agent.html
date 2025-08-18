@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Layered Agents Example – Lasagna AI: Documentation</title>
+<title>Agent Routing Example – Lasagna AI: Documentation</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -66,7 +66,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../recipes/committee.html" rel="next">
-<link href="../recipes/sms.html" rel="prev">
+<link href="../recipes/agents_as_tools.html" rel="prev">
 <link href="../assets/Lasagna AI - Logo - Square - SMOOSHED.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -108,7 +108,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <link rel="stylesheet" href="../styles.css">
-<meta property="og:title" content="Layered Agents Example – Lasagna AI: Documentation">
+<meta property="og:title" content="Agent Routing Example – Lasagna AI: Documentation">
 <meta property="og:site_name" content="Lasagna AI: Documentation">
 </head>
 
@@ -158,7 +158,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../recipes/rag.html">😋 Recipes</a></li><li class="breadcrumb-item"><a href="../recipes/layered_agents.html">Layered Agents Example</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../recipes/rag.html">😋 Recipes</a></li><li class="breadcrumb-item"><a href="../recipes/routing_agent.html">Agent Routing Example</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -260,12 +260,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../agent_features/routing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Agent Routing</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../agent_features/parallelizing.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Parallelizing</span></a>
   </div>
@@ -280,6 +274,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../agent_features/caching.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Caching Decorator</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent_features/functional_agents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functional Agents</span></a>
   </div>
 </li>
       </ul>
@@ -313,8 +313,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../recipes/layered_agents.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Layered Agents Example</span></a>
+  <a href="../recipes/agents_as_tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agents as Tools Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/routing_agent.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Agent Routing Example</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -459,9 +465,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../recipes/rag.html">😋 Recipes</a></li><li class="breadcrumb-item"><a href="../recipes/layered_agents.html">Layered Agents Example</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../recipes/rag.html">😋 Recipes</a></li><li class="breadcrumb-item"><a href="../recipes/routing_agent.html">Agent Routing Example</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Layered Agents Example</h1>
+<h1 class="title">Agent Routing Example</h1>
 </div>
 
 
@@ -478,7 +484,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div id="db75e279-20a8-427e-bdab-e014f818bcc6" class="cell" data-execution_count="1">
+<div id="d0f90b80-ebc5-49ae-acc7-5d6a9991b296" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 🚧 Under Construction 🏗️</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
@@ -886,8 +892,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../recipes/sms.html" class="pagination-link" aria-label="Twilio SMS Example">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Twilio SMS Example</span>
+      <a href="../recipes/agents_as_tools.html" class="pagination-link" aria-label="Agents as Tools Example">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Agents as Tools Example</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
@@ -904,7 +910,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>   
     <div class="nav-footer-center">
 <p>Copyright © 2025 (<a href="https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt">MIT License</a>)</p>
-<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/recipes/layered_agents.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/recipes/layered_agents.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/recipes/routing_agent.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/recipes/routing_agent.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

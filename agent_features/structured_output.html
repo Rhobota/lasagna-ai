@@ -262,12 +262,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../agent_features/routing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Agent Routing</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../agent_features/parallelizing.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Parallelizing</span></a>
   </div>
@@ -282,6 +276,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../agent_features/caching.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Caching Decorator</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent_features/functional_agents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functional Agents</span></a>
   </div>
 </li>
       </ul>
@@ -315,8 +315,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../recipes/layered_agents.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Layered Agents Example</span></a>
+  <a href="../recipes/agents_as_tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agents as Tools Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/routing_agent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agent Routing Example</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -517,7 +523,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.environ.get(<span class="st">'OPENAI_API_KEY'</span>):</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using OpenAI'</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> known_models.openai_gpt_4o_binder</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> known_models.openai_gpt_5_mini_binder</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> os.environ.get(<span class="st">'ANTHROPIC_API_KEY'</span>):</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using Anthropic'</span>)</span>
@@ -619,7 +625,7 @@ We Recommend Pydantic
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="st">And the dish ran away with the spoon.</span></span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>.strip()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="a317d432-15e2-4a60-84ef-464a378435e3" class="cell" data-execution_count="14">
+<div id="a317d432-15e2-4a60-84ef-464a378435e3" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>prev_runs: <span class="bu">list</span>[AgentRun] <span class="op">=</span> [</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    flat_messages(</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">'input'</span>,</span>
@@ -647,10 +653,13 @@ We Recommend Pydantic
 <span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'   '</span>, construction)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class '__main__.ExtractionModel'&gt;
-A whimsical poem describing a cat with a fiddle, a cow jumping over the moon, a laughing dog, and a dish running away with a spoon.
-    subject='The cow' verb='jumped' object='over the moon'
-    subject='The little dog' verb='laughed' object='To see such sport'
-    subject='The dish' verb='ran away' object='with the spoon'</code></pre>
+Extracted main clauses and simple subject-verb-object (or equivalent) constructions from the nursery rhyme 'Hey Diddle Diddle'. Identifies interjection, elliptical phrases, finite clauses, intransitive verbs, an infinitival clause, and a prepositional complement.
+    subject='(interjection)' verb='hey diddle (exclamation)' object=''
+    subject='the cat and the fiddle' verb='(elliptical/none)' object=''
+    subject='the cow' verb='jumped' object='over the moon'
+    subject='the little dog' verb='laughed' object=''
+    subject='(implicit subject for infinitive)' verb='to see' object='such sport'
+    subject='the dish' verb='ran away' object='with the spoon'</code></pre>
 </div>
 </div>
 </section>
@@ -659,7 +668,7 @@ A whimsical poem describing a cat with a fiddle, a cow jumping over the moon, a 
 <p>The steps above are designed such that you can <em>layer</em> agents. There’s a lot of “wrapping” and “unwrapping” that goes on.</p>
 <p>However, that can be overkill if you only want a <em>simple</em> (“easy”) extraction method.</p>
 <p>Here’s an “easy” way to do it, if you don’t care about building complex layered agents:</p>
-<div id="bd84a28c-4377-463d-b68b-8d187fe3552a" class="cell" data-execution_count="6">
+<div id="bd84a28c-4377-463d-b68b-8d187fe3552a" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> <span class="cf">await</span> easy_extract(binder, PROMPT, ExtractionModel)  <span class="co"># type: ignore[top-level-await]</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">isinstance</span>(result, ExtractionModel)</span>
@@ -671,10 +680,13 @@ A whimsical poem describing a cat with a fiddle, a cow jumping over the moon, a 
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'   '</span>, construction)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class '__main__.ExtractionModel'&gt;
-This is a whimsical nursery rhyme featuring anthropomorphized characters engaged in playful and surreal activities.
-    subject='The cow' verb='jumped over' object='the moon'
-    subject='The little dog' verb='laughed' object='to see such sport'
-    subject='The dish' verb='ran away with' object='the spoon'</code></pre>
+Extract basic subject-verb-object and notable clause constructions from the nursery rhyme 'Hey Diddle Diddle'.
+    subject="(exclamation) 'Hey'" verb='diddle (vocative/nonsense)' object=''
+    subject='The cat and the fiddle' verb='' object=''
+    subject='The cow' verb='jumped' object='over the moon'
+    subject='The little dog' verb='laughed' object=''
+    subject='(implicit: the little dog)' verb='to see / see' object='such sport'
+    subject='The dish' verb='ran away' object='with the spoon'</code></pre>
 </div>
 </div>
 </section>

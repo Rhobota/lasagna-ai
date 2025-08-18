@@ -65,7 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../agent_features/routing.html" rel="next">
+<link href="../agent_features/parallelizing.html" rel="next">
 <link href="../agent_features/structured_output.html" rel="prev">
 <link href="../assets/Lasagna AI - Logo - Square - SMOOSHED.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
@@ -261,12 +261,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../agent_features/routing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Agent Routing</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../agent_features/parallelizing.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Parallelizing</span></a>
   </div>
@@ -281,6 +275,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../agent_features/caching.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Caching Decorator</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent_features/functional_agents.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Functional Agents</span></a>
   </div>
 </li>
       </ul>
@@ -314,8 +314,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../recipes/layered_agents.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Layered Agents Example</span></a>
+  <a href="../recipes/agents_as_tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agents as Tools Example</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../recipes/routing_agent.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Agent Routing Example</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -454,8 +460,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#agents-as-tools" id="toc-agents-as-tools" class="nav-link active" data-scroll-target="#agents-as-tools">Agents as Tools</a></li>
+  <li><a href="#agent-routing" id="toc-agent-routing" class="nav-link" data-scroll-target="#agent-routing">Agent Routing</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/agent_features/layering.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/agent_features/layering.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -479,12 +492,338 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div id="d0f90b80-ebc5-49ae-acc7-5d6a9991b296" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 🚧 Under Construction 🏗️</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Agents for your agents!</strong></p>
+<p>There are two main ways to layer agents together into a multi-agent system:</p>
+<ol type="1">
+<li>Agents as Tools</li>
+<li>Agent Routing</li>
+</ol>
+<p>We’ll discuss each in their own sections below.</p>
+<div id="9e6a7441-3c36-4c4c-9cc1-04532c7f8522" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This page will use the following imports:</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> Model, EventCallback, AgentRun</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> (</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    recursive_extract_messages,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    override_system_prompt,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    flat_messages,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    extraction,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    chained_runs,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    BoundAgentCallable,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> known_models</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna.tui <span class="im">import</span> tui_input_loop</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pydantic <span class="im">import</span> BaseModel, Field</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> enum <span class="im">import</span> Enum</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The key idea: <strong>Agents for your agents!</strong></p>
+<p>We need to set up our “binder” (see the <a href="../quickstart.html">quickstart guide</a> for what this is).</p>
+<div id="cb773ffd-bd3b-48de-b2da-eeac26bc2a73" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> os.environ.get(<span class="st">'ANTHROPIC_API_KEY'</span>):</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using Anthropic'</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> known_models.anthropic_claude_sonnet_4_binder</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> os.environ.get(<span class="st">'OPENAI_API_KEY'</span>):</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Using OpenAI'</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> known_models.openai_gpt_5_mini_binder</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="va">False</span>, <span class="st">"Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is set! We need at least one to do this demo."</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Using Anthropic</code></pre>
+</div>
+</div>
+<section id="agents-as-tools" class="level2">
+<h2 class="anchored" data-anchor-id="agents-as-tools">Agents as Tools</h2>
+<p>The simplest way to combine agents is to pass one (or more) agents as “tools” to another agent.</p>
+<p>Here is a simple example:</p>
+<div id="86245aed-148e-4fea-b337-dac9dda4e8da" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> joke_specialist(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    prev_runs: <span class="bu">list</span>[AgentRun],</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> AgentRun:</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Use this agent when the user seems discouraged and needs to feel better.</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">    This tool will return the perfect joke for you to use to cheer the user up.</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> recursive_extract_messages(prev_runs, from_tools<span class="op">=</span><span class="va">False</span>, from_extraction<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> override_system_prompt(messages, <span class="st">"You are a joke-telling specialist. You always tell a joke related to the user's most recent message. Your response must contain **only** the joke."</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    new_messages <span class="op">=</span> <span class="cf">await</span> model.run(event_callback, messages, tools<span class="op">=</span>[])</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> flat_messages(<span class="st">'joke_specialist'</span>, new_messages)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> root_agent(</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    prev_runs: <span class="bu">list</span>[AgentRun],</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> AgentRun:</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> recursive_extract_messages(prev_runs, from_tools<span class="op">=</span><span class="va">False</span>, from_extraction<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> override_system_prompt(messages, <span class="st">'You are a generic assistant. Answer all prompts briefly. Use your tools when necessary.'</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    new_messages <span class="op">=</span> <span class="cf">await</span> model.run(</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        event_callback,</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        messages,</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        tools<span class="op">=</span>[</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>            joke_specialist,   <span class="co"># &lt;-- 🔨 downstream agent as a tool</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> flat_messages(<span class="st">'root_agent'</span>, new_messages)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="7a366a5f-dfd8-46f2-ad80-40c15e01726a" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> tui_input_loop(binder(root_agent))   <span class="co"># type: ignore[top-level-await]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdin">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-green-fg ansi-bold">&gt;  Hi!
+</span></pre>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre>Hello! How can I help you today?
+</pre>
+</div>
+</div>
+<div class="cell-output cell-output-stdin">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-green-fg ansi-bold">&gt;  Oh, I'm sick. :(
+</span></pre>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre>I'm sorry to hear you're not feeling well! Being sick is never fun. Let me try to cheer you up a little bit.<span class="ansi-red-fg">joke_specialist(</span><span class="ansi-red-fg">)
+
+</span>Why don't sick people ever win at poker?
 
 
+
+Because they always fold! 🤧<span class="ansi-blue-fg"> -&gt; Why don't sick people ever win at poker?
+
+
+
+Because they always fold! 🤧
+
+</span>Here's a little joke to hopefully bring a smile to your face: Why don't sick people ever win at poker? Because they always fold! 🤧
+
+
+
+I hope you feel better soon! Make sure to get plenty of rest and stay hydrated. Take care of yourself! 💙
+</pre>
+</div>
+</div>
+<div class="cell-output cell-output-stdin">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-green-fg ansi-bold">&gt;  exit
+</span></pre>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre></pre>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Why Two Agents?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>While this example is simple (and a bit contrived), it still demonstrates the correct <em>idea</em>: <strong>Split up responsibilities between agents.</strong></p>
+<p>How are responsibilities split in the example above?</p>
+<ul>
+<li><code>root_agent()</code>: Identifies <em>when</em> the user needs to be cheered up.</li>
+<li><code>joke_specialist()</code>: Identifies <em>how</em> to cheer the user up.</li>
+</ul>
+<p>It’s best to separate responsibilities for at least two reasons:</p>
+<ol type="1">
+<li><strong>Better performance:</strong> Invoking an AI model twice, each with a narrow goal, should boost performance (at the expense of more tokens).</li>
+<li><strong>Safer modification:</strong> If you decide to <em>modify</em> one of the agents, you can without too much fear of breaking the <em>other</em> agents! Whereas, if this was all in a single agent, you might break the “when” by trying to improve the “how” (or vice versa). Yikes.</li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Bound vs Unbound Agents
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You are free to pass either <em>bound</em> or <em>unbound</em> agents as tools.</p>
+<p>If <em>bound</em>, it will use the bound model (of course).</p>
+<p>If <em>unbound</em>, it will use the model of the calling agent.</p>
+</div>
+</div>
+<p>See the <a href="../recipes/agents_as_tools.html">Agents as Tools</a> recipe for another example.</p>
+</section>
+<section id="agent-routing" class="level2">
+<h2 class="anchored" data-anchor-id="agent-routing">Agent Routing</h2>
+<p>The most flexible way to combine agents is to have agents delegate to one another (“routing”). The router agent’s job is to delegate. It might delegate <em>wholesale</em>, or it might <em>transform</em> the prompt before delegating. It might delegate to a <em>single</em> downstream agent, or to <em>several</em> downstream agents. This is what makes it so flexible!</p>
+<p>The recipe for routing is to combine <em>structured output</em> with good ol’ programming.</p>
+<p>Here is an example, extending the example above to be more flexible:</p>
+<div id="9aacaccb-9677-41e2-a922-2c9e6be6680c" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Mood(Enum):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    happy <span class="op">=</span> <span class="st">'happy'</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    sad <span class="op">=</span> <span class="st">'sad'</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    neutral <span class="op">=</span> <span class="st">'neutral'</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MessageClassification(BaseModel):</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    thoughts: <span class="bu">str</span> <span class="op">=</span> Field(description<span class="op">=</span><span class="st">"Your free-form thoughts about the user's most recent message, and what mood the user may be in."</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    mood: Mood <span class="op">=</span> Field(description<span class="op">=</span><span class="st">"Your determination of the user's mood based on their most recent message. If it is not clear, output 'neutral'."</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RouterAgent:</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        cheer_up_agent: BoundAgentCallable,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        default_agent: BoundAgentCallable,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.cheer_up_agent <span class="op">=</span> cheer_up_agent</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.default_agent <span class="op">=</span> default_agent</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">async</span> <span class="kw">def</span> <span class="fu">__call__</span>(</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        model: Model,</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        event_callback: EventCallback,</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        prev_runs: <span class="bu">list</span>[AgentRun],</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> AgentRun:</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        messages <span class="op">=</span> recursive_extract_messages(prev_runs, from_tools<span class="op">=</span><span class="va">False</span>, from_extraction<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        messages <span class="op">=</span> override_system_prompt(messages, <span class="st">"You classify the user's mood."</span>)</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        message, result <span class="op">=</span> <span class="cf">await</span> model.extract(</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>            event_callback,</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>            messages <span class="op">=</span> messages,</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>            extraction_type <span class="op">=</span> MessageClassification,</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        extraction_run <span class="op">=</span> extraction(<span class="st">'router_agent'</span>, [message], result)</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>        downstream_agent <span class="op">=</span> (<span class="va">self</span>.cheer_up_agent <span class="cf">if</span> result.mood <span class="op">==</span> Mood.sad <span class="cf">else</span> <span class="va">self</span>.default_agent)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>        downstream_run <span class="op">=</span> <span class="cf">await</span> downstream_agent(event_callback, prev_runs)</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> chained_runs(<span class="st">'router_agent'</span>, [extraction_run, downstream_run])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="52ec3462-50c8-49c0-8d5d-b5b743437fc7" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> joke_telling_agent(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    prev_runs: <span class="bu">list</span>[AgentRun],</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> AgentRun:</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> recursive_extract_messages(prev_runs, from_tools<span class="op">=</span><span class="va">False</span>, from_extraction<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> override_system_prompt(messages, <span class="st">"You are a joke-telling specialist. You always tell a joke related to the user's most recent message. Cheer the user up by telling a joke!"</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    new_messages <span class="op">=</span> <span class="cf">await</span> model.run(event_callback, messages, tools<span class="op">=</span>[])</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> flat_messages(<span class="st">'joke_telling_agent'</span>, new_messages)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> generic_agent(</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    prev_runs: <span class="bu">list</span>[AgentRun],</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> AgentRun:</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> recursive_extract_messages(prev_runs, from_tools<span class="op">=</span><span class="va">False</span>, from_extraction<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> override_system_prompt(messages, <span class="st">"You are a helpful assistant."</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    new_messages <span class="op">=</span> <span class="cf">await</span> model.run(event_callback, messages, tools<span class="op">=</span>[])</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> flat_messages(<span class="st">'generic_agent'</span>, new_messages)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>my_agent <span class="op">=</span> RouterAgent(</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    cheer_up_agent <span class="op">=</span> binder(joke_telling_agent),</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    default_agent <span class="op">=</span> binder(generic_agent),</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> tui_input_loop(binder(my_agent))   <span class="co"># type: ignore[top-level-await]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdin">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-green-fg ansi-bold">&gt;  Hi!
+</span></pre>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-red-fg">MessageClassification(</span><span class="ansi-red-fg">{"thoughts":</span><span class="ansi-red-fg"> "Th</span><span class="ansi-red-fg">e user sent </span><span class="ansi-red-fg">a simple</span><span class="ansi-red-fg"> greeting \"</span><span class="ansi-red-fg">Hi!\" </span><span class="ansi-red-fg">which </span><span class="ansi-red-fg">is a friendl</span><span class="ansi-red-fg">y and posit</span><span class="ansi-red-fg">ive wa</span><span class="ansi-red-fg">y to start</span><span class="ansi-red-fg"> a convers</span><span class="ansi-red-fg">ation. There</span><span class="ansi-red-fg">'s nothi</span><span class="ansi-red-fg">ng in the</span><span class="ansi-red-fg"> mes</span><span class="ansi-red-fg">sage th</span><span class="ansi-red-fg">at s</span><span class="ansi-red-fg">uggest</span><span class="ansi-red-fg">s sa</span><span class="ansi-red-fg">dnes</span><span class="ansi-red-fg">s or n</span><span class="ansi-red-fg">egati</span><span class="ansi-red-fg">vity</span><span class="ansi-red-fg">, and the</span><span class="ansi-red-fg"> excl</span><span class="ansi-red-fg">amatio</span><span class="ansi-red-fg">n point </span><span class="ansi-red-fg">adds a b</span><span class="ansi-red-fg">it of en</span><span class="ansi-red-fg">thusi</span><span class="ansi-red-fg">asm or chee</span><span class="ansi-red-fg">rful</span><span class="ansi-red-fg">ness</span><span class="ansi-red-fg"> to t</span><span class="ansi-red-fg">he</span><span class="ansi-red-fg"> gree</span><span class="ansi-red-fg">tin</span><span class="ansi-red-fg">g. Thi</span><span class="ansi-red-fg">s seems </span><span class="ansi-red-fg">like a neu</span><span class="ansi-red-fg">tral to sli</span><span class="ansi-red-fg">gh</span><span class="ansi-red-fg">tly positi</span><span class="ansi-red-fg">ve interac</span><span class="ansi-red-fg">tion."</span><span class="ansi-red-fg">, "</span><span class="ansi-red-fg">mood"</span><span class="ansi-red-fg">: "hap</span><span class="ansi-red-fg">py"}</span><span class="ansi-red-fg">)
+
+</span>Hello! How are you doing today? Is there anything I can help you with?
+</pre>
+</div>
+</div>
+<div class="cell-output cell-output-stdin">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-green-fg ansi-bold">&gt;  Oh, I'm sick. :(
+</span></pre>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-red-fg">MessageClassification(</span><span class="ansi-red-fg">{"though</span><span class="ansi-red-fg">ts": "</span><span class="ansi-red-fg">The user m</span><span class="ansi-red-fg">entioned</span><span class="ansi-red-fg"> they a</span><span class="ansi-red-fg">re sic</span><span class="ansi-red-fg">k and used</span><span class="ansi-red-fg"> a sa</span><span class="ansi-red-fg">d face emo</span><span class="ansi-red-fg">ticon</span><span class="ansi-red-fg"> \":(\" wh</span><span class="ansi-red-fg">ic</span><span class="ansi-red-fg">h cle</span><span class="ansi-red-fg">arly in</span><span class="ansi-red-fg">dic</span><span class="ansi-red-fg">ates they're</span><span class="ansi-red-fg"> not feeli</span><span class="ansi-red-fg">ng well both</span><span class="ansi-red-fg"> phy</span><span class="ansi-red-fg">sically and </span><span class="ansi-red-fg">emotionall</span><span class="ansi-red-fg">y. Being s</span><span class="ansi-red-fg">ick t</span><span class="ansi-red-fg">ypically m</span><span class="ansi-red-fg">akes </span><span class="ansi-red-fg">people feel </span><span class="ansi-red-fg">down, un</span><span class="ansi-red-fg">co</span><span class="ansi-red-fg">mfor</span><span class="ansi-red-fg">tabl</span><span class="ansi-red-fg">e, and </span><span class="ansi-red-fg">unhappy. Th</span><span class="ansi-red-fg">e c</span><span class="ansi-red-fg">ombination</span><span class="ansi-red-fg"> of stating </span><span class="ansi-red-fg">they're</span><span class="ansi-red-fg"> s</span><span class="ansi-red-fg">ick and the </span><span class="ansi-red-fg">sad emoticon</span><span class="ansi-red-fg"> s</span><span class="ansi-red-fg">trongly</span><span class="ansi-red-fg"> sugges</span><span class="ansi-red-fg">ts a sad </span><span class="ansi-red-fg">mood."</span><span class="ansi-red-fg">, "mo</span><span class="ansi-red-fg">od":</span><span class="ansi-red-fg"> "sad"}</span><span class="ansi-red-fg">)
+
+</span>Oh no, I'm sorry you're feeling under the weather! Here's a joke to hopefully brighten your day:
+
+
+
+Why don't sick people ever win races?
+
+
+
+Because they're always running a fever! 🤒
+
+
+
+I hope you feel better soon! Rest up and take care of yourself! 😊
+</pre>
+</div>
+</div>
+<div class="cell-output cell-output-stdin">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-green-fg ansi-bold">&gt;  Thanks, bye.
+</span></pre>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-red-fg">MessageClassification(</span><span class="ansi-red-fg">{"thought</span><span class="ansi-red-fg">s": "Th</span><span class="ansi-red-fg">e us</span><span class="ansi-red-fg">er is saying</span><span class="ansi-red-fg"> g</span><span class="ansi-red-fg">oodb</span><span class="ansi-red-fg">ye </span><span class="ansi-red-fg">with a sim</span><span class="ansi-red-fg">ple \"Tha</span><span class="ansi-red-fg">nks, bye.</span><span class="ansi-red-fg">\" </span><span class="ansi-red-fg">Thi</span><span class="ansi-red-fg">s ap</span><span class="ansi-red-fg">pear</span><span class="ansi-red-fg">s to be a </span><span class="ansi-red-fg">polit</span><span class="ansi-red-fg">e but</span><span class="ansi-red-fg"> brief far</span><span class="ansi-red-fg">ewell.</span><span class="ansi-red-fg"> While they </span><span class="ansi-red-fg">thank</span><span class="ansi-red-fg">ed</span><span class="ansi-red-fg"> me,</span><span class="ansi-red-fg"> which </span><span class="ansi-red-fg">could ind</span><span class="ansi-red-fg">icat</span><span class="ansi-red-fg">e </span><span class="ansi-red-fg">some appre</span><span class="ansi-red-fg">ciation,</span><span class="ansi-red-fg"> the bre</span><span class="ansi-red-fg">vity an</span><span class="ansi-red-fg">d conte</span><span class="ansi-red-fg">xt (they </span><span class="ansi-red-fg">mentioned</span><span class="ansi-red-fg"> bein</span><span class="ansi-red-fg">g sick</span><span class="ansi-red-fg"> e</span><span class="ansi-red-fg">arli</span><span class="ansi-red-fg">er) </span><span class="ansi-red-fg">sug</span><span class="ansi-red-fg">gests they m</span><span class="ansi-red-fg">igh</span><span class="ansi-red-fg">t st</span><span class="ansi-red-fg">ill not be</span><span class="ansi-red-fg"> feelin</span><span class="ansi-red-fg">g great. H</span><span class="ansi-red-fg">owever,</span><span class="ansi-red-fg"> t</span><span class="ansi-red-fg">he \"than</span><span class="ansi-red-fg">ks\" does sh</span><span class="ansi-red-fg">ow some grat</span><span class="ansi-red-fg">itude f</span><span class="ansi-red-fg">or the joke </span><span class="ansi-red-fg">I shared. O</span><span class="ansi-red-fg">verall, this</span><span class="ansi-red-fg"> seems lik</span><span class="ansi-red-fg">e a neutral </span><span class="ansi-red-fg">farewell</span><span class="ansi-red-fg"> - not parti</span><span class="ansi-red-fg">cular</span><span class="ansi-red-fg">ly happy </span><span class="ansi-red-fg">or sad,</span><span class="ansi-red-fg"> just</span><span class="ansi-red-fg"> a standard </span><span class="ansi-red-fg">goodbye."</span><span class="ansi-red-fg">, "mo</span><span class="ansi-red-fg">od": "neu</span><span class="ansi-red-fg">tral"}</span><span class="ansi-red-fg">)
+
+</span>You're welcome! Take care and get well soon! 🌟
+
+
+
+Bye! 👋
+</pre>
+</div>
+</div>
+<div class="cell-output cell-output-stdin">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-green-fg ansi-bold">&gt;  exit
+</span></pre>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<div class="ansi-escaped-output">
+<pre></pre>
+</div>
+</div>
+</div>
+<p>See the <a href="../recipes/routing_agent.html">Agent Routing</a> recipe for a working example.</p>
+
+
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -893,8 +1232,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../agent_features/routing.html" class="pagination-link" aria-label="Agent Routing">
-        <span class="nav-page-text">Agent Routing</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../agent_features/parallelizing.html" class="pagination-link" aria-label="Parallelizing">
+        <span class="nav-page-text">Parallelizing</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
@@ -906,7 +1245,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>   
     <div class="nav-footer-center">
 <p>Copyright © 2025 (<a href="https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt">MIT License</a>)</p>
-<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/agent_features/layering.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/agent_features/layering.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/agent_features/layering.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/agent_features/layering.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>
