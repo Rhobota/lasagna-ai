@@ -11,6 +11,8 @@ from typing import (
     get_type_hints, cast,
 )
 
+import json
+
 from pydantic import BaseModel, Field, create_model
 
 
@@ -53,3 +55,12 @@ def build_and_validate(
         return cast(ExtractionType, obj.model_dump())
     else:
         raise ValueError(f'Cannot handle parsing data for type: {extraction_type}')
+
+
+def result_to_string(result: Any) -> str:
+    if isinstance(result, BaseModel):
+        return json.dumps(result.model_dump())
+    elif isinstance(result, dict):
+        return json.dumps(result)
+    else:
+        return str(result)

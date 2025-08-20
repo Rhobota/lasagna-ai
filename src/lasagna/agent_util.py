@@ -27,6 +27,10 @@ from typing import (
     Callable, Protocol,
 )
 
+import pydantic
+import json
+import copy
+
 
 def make_model_binder(
     provider: Union[str, ModelFactory],
@@ -198,6 +202,17 @@ def extraction(
         'messages': messages,
         'result': result,
     }
+
+
+def human_input(prompt: str) -> List[AgentRun]:
+    return [
+        flat_messages('human_input', [
+            {
+                'role': 'human',
+                'text': prompt,
+            },
+        ]),
+    ]
 
 
 def override_system_prompt(
@@ -465,3 +480,56 @@ def build_static_output_agent(
     if doc:
         a.__doc__ = doc
     return a
+
+
+def strip_raw_cost_from_message(message: Message) -> Message:
+    message = copy.copy(message)
+    if 'raw' in message:
+        del message['raw']
+    if 'cost' in message:
+        del message['cost']
+    return message
+
+
+def strip_raw_cost_from_run(run: AgentRun) -> AgentRun:
+    run = copy.copy(run)
+    if run['type'] == 'messages' or run['type'] == 'extraction':
+        run['messages'] = [strip_raw_cost_from_message(m) for m in run['messages']]
+    elif run['type'] == 'chain' or run['type'] == 'parallel':
+        run['runs'] = [strip_raw_cost_from_run(r) for r in run['runs']]
+    else:
+        raise RuntimeError('unreachable')
+    return run
+
+
+def model_dump_all_pydantic_results(run: AgentRun) -> AgentRun:
+    run = copy.copy(run)
+    if run['type'] == 'messages':
+        pass  # noop
+    elif run['type'] == 'extraction':
+        result = run['result']
+        if isinstance(result, pydantic.BaseModel):
+            run['result'] = result.model_dump()
+    elif run['type'] == 'chain' or run['type'] == 'parallel':
+        run['runs'] = [model_dump_all_pydantic_results(r) for r in run['runs']]
+    else:
+        raise RuntimeError('unreachable')
+    return run
+
+
+def _prep_for_debug_print(run: AgentRun) -> AgentRun:
+    run = model_dump_all_pydantic_results(run)
+    run = strip_raw_cost_from_run(run)
+    return run
+
+
+def to_str(
+    agent_run_or_runs: Union[AgentRun, List[AgentRun]],
+) -> str:
+    if isinstance(agent_run_or_runs, list):
+        runs = agent_run_or_runs
+        runs = [_prep_for_debug_print(r) for r in runs]
+        return json.dumps(runs, indent=2)
+    else:
+        run = _prep_for_debug_print(agent_run_or_runs)
+        return json.dumps(run, indent=2)

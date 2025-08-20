@@ -11,6 +11,7 @@ from .agent_util import (
     parallel_runs,
     chained_runs,
     extraction,
+    human_input,
     override_system_prompt,
     strip_tool_calls_and_results,
     strip_all_but_last_human_message,
@@ -24,6 +25,14 @@ from .agent_util import (
     build_agent_chainer,
     build_agent_router,
     build_static_output_agent,
+    strip_raw_cost_from_message,
+    strip_raw_cost_from_run,
+    model_dump_all_pydantic_results,
+    to_str,
+)
+
+from .pydantic_util import (
+    result_to_string,
 )
 
 from .easy import (
@@ -41,6 +50,7 @@ __all__ = [
     'parallel_runs',
     'chained_runs',
     'extraction',
+    'human_input',
     'override_system_prompt',
     'strip_tool_calls_and_results',
     'strip_all_but_last_human_message',
@@ -54,8 +64,13 @@ __all__ = [
     'build_agent_chainer',
     'build_agent_router',
     'build_static_output_agent',
+    'strip_raw_cost_from_message',
+    'strip_raw_cost_from_run',
+    'model_dump_all_pydantic_results',
+    'to_str',
+    'result_to_string',
     'easy_ask',
     'easy_extract',
 ]
 
-__version__ = "0.18.0"
+__version__ = "0.18.1"
