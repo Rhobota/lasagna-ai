@@ -1,5 +1,7 @@
 import pytest
 
+import json
+import copy
 from typing import Callable, List
 
 from lasagna.agent_util import (
@@ -14,6 +16,10 @@ from lasagna.agent_util import (
     flat_messages,
     build_extraction_agent,
     override_system_prompt,
+    strip_raw_cost_from_message,
+    strip_raw_cost_from_run,
+    model_dump_all_pydantic_results,
+    to_str,
 )
 
 from lasagna.types import (
@@ -712,3 +718,212 @@ def test_recursive_sum_costs():
         'output_tokens': 5,
         'total_tokens': 12,
     }
+
+
+def test_strip_raw_cost_from_message():
+    message: Message = {
+        'role': 'ai',
+        'text': 'Hi',
+        'raw': {'test': 1},
+        'cost': {
+            'input_tokens': 3,
+        },
+    }
+    message_orig = copy.deepcopy(message)
+    message_stripped = strip_raw_cost_from_message(message)
+    assert message_orig == message   # ensure pure function!
+    assert message_stripped == {
+        'role': 'ai',
+        'text': 'Hi',
+    }
+
+
+def test_strip_raw_cost_from_run():
+    run: AgentRun = {
+        'agent': 'test',
+        'type': 'chain',
+        'runs': [
+            {
+                'agent': 'test',
+                'type': 'messages',
+                'messages': [
+                    {
+                        'role': 'human',
+                        'text': 'Hello',
+                    },
+                    {
+                        'role': 'ai',
+                        'text': 'Hi',
+                        'raw': {'test': 1},
+                        'cost': {
+                            'input_tokens': 3,
+                        },
+                    },
+                ],
+            },
+        ],
+    }
+    run_orig = copy.deepcopy(run)
+    run_stripped = strip_raw_cost_from_run(run)
+    assert run_orig == run   # ensure pure function!
+    assert run_stripped == {
+        'agent': 'test',
+        'type': 'chain',
+        'runs': [
+            {
+                'agent': 'test',
+                'type': 'messages',
+                'messages': [
+                    {
+                        'role': 'human',
+                        'text': 'Hello',
+                    },
+                    {
+                        'role': 'ai',
+                        'text': 'Hi',
+                    },
+                ],
+            },
+        ],
+    }
+
+
+def test_model_dump_all_pydantic_results():
+    run: AgentRun = {
+        'agent': 'test',
+        'type': 'chain',
+        'runs': [
+            {
+                'agent': 'test',
+                'type': 'messages',
+                'messages': [
+                    {
+                        'role': 'human',
+                        'text': 'Hello',
+                    },
+                    {
+                        'role': 'ai',
+                        'text': 'Hi',
+                    },
+                ],
+            },
+            {
+                'agent': 'test',
+                'type': 'extraction',
+                'messages': [
+                    {
+                        'role': 'ai',
+                        'text': 'Here is the structured output...',
+                    },
+                ],
+                'result': MyTestType(
+                    a = 'stuff',
+                    b = 100,
+                ),
+            },
+        ],
+    }
+    run_orig = copy.deepcopy(run)
+    run_dumped = model_dump_all_pydantic_results(run)
+    assert run_orig == run   # ensure pure function!
+    assert run_dumped == {
+        'agent': 'test',
+        'type': 'chain',
+        'runs': [
+            {
+                'agent': 'test',
+                'type': 'messages',
+                'messages': [
+                    {
+                        'role': 'human',
+                        'text': 'Hello',
+                    },
+                    {
+                        'role': 'ai',
+                        'text': 'Hi',
+                    },
+                ],
+            },
+            {
+                'agent': 'test',
+                'type': 'extraction',
+                'messages': [
+                    {
+                        'role': 'ai',
+                        'text': 'Here is the structured output...',
+                    },
+                ],
+                'result': {
+                    'a': 'stuff',
+                    'b': 100,
+                },
+            },
+        ],
+    }
+
+
+def test_to_str():
+    run: AgentRun = {
+        'agent': 'test',
+        'type': 'chain',
+        'runs': [
+            {
+                'agent': 'test',
+                'type': 'messages',
+                'messages': [
+                    {
+                        'role': 'human',
+                        'text': 'Hello',
+                    },
+                    {
+                        'role': 'ai',
+                        'text': 'Hi',
+                    },
+                ],
+            },
+            {
+                'agent': 'test',
+                'type': 'extraction',
+                'messages': [
+                    {
+                        'role': 'ai',
+                        'text': 'Here is the structured output...',
+                    },
+                ],
+                'result': MyTestType(
+                    a = 'stuff',
+                    b = 100,
+                ),
+            },
+        ],
+    }
+
+    # Test a single AgentRun:
+    run_orig = copy.deepcopy(run)
+    run_as_str = to_str(run)
+    assert run_orig == run   # ensure pure function!
+    assert run_as_str == json.dumps(
+        strip_raw_cost_from_run(
+            model_dump_all_pydantic_results(
+                run_orig,
+            ),
+        ),
+        indent=2,
+    )
+
+    # Test a list of AgentRuns:
+    runs: List[AgentRun] = [run, run]
+    runs_orig = copy.deepcopy(runs)
+    runs_as_str = to_str(runs)
+    assert runs_orig == runs   # ensure pure function!
+    assert runs_as_str == json.dumps(
+        [
+            strip_raw_cost_from_run(
+                model_dump_all_pydantic_results(
+                    r,
+                ),
+            )
+            for r in runs_orig
+        ],
+        indent=2,
+    )

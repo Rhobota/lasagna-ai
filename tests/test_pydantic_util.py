@@ -4,6 +4,7 @@ from enum import Enum
 from lasagna.pydantic_util import (
     ensure_pydantic_model,
     build_and_validate,
+    result_to_string,
 )
 
 from pydantic import BaseModel, ValidationError
@@ -253,3 +254,17 @@ def test_build_and_validate_typeddict():
                 ],
             },
         )
+
+
+def test_result_to_string():
+    obj = MyPydanticModel(a='test', b=100)
+    assert result_to_string(obj) == '{"a": "test", "b": 100}'
+
+    dct = {'a': 'test', 'b': 100}
+    assert result_to_string(dct) == '{"a": "test", "b": 100}'
+
+    s = 'hi'
+    assert result_to_string(s) == 'hi'
+
+    i = 100
+    assert result_to_string(i) == '100'
