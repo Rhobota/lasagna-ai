@@ -39,7 +39,7 @@ dependencies = [
   "python-dotenv",
   "colorama",
   "pydantic >= 2.7, < 3",
-  "openai>=1.52.0",
+  "openai >= 1.52.0, <= 1.99.9",
 ]
 
 [project.urls]
@@ -52,7 +52,7 @@ openai = [
   # This optional dependency name is left here for backward compatibility.
 ]
 anthropic = [
-  "anthropic>=0.37.1",
+  "anthropic >= 0.37.1, <= 0.64.0",
 ]
 bedrock = [
   "boto3>=1.37.0",
@@ -84,7 +84,7 @@ features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/lasagna tests examples}"
+check = "mypy --install-types --non-interactive src/lasagna/ tests/ examples/"
 
 [tool.hatch.envs.docs]
 python = "3.12"
