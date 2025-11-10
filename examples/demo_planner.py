@@ -20,7 +20,7 @@ if os.environ.get('DEBUG', 'false').lower() in ['1', 'true', 'yes', 'y']:
     BINDER = make_model_binder(DebugModel, 'NA')
 elif os.environ.get('ANTHROPIC_API_KEY'):
     print('Using Anthropic')
-    BINDER = known_models.anthropic_claude_sonnet_4_binder
+    BINDER = known_models.anthropic_claude_sonnet_4_5_binder
 elif os.environ.get('OPENAI_API_KEY'):
     print('Using OpenAI')
     BINDER = known_models.openai_gpt_5_mini_binder
