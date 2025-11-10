@@ -75,6 +75,10 @@ import logging
 _LOG = logging.getLogger(__name__)
 
 
+class ValidatorError(Exception):
+    pass
+
+
 async def _build_anthropic_content(
     message: MessageContent,
 ) -> List[Union[TextBlockParam, ImageBlockParam]]:
@@ -353,7 +357,7 @@ class LasagnaAnthropic(Model):
             _LOG.warning(f'untested model: {model} (may or may not work)')
         self.model = model
         self.model_kwargs = copy.deepcopy(model_kwargs)
-        self.n_retries: int = self.model_kwargs.get('retries', 3)
+        self.n_retries: int = self.model_kwargs.get('retries', 5)
         if not isinstance(self.n_retries, int) or self.n_retries < 0:
             raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.n_retries})")
         self.model_spec: ModelSpec = {
@@ -464,6 +468,7 @@ class LasagnaAnthropic(Model):
         tools_spec: Union[NotGiven, List[AnthropicToolParam]],
         force_tool: bool,
         disable_parallel_tool_use: bool,
+        validator: Union[Callable[[List[Message]], Any], None] = None,  # <-- raises if validations fails
     ) -> List[Message]:
         last_error: Union[Exception, None] = None
         assert self.n_retries + 1 > 0   # <-- we know this is true from the check in __init__
@@ -478,6 +483,11 @@ class LasagnaAnthropic(Model):
                         force_tool = force_tool,
                         disable_parallel_tool_use = disable_parallel_tool_use,
                     )
+                    if validator:
+                        try:
+                            validator(new_messages)
+                        except Exception as e:
+                            raise ValidatorError(e)
                 except:
                     await event_callback(('transaction', 'rollback', None))
                     raise
@@ -510,6 +520,9 @@ class LasagnaAnthropic(Model):
                 if delay_on_error > 0.0:
                     _LOG.warning(f"Got a maybe-recoverable error (will retry in {delay_on_error:.2f} seconds): {e}")
                     await asyncio.sleep(delay_on_error)
+            except ValidatorError as e:
+                last_error = e
+                _LOG.warning(f"Validator error (will retry immediately): {e.args[0]}")
         assert last_error is not None   # <-- we know this is true because `n_retries + 1 > 0`
         raise last_error
 
@@ -568,27 +581,31 @@ class LasagnaAnthropic(Model):
         if docstr:
             tools_spec[0]['description'] = docstr
 
+        def _parse_it(new_messages: List[Message]) -> Tuple[Message, ExtractionType]:
+            assert len(new_messages) == 1
+            new_message = new_messages[0]
+
+            if new_message['role'] == 'tool_call':
+                tools = new_message['tools']
+
+                assert len(tools) == 1
+                parsed = json.loads(tools[0]['function']['arguments'])
+                result = build_and_validate(extraction_type, parsed)
+
+                return new_message, result
+
+            else:
+                assert new_message['role'] == 'ai'
+                text = new_message['text']
+                raise RuntimeError(f"Model failed to generate structured output; instead, it output: {text}")
+
         new_messages = await self._retrying_run_once(
             event_callback = event_callback,
             messages       = messages,
             tools_spec     = tools_spec,
             force_tool     = True,
             disable_parallel_tool_use = True,
+            validator      = _parse_it,
         )
 
-        assert len(new_messages) == 1
-        new_message = new_messages[0]
-
-        if new_message['role'] == 'tool_call':
-            tools = new_message['tools']
-
-            assert len(tools) == 1
-            parsed = json.loads(tools[0]['function']['arguments'])
-            result = build_and_validate(extraction_type, parsed)
-
-            return new_message, result
-
-        else:
-            assert new_message['role'] == 'ai'
-            text = new_message['text']
-            raise RuntimeError(f"Model failed to generate structured output; instead, it output: {text}")
+        return _parse_it(new_messages)

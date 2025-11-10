@@ -66,16 +66,26 @@ ANTHROPIC_KNOWN_MODELS: List[ModelRecord] = [
         'display_name': 'Claude Opus 4.1',
     },
     {
-        'formal_name': 'claude-sonnet-4-20250514',
-        'display_name': 'Claude Sonnet 4',
+        'formal_name': 'claude-sonnet-4-5-20250929',
+        'display_name': 'Claude Sonnet 4.5',
+    },
+    {
+        'formal_name': 'claude-haiku-4-5-20251001',
+        'display_name': 'Claude Haiku 4.5',
     },
     {
         'formal_name': 'claude-3-5-haiku-20241022',
         'display_name': 'Claude Haiku 3.5',
+        'outdated': True,
     },
     {
         'formal_name': 'claude-opus-4-20250514',
         'display_name': 'Claude Opus 4',
+        'outdated': True,
+    },
+    {
+        'formal_name': 'claude-sonnet-4-20250514',
+        'display_name': 'Claude Sonnet 4',
         'outdated': True,
     },
     {
@@ -106,8 +116,8 @@ ANTHROPIC_KNOWN_MODELS: List[ModelRecord] = [
 ]
 
 anthropic_claude_opus_4_1_binder  = make_model_binder('anthropic', 'claude-opus-4-1-20250805')
-anthropic_claude_sonnet_4_binder  = make_model_binder('anthropic', 'claude-sonnet-4-20250514')
-anthropic_claude_haiku_3_5_binder = make_model_binder('anthropic', 'claude-3-5-haiku-20241022')
+anthropic_claude_sonnet_4_5_binder  = make_model_binder('anthropic', 'claude-sonnet-4-5-20250929')
+anthropic_claude_haiku_4_5_binder = make_model_binder('anthropic', 'claude-haiku-4-5-20251001')
 
 
 OLLAMA_KNOWN_MODELS: List[ModelRecord] = [

@@ -42,7 +42,7 @@ async def main() -> None:
         ),
         doc = "Use this tool if the user asks a math question.",
     )
-    health_agent = known_models.anthropic_claude_sonnet_4_binder(
+    health_agent = known_models.anthropic_claude_sonnet_4_5_binder(
         build_simple_agent(
             name = 'health_agent',
             tools = [],
