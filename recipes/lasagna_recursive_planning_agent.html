@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>The AgentRun type – Lasagna AI: Documentation</title>
+<title>Lasagna Recursive Planning Agent (LRPA) – Lasagna AI: Documentation</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -65,8 +65,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../agent_features/tools.html" rel="next">
-<link href="../what_is_an_agent/agent.html" rel="prev">
 <link href="../assets/Lasagna AI - Logo - Square - SMOOSHED.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -109,8 +107,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <link rel="stylesheet" href="../styles.css">
-<meta property="og:title" content="The AgentRun type – Lasagna AI: Documentation">
-<meta property="og:description" content="">
+<meta property="og:title" content="Lasagna Recursive Planning Agent (LRPA) – Lasagna AI: Documentation">
 <meta property="og:site_name" content="Lasagna AI: Documentation">
 </head>
 
@@ -161,7 +158,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../what_is_an_agent/agent.html">🤖 What is an Agent?</a></li><li class="breadcrumb-item"><a href="../what_is_an_agent/type_agentrun.html">The <code>AgentRun</code> type</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Lasagna Recursive Planning Agent (LRPA)</li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -232,7 +229,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../what_is_an_agent/type_agentrun.html" class="sidebar-item-text sidebar-link active">
+  <a href="../what_is_an_agent/type_agentrun.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">The <code>AgentRun</code> type</span></a>
   </div>
 </li>
@@ -466,42 +463,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#what-is-an-agentrun" id="toc-what-is-an-agentrun" class="nav-link active" data-scroll-target="#what-is-an-agentrun">What is an <code>AgentRun</code>?</a></li>
-  <li><a href="#the-four-types-of-agentrun" id="toc-the-four-types-of-agentrun" class="nav-link" data-scroll-target="#the-four-types-of-agentrun">The Four Types of <code>AgentRun</code></a>
-  <ul class="collapse">
-  <li><a href="#agentrunmessagelist-standard-conversation" id="toc-agentrunmessagelist-standard-conversation" class="nav-link" data-scroll-target="#agentrunmessagelist-standard-conversation">1. <code>AgentRunMessageList</code> — Standard Conversation</a></li>
-  <li><a href="#agentrunparallel-concurrent-execution" id="toc-agentrunparallel-concurrent-execution" class="nav-link" data-scroll-target="#agentrunparallel-concurrent-execution">2. <code>AgentRunParallel</code> — Concurrent Execution</a></li>
-  <li><a href="#agentrunchained-sequential-execution" id="toc-agentrunchained-sequential-execution" class="nav-link" data-scroll-target="#agentrunchained-sequential-execution">3. <code>AgentRunChained</code> — Sequential Execution</a></li>
-  <li><a href="#agentrunextraction-structured-output" id="toc-agentrunextraction-structured-output" class="nav-link" data-scroll-target="#agentrunextraction-structured-output">4. <code>AgentRunExtraction</code> — Structured Output</a></li>
-  </ul></li>
-  <li><a href="#patterns" id="toc-patterns" class="nav-link" data-scroll-target="#patterns">Patterns</a>
-  <ul class="collapse">
-  <li><a href="#agent-composition-pattern" id="toc-agent-composition-pattern" class="nav-link" data-scroll-target="#agent-composition-pattern">Agent Composition Pattern</a></li>
-  <li><a href="#recursive-extract-messages" id="toc-recursive-extract-messages" class="nav-link" data-scroll-target="#recursive-extract-messages">Recursive Extract Messages</a></li>
-  <li><a href="#wrap-messages-into-an-agentrun" id="toc-wrap-messages-into-an-agentrun" class="nav-link" data-scroll-target="#wrap-messages-into-an-agentrun">Wrap Messages into an <code>AgentRun</code></a></li>
-  <li><a href="#put-it-all-together" id="toc-put-it-all-together" class="nav-link" data-scroll-target="#put-it-all-together">Put it all together!</a></li>
-  </ul></li>
-  <li><a href="#other-benefits-of-the-agentrun-type" id="toc-other-benefits-of-the-agentrun-type" class="nav-link" data-scroll-target="#other-benefits-of-the-agentrun-type">Other Benefits of the <code>AgentRun</code> type</a>
-  <ul class="collapse">
-  <li><a href="#canonized-message-representations" id="toc-canonized-message-representations" class="nav-link" data-scroll-target="#canonized-message-representations">Canonized Message Representations 😇</a></li>
-  <li><a href="#token-count-preservation" id="toc-token-count-preservation" class="nav-link" data-scroll-target="#token-count-preservation">Token Count Preservation</a></li>
-  <li><a href="#immutable-by-design" id="toc-immutable-by-design" class="nav-link" data-scroll-target="#immutable-by-design">Immutable by Design</a></li>
-  <li><a href="#json-serializable" id="toc-json-serializable" class="nav-link" data-scroll-target="#json-serializable">JSON Serializable</a></li>
-  </ul></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/what_is_an_agent/type_agentrun.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/what_is_an_agent/type_agentrun.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../what_is_an_agent/agent.html">🤖 What is an Agent?</a></li><li class="breadcrumb-item"><a href="../what_is_an_agent/type_agentrun.html">The <code>AgentRun</code> type</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">The <code>AgentRun</code> type</h1>
+<h1 class="title">Lasagna Recursive Planning Agent (LRPA)</h1>
 </div>
 
 
@@ -518,278 +488,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>The <code>AgentRun</code> type is the <strong>core data structure</strong> in Lasagna AI. It represents <em>what the agent generated</em>. It serves as both the input and output format for agents, enabling seamless composition and layering.</p>
-<div id="c68f3505-41f9-4bdb-8f36-75606651f9d0" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This page will use the following imports:</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> AgentRun, Model, EventCallback, Message</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> recursive_extract_messages, flat_messages</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> recursive_sum_costs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<section id="what-is-an-agentrun" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-an-agentrun">What is an <code>AgentRun</code>?</h2>
-<p>An <code>AgentRun</code> is a <code>TypedDict</code> that captures an agent’s execution:</p>
-<ul>
-<li><strong>which agent ran</strong> (agent name, model, provider)</li>
-<li><strong>what it generated</strong> (messages, structured data, or downstream <code>AgentRun</code>s)</li>
-</ul>
-<p>Indeed, the <code>AgentRun</code> data structure is recursive! That is, an <code>AgentRun</code> can contain other <code>AgentRun</code>s. This recursive nature reflects the execution path of layered agents (i.e., when an agent uses another agent during its execution).</p>
-</section>
-<section id="the-four-types-of-agentrun" class="level2">
-<h2 class="anchored" data-anchor-id="the-four-types-of-agentrun">The Four Types of <code>AgentRun</code></h2>
-<p>The <code>AgentRun</code> type is a Union of <strong>four</strong> different execution patterns:</p>
-<div id="d33284c3-cb28-4de6-8d50-28045b09e901" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> (</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># These are the unioned types:</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    AgentRunMessageList,</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    AgentRunParallel,</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    AgentRunChained,</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    AgentRunExtraction,</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<section id="agentrunmessagelist-standard-conversation" class="level3">
-<h3 class="anchored" data-anchor-id="agentrunmessagelist-standard-conversation">1. <code>AgentRunMessageList</code> — Standard Conversation</h3>
-<p>This is the most common type — a simple conversation between human and AI.</p>
-<div id="9a6214fe-c40d-412b-b586-f32d0ea4c7e3" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>simple_conversation: AgentRunMessageList <span class="op">=</span> {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"type"</span>: <span class="st">"messages"</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"agent"</span>: <span class="st">"my_chat_agent"</span>,  <span class="co"># ← agent name can be anything you want!</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"messages"</span>: [</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"human"</span>, <span class="st">"text"</span>: <span class="st">"Hello!"</span>},</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"role"</span>: <span class="st">"ai"</span>, <span class="st">"text"</span>: <span class="st">"Hi there! How can I help?"</span>},</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="agentrunparallel-concurrent-execution" class="level3">
-<h3 class="anchored" data-anchor-id="agentrunparallel-concurrent-execution">2. <code>AgentRunParallel</code> — Concurrent Execution</h3>
-<p>Used when an agent spawns multiple sub-agents to work simultaneously (in parallel).</p>
-<div id="62591c28-e095-49db-a8b1-2759232df147" class="cell" data-execution_count="4">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>parallel_subagents: AgentRunParallel <span class="op">=</span> {</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"type"</span>: <span class="st">"parallel"</span>,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"agent"</span>: <span class="st">"committee_agent"</span>,  <span class="co"># ← agent name can be anything you want!</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"runs"</span>: [</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Multiple AgentRuns that executed in parallel:</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># {...}, {...}, {...}</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="agentrunchained-sequential-execution" class="level3">
-<h3 class="anchored" data-anchor-id="agentrunchained-sequential-execution">3. <code>AgentRunChained</code> — Sequential Execution</h3>
-<p>Used when an agent coordinates a sequence of sub-agents (“chained subagents”).</p>
-<div id="a8c81659-5568-4919-827c-7e26bf9e3977" class="cell" data-execution_count="5">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>chained_subagents: AgentRunChained <span class="op">=</span> {</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"type"</span>: <span class="st">"chain"</span>,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"agent"</span>: <span class="st">"pipeline_agent"</span>,  <span class="co"># ← agent name can be anything you want!</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"runs"</span>: [</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># AgentRuns that executed one after another:</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># {...}, {...}, {...}</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="agentrunextraction-structured-output" class="level3">
-<h3 class="anchored" data-anchor-id="agentrunextraction-structured-output">4. <code>AgentRunExtraction</code> — Structured Output</h3>
-<p>Used when an agent extracts structured data from its input.</p>
-<div id="5fc12e6f-ae5b-4912-9e9a-e2fa9af8f7c1" class="cell" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>extracted_info: AgentRunExtraction <span class="op">=</span> {</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"type"</span>: <span class="st">"extraction"</span>,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"agent"</span>: <span class="st">"data_extractor"</span>,  <span class="co"># ← agent name can be anything you want!</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"messages"</span>: [</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Model's generated messages will be here.</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Consider this an implementation detail; see the `result` below</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># for the actual "extraction result".</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"result"</span>: {</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># This is the payload that was extracted:</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"name"</span>: <span class="st">"John Doe"</span>,</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"email"</span>: <span class="st">"john@example.com"</span>, </span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age"</span>: <span class="dv">30</span>,</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-</section>
-<section id="patterns" class="level2">
-<h2 class="anchored" data-anchor-id="patterns">Patterns</h2>
-<p>Much of your job writing code that uses Lasagna will be “wrapping” and “unwrapping” <code>AgentRun</code> objects. Each agent must:</p>
-<ol type="1">
-<li>Consider the <code>AgentRun</code>s it has as input.</li>
-<li>(zero, one, or more times) Invoke its <code>model</code> to generate new messages.</li>
-<li>(zero, one, or more times) Invoke downstream agents.</li>
-<li>Wrap those messages (from step 2) and/or downstream <code>AgentRun</code>s (from step 3) into a new <code>AgentRun</code> and return it.</li>
-</ol>
-<p>Let’s discuss this pattern and give some helper functions along the way!</p>
-<section id="agent-composition-pattern" class="level3">
-<h3 class="anchored" data-anchor-id="agent-composition-pattern">Agent Composition Pattern</h3>
-<p>The <code>AgentRun</code> type enables Lasagna’s core composition pattern. Recall the standard agent signature:</p>
-<div id="6c79d20e-5603-491b-ba46-87b851998c6b" class="cell" data-execution_count="7">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> my_agent(</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    prev_runs: <span class="bu">list</span>[AgentRun],  <span class="co"># ← Input: previous AgentRuns</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> AgentRun:                  <span class="co"># ← Output: new AgentRun</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Agent logic here... normally you'd do something with `prev_runs`.</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"type"</span>: <span class="st">"messages"</span>,</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"agent"</span>: <span class="st">"my_agent"</span>,</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"messages"</span>: [</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"role"</span>: <span class="st">"ai"</span>, <span class="st">"text"</span>: <span class="st">"Hi there! How can I help?"</span>},</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        ],</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>This pattern allows agents to:</p>
-<ul>
-<li><strong>Build on previous work</strong> by analyzing <code>prev_runs</code>.</li>
-<li><strong>Chain together</strong> by passing outputs as inputs to next agents.</li>
-<li><strong>Compose into larger systems</strong> through layering and delegation.</li>
-</ul>
-</section>
-<section id="recursive-extract-messages" class="level3">
-<h3 class="anchored" data-anchor-id="recursive-extract-messages">Recursive Extract Messages</h3>
-<p>Since an <code>AgentRun</code> can be a recursive data structure, yet models require a flattened list of messages, there’s a convenience function to recursively extract all the messages found in an <code>AgentRun</code>:</p>
-<div id="845d7451-06ca-4e91-88b3-890d4c09d021" class="cell" data-execution_count="8">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>recursive_extract_messages([simple_conversation], from_tools<span class="op">=</span><span class="va">False</span>, from_extraction<span class="op">=</span><span class="va">False</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
-<pre><code>[{'role': 'human', 'text': 'Hello!'},
- {'role': 'ai', 'text': 'Hi there! How can I help?'}]</code></pre>
-</div>
-</div>
-</section>
-<section id="wrap-messages-into-an-agentrun" class="level3">
-<h3 class="anchored" data-anchor-id="wrap-messages-into-an-agentrun">Wrap Messages into an <code>AgentRun</code></h3>
-<p>It is common that you have a list of messages that you want to return as an <code>AgentRun</code>, so there’s a simple convenience function for that as well!</p>
-<div id="c5b5aa7e-0cce-4bb1-8f12-95aef6b20c2b" class="cell" data-execution_count="9">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>messages: <span class="bu">list</span>[Message] <span class="op">=</span> [</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"role"</span>: <span class="st">"human"</span>, <span class="st">"text"</span>: <span class="st">"Hello!"</span>},</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"role"</span>: <span class="st">"ai"</span>, <span class="st">"text"</span>: <span class="st">"Hi there! How can I help?"</span>},</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>flat_messages(<span class="st">'my_agent'</span>, messages)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="9">
-<pre><code>{'agent': 'my_agent',
- 'type': 'messages',
- 'messages': [{'role': 'human', 'text': 'Hello!'},
-  {'role': 'ai', 'text': 'Hi there! How can I help?'}]}</code></pre>
-</div>
-</div>
-</section>
-<section id="put-it-all-together" class="level3">
-<h3 class="anchored" data-anchor-id="put-it-all-together">Put it all together!</h3>
-<p>Using the patterns above, we’ve derived the “most basic agent” from the <a href="../quickstart.html">Quickstart</a>. Recall, this agent is very simple:</p>
-<ol type="1">
-<li>It extracts all previous messages.</li>
-<li>Passes those messages to the model, which generates new messages.</li>
-<li>Returns those new messages as an <code>AgentRun</code>.</li>
-</ol>
-<div id="7e497926-4aca-407b-8a86-157b1e5ef31d" class="cell" data-execution_count="10">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> my_basic_agent(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    prev_runs: <span class="bu">list</span>[AgentRun],</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> AgentRun:</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> recursive_extract_messages(prev_runs, from_tools<span class="op">=</span><span class="va">False</span>, from_extraction<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    new_messages <span class="op">=</span> <span class="cf">await</span> model.run(event_callback, messages, tools<span class="op">=</span>[])</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    this_run <span class="op">=</span> flat_messages(<span class="st">'my_agent'</span>, new_messages)</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> this_run</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-</section>
-<section id="other-benefits-of-the-agentrun-type" class="level2">
-<h2 class="anchored" data-anchor-id="other-benefits-of-the-agentrun-type">Other Benefits of the <code>AgentRun</code> type</h2>
-<section id="canonized-message-representations" class="level3">
-<h3 class="anchored" data-anchor-id="canonized-message-representations">Canonized Message Representations 😇</h3>
-<p>The <code>AgentRun</code> type provides a <strong>standardized format</strong> for representing any agent execution, regardless of which agent or which underlying model was invoked. Whether your agent is a simple chatbot or a complex multi-agent system, it all gets represented in the same consistent format.</p>
-<p>This canonization means:</p>
-<ul>
-<li><strong>Type safety:</strong> Static analysis catches mismatches at development time! See <a href="../misc/python_type_hints.html">Intro to Type Hints</a> if you’re new to static type checking.</li>
-<li><strong>Model swapping:</strong> You can swap providers or models at any point; data types will stay the same! See <a href="../recipes/swapping_providers.html">Model-swap Example</a>.</li>
-<li><strong>Layering:</strong> You can develop an agent as the root, then later on use it as a subagent. See <a href="../agent_features/layering.html">Layering</a>.</li>
-</ul>
-</section>
-<section id="token-count-preservation" class="level3">
-<h3 class="anchored" data-anchor-id="token-count-preservation">Token Count Preservation</h3>
-<p>Unlike other AI frameworks, Lasagna AI <strong>meticulously tracks token usage</strong> throughout your entire agent system. Token counts are preserved inside every <code>AgentRun</code>, no matter how many layers of agents you stack.</p>
-<p>Each <code>Message</code> within an <code>AgentRun</code> can include cost information:</p>
-<div id="8e11b9c8-7d41-4394-a58c-82f3b5d55354" class="cell" data-execution_count="11">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>this_run: AgentRun <span class="op">=</span> {</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"type"</span>: <span class="st">"messages"</span>,</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"agent"</span>: <span class="st">"my_agent"</span>,</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"messages"</span>: [</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        {</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"role"</span>: <span class="st">"ai"</span>,</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"text"</span>: <span class="st">"Hi there! How can I help?"</span>,</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"cost"</span>: {</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>                <span class="st">"input_tokens"</span>: <span class="dv">150</span>,</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>                <span class="st">"output_tokens"</span>: <span class="dv">75</span>, </span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>                <span class="st">"total_tokens"</span>: <span class="dv">225</span>,</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>            },</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        },</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p><strong>Why this matters:</strong></p>
-<ul>
-<li><strong>Accurate billing:</strong> Know exactly what each agent execution costs.</li>
-<li><strong>Performance optimization:</strong> Identify expensive operations in complex systems.</li>
-<li><strong>Budget management:</strong> Set limits and track usage across layered agents.</li>
-<li><strong>No surprises:</strong> Token counts don’t get lost in multi-agent workflows.</li>
-</ul>
-<p>Here is a convenient helper function to recursively sum the cost across an entire <code>AgentRun</code>:</p>
-<div id="baeeab9a-1666-4a32-98b9-65d2136921ab" class="cell" data-execution_count="12">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>recursive_sum_costs(this_run)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="12">
-<pre><code>{'input_tokens': 150, 'output_tokens': 75, 'total_tokens': 225}</code></pre>
-</div>
-</div>
-</section>
-<section id="immutable-by-design" class="level3">
-<h3 class="anchored" data-anchor-id="immutable-by-design">Immutable by Design</h3>
-<p><code>AgentRun</code> follows functional-programming principles — once created, it never changes. This provides:</p>
-<ul>
-<li><strong>Thread and coroutine safety:</strong> No race conditions in concurrent environments.</li>
-<li><strong>Predictable behavior:</strong> No surprise modifications to debug.</li>
-</ul>
-</section>
-<section id="json-serializable" class="level3">
-<h3 class="anchored" data-anchor-id="json-serializable">JSON Serializable</h3>
-<p>Since <code>AgentRun</code> is a <code>TypedDict</code>, it’s just a Python <code>dict</code> at runtime:</p>
-<ul>
-<li><strong>Database storage:</strong> Store directly in JSON columns or document stores.</li>
-<li><strong>API communication:</strong> Send over HTTP/WebSocket without complicated serialization.</li>
-<li><strong>Caching:</strong> Easy to cache and retrieve from Redis, memcached, etc.</li>
-<li><strong>Logging:</strong> Human-readable, and can be pretty printed into logs.</li>
-</ul>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Database Storage
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The <code>AgentRun</code> type makes database storage easy. See <a href="../deployment/database.html">Database Management</a> for more information.</p>
-</div>
-</div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Best of two worlds!
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>You can have <em>both</em> <strong>streaming</strong> and <strong>easy database storage</strong>. See <a href="../deployment/streaming_and_events.html">Streaming &amp; Events</a> for how to stream, which is an independent feature, so you can have <em>both</em>!</p>
-</div>
+<div id="db75e279-20a8-427e-bdab-e014f818bcc6" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 🚧 Under Construction 🏗️</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># For now, see `examples/demo_planner.py`</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 
-</section>
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -1192,18 +897,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     }
   });
   </script>
-<nav class="page-navigation">
-  <div class="nav-page nav-page-previous">
-      <a href="../what_is_an_agent/agent.html" class="pagination-link" aria-label="The Lasagna Agent">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">The Lasagna Agent</span>
-      </a>          
-  </div>
-  <div class="nav-page nav-page-next">
-      <a href="../agent_features/tools.html" class="pagination-link" aria-label="Tool Use">
-        <span class="nav-page-text">Tool Use</span> <i class="bi bi-arrow-right-short"></i>
-      </a>
-  </div>
-</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -1212,7 +905,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>   
     <div class="nav-footer-center">
 <p>Copyright © 2025 (<a href="https://github.com/Rhobota/lasagna-ai/blob/main/LICENSE.txt">MIT License</a>)</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/what_is_an_agent/type_agentrun.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/what_is_an_agent/type_agentrun.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+<div class="toc-actions"><ul><li><a href="https://github.dev/Rhobota/lasagna-ai/blob/main/docs/recipes/lasagna_recursive_planning_agent.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/blob/main/docs/recipes/lasagna_recursive_planning_agent.ipynb" class="toc-action"><i class="bi empty"></i>View source</a></li><li><a href="https://github.com/Rhobota/lasagna-ai/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

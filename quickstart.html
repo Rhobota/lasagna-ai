@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.33">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,14 +70,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="./assets/Lasagna AI - Logo - Square - SMOOSHED.png" rel="icon" type="image/png">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea385d0e468b0dd5ea5bf0780b1290d9.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-67d7d124950b7fa853046764b801d6c3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-83ff3a71db0ec49e2591a4ae8a620606.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -121,7 +122,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="./index.html" class="navbar-brand navbar-brand-logo">
-    <img src="./assets/Lasagna AI - Logo - Square - SMOOSHED.png" alt="" class="navbar-logo">
+    <img src="./assets/Lasagna AI - Logo - Square - SMOOSHED.png" alt="" class="navbar-logo light-content">
+    <img src="./assets/Lasagna AI - Logo - Square - SMOOSHED.png" alt="" class="navbar-logo dark-content">
     </a>
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Lasagna AI: Documentation</span>
@@ -172,6 +174,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -544,7 +550,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Reality Check
+<span class="screen-reader-only">Note</span>Reality Check
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -598,18 +604,18 @@ Reality Check
 </ul>
 <p>Here is your first agent:</p>
 <div id="b42fa88d-1a5d-4db9-8c51-44c3f3a78631" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> Model, EventCallback, AgentRun</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> Model, EventCallback, AgentRun</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> my_first_agent(</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    prev_runs: <span class="bu">list</span>[AgentRun],</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> AgentRun:</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="st">"not implemented"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="st">"not implemented"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>You can make it a <em>callable object</em> (rather than a <em>function</em>), if you want, like this:</p>
 <div id="1ec7abdd-2084-4c35-aae8-ff210a2fd9cb" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MyFirstAgent:</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MyFirstAgent:</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">pass</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -621,7 +627,7 @@ Reality Check
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> AgentRun:</span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="st">"not implemented"</span>)</span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>my_first_agent <span class="op">=</span> MyFirstAgent()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>my_first_agent <span class="op">=</span> MyFirstAgent()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="the-agents-job" class="level3">
@@ -635,7 +641,7 @@ Reality Check
 <p>That <em>basic</em> agent above is just a simple passthrough to the underlying AI model. We discuss more <em>complex</em> agent behaviors (with tools, chaining, splitting, routing, layering, etc) elsewhere in these docs.</p>
 <p>So, the most <em>basic</em> agent looks like this:</p>
 <div id="16343ecb-dc0d-4eec-9f95-ddff1730da89" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> recursive_extract_messages, flat_messages</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> recursive_extract_messages, flat_messages</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> my_basic_agent(</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
@@ -645,7 +651,7 @@ Reality Check
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> recursive_extract_messages(prev_runs, from_tools<span class="op">=</span><span class="va">False</span>, from_extraction<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    new_messages <span class="op">=</span> <span class="cf">await</span> model.run(event_callback, messages, tools<span class="op">=</span>[])</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    this_run <span class="op">=</span> flat_messages(<span class="st">'my_basic_agent'</span>, new_messages)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> this_run</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> this_run</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="binding-the-agent" class="level3">
@@ -659,7 +665,7 @@ Reality Check
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-*Reality Check
+<span class="screen-reader-only">Note</span>*Reality Check
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -677,7 +683,7 @@ Reality Check
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Bind a <em>single</em> agent to <em>multiple</em> models!
+<span class="screen-reader-only">Tip</span>Bind a <em>single</em> agent to <em>multiple</em> models!
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -693,39 +699,39 @@ Bind a <em>single</em> agent to <em>multiple</em> models!
 </div>
 <p>Here is how to <strong>bind</strong> your agent. Let’s <strong>bind</strong> the agent from above to <em>two</em> different models (stored in <em>two</em> distinct bound agent variables):</p>
 <div id="91d3d151-9cac-4200-a302-1295f480f2fd" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> make_model_binder</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> make_model_binder</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>binder_gpt5mini <span class="op">=</span> make_model_binder(<span class="st">'openai'</span>, <span class="st">'gpt-5-mini-2025-08-07'</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>binder_claude4  <span class="op">=</span> make_model_binder(<span class="st">'anthropic'</span>, <span class="st">'claude-sonnet-4-0'</span>)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>my_basic_gpt5mini_agent <span class="op">=</span> binder_gpt5mini(my_basic_agent)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>my_basic_claude4_agent  <span class="op">=</span> binder_claude4(my_basic_agent)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>my_basic_claude4_agent  <span class="op">=</span> binder_claude4(my_basic_agent)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="known-models" class="level4">
 <h4 class="anchored" data-anchor-id="known-models">Known Models</h4>
 <p>The <code>make_model_binder()</code> function above isn’t type-checked. Those strings could be anything, and you’ll get a runtime error if they are wrong!</p>
 <p>A safer (static type-checked) way is to use the functions in the <code>known_models</code> module, like this:</p>
 <div id="6b8ee6f6-bd03-4e94-970f-e77c93690845" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> known_models</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> known_models</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>binder_gpt5mini <span class="op">=</span> known_models.openai_gpt_5_mini_binder           <span class="co"># &lt;-- type safe!</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>binder_claude4  <span class="op">=</span> known_models.anthropic_claude_sonnet_4_binder   <span class="co"># &lt;-- type safe!</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>binder_gpt5mini <span class="op">=</span> known_models.openai_gpt_5_mini_binder             <span class="co"># &lt;-- type safe!</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>binder_claude4  <span class="op">=</span> known_models.anthropic_claude_sonnet_4_5_binder   <span class="co"># &lt;-- type safe!</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>my_basic_gpt5mini_agent <span class="op">=</span> binder_gpt5mini(my_basic_agent)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>my_basic_claude4_agent  <span class="op">=</span> binder_claude4(my_basic_agent)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>my_basic_claude4_agent  <span class="op">=</span> binder_claude4(my_basic_agent)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="binding-as-a-decorator" class="level4">
 <h4 class="anchored" data-anchor-id="binding-as-a-decorator">Binding as a Decorator</h4>
 <p>If you know exactly which <em>single</em> model you want your agent to use, then it’s convenient to use a <strong>decorator</strong> to bind it, like this:</p>
 <div id="7d4ce10d-5680-4ba7-beb6-bdefb6dac9f5" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="at">@known_models.openai_gpt_5_mini_binder</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="at">@known_models.openai_gpt_5_mini_binder</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> some_agent(</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    model: Model,</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    event_callback: EventCallback,</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    prev_runs: <span class="bu">list</span>[AgentRun],</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> AgentRun:</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="st">"not implemented"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">RuntimeError</span>(<span class="st">"not implemented"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 </section>
@@ -733,7 +739,7 @@ Bind a <em>single</em> agent to <em>multiple</em> models!
 <h3 class="anchored" data-anchor-id="set-your-api-key">Set your API Key</h3>
 <p>For the demo below, you either need an OpenAI or Anthropic key:</p>
 <div id="52c0fe32-2ae9-4ff0-93ae-0fb916d41764" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>load_dotenv()</span>
@@ -747,7 +753,7 @@ Bind a <em>single</em> agent to <em>multiple</em> models!
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    binder <span class="op">=</span> binder_claude4</span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="va">False</span>, <span class="st">"Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is set! We need at least one to do this demo."</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> <span class="va">False</span>, <span class="st">"Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY is set! We need at least one to do this demo."</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Using OpenAI</code></pre>
 </div>
@@ -757,11 +763,11 @@ Bind a <em>single</em> agent to <em>multiple</em> models!
 <h3 class="anchored" data-anchor-id="test-in-the-terminal">Test in the Terminal</h3>
 <p>Let’s roll!</p>
 <div id="cad40376-701d-474c-9a00-1e487252c047" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna.tui <span class="im">import</span> tui_input_loop</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna.tui <span class="im">import</span> tui_input_loop</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>system_prompt <span class="op">=</span> <span class="st">"""You are a grumpy assistant. Be helpful, *extremely* brief, and grumpy. Your name is Grumble."""</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> tui_input_loop(binder(my_basic_agent), system_prompt)   <span class="co"># type: ignore[top-level-await]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> tui_input_loop(binder(my_basic_agent), system_prompt)   <span class="co"># type: ignore[top-level-await]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdin">
 <div class="ansi-escaped-output">
 <pre><span class="ansi-green-fg ansi-bold">&gt;  Hi friend!
@@ -811,7 +817,7 @@ Bind a <em>single</em> agent to <em>multiple</em> models!
 <p>However, that can be overkill if you only want a <em>simple</em> (“easy”) function to ask the AI a question.</p>
 <p>Here’s an “easy” way to do it, if you don’t care about building complex layered agents:</p>
 <div id="ab9c4b1b-6ea2-4199-b7d1-64378cd87b6e" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> easy_ask</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lasagna <span class="im">import</span> easy_ask</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>answer <span class="op">=</span> <span class="cf">await</span> easy_ask(   <span class="co"># type: ignore[top-level-await]</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    binder,</span>
@@ -819,7 +825,7 @@ Bind a <em>single</em> agent to <em>multiple</em> models!
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    system_prompt <span class="op">=</span> system_prompt,</span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(answer)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(answer)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Hi. What do you need? —Grumble</code></pre>
 </div>
@@ -894,13 +900,14 @@ Bind a <em>single</em> agent to <em>multiple</em> models!
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
