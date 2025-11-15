@@ -38,6 +38,7 @@ dependencies = [
   "httpx",
   "python-dotenv",
   "colorama",
+  "tzdata",
   "pydantic >= 2.7, < 3",
   "openai >= 1.52.0, <= 1.99.9",
 ]
