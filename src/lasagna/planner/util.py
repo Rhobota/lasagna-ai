@@ -1,9 +1,32 @@
+from ..types import AgentRun
+
 from typing import List, Any
 
 
+class NoResult(Exception):
+    pass
+
+
+def _extract_last_result_from_run(run: AgentRun) -> Any:
+    if run['type'] == 'extraction':
+        return run['result']
+    elif run['type'] == 'messages':
+        raise NoResult()
+    elif run['type'] == 'chain' or run['type'] == 'parallel':
+        for r in reversed(run['runs']):
+            try:
+                return _extract_last_result_from_run(r)
+            except NoResult:
+                pass  # keep iterate...
+        raise NoResult()
+    else:
+        raise RuntimeError('unreachable')
+
+
 def extract_is_trivial(
-    result: Any,
+    extraction_run: AgentRun,
 ) -> bool:
+    result = _extract_last_result_from_run(extraction_run)
     extraction_type = type(result)
 
     if hasattr(result, 'is_trivial'):
@@ -18,8 +41,9 @@ def extract_is_trivial(
 
 
 def extract_subtask_strings(
-    result: Any,
+    extraction_run: AgentRun,
 ) -> List[str]:
+    result = _extract_last_result_from_run(extraction_run)
     extraction_type = type(result)
 
     if hasattr(result, 'subtasks'):
@@ -36,8 +60,9 @@ def extract_subtask_strings(
 
 
 def extract_task_statement(
-    result: Any,
+    extraction_run: AgentRun,
 ) -> str:
+    result = _extract_last_result_from_run(extraction_run)
     extraction_type = type(result)
 
     if hasattr(result, 'task_statement'):
