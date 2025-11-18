@@ -36,7 +36,7 @@ async def test_async_throttle_max_concurrent():
         for name, _ in res:
             assert name == expected_name
 
-        pairs: list[float] = []
+        pairs: List[float] = []
         for i in range(0, len(res), 2):
             _, a = res[i]
             _, b = res[i+1]

@@ -15,7 +15,8 @@ import json
 import asyncio
 import aiohttp
 from datetime import datetime, timezone
-from zoneinfo import ZoneInfo
+
+from typing import Dict
 
 from dotenv import load_dotenv; load_dotenv()
 
@@ -62,11 +63,11 @@ async def web_search(search_term: str, num_results: int) -> str:
     :param: num_results: int: the number of results that should be returned by this search (must be a positive value, at most 100)
     """
     assert (0 < num_results <= 100), f"num_results cannot be {num_results}; it must be in the range (0, 100]"
-    headers: dict[str, str] = {
+    headers: Dict[str, str] = {
         'x-subscription-token': os.environ['BRAVE_API_KEY'],
     }
     url = 'https://api.search.brave.com/res/v1/news/search'
-    params: dict[str, str] = {
+    params: Dict[str, str] = {
         'q': search_term,
         'safesearch': 'moderate',
         'count': str(num_results),
@@ -111,9 +112,14 @@ def current_time() -> str:
     The date and time will be returned as a string in the user's
     current timezone.
     """
-    user_tz_name = os.environ.get('USER_TIMEZONE', 'US/Central')
-    user_tz = ZoneInfo(user_tz_name)
     utc_now = datetime.now(timezone.utc)
+    user_tz_name = os.environ.get('USER_TIMEZONE', 'US/Central')
+    if sys.version_info >= (3, 9):
+        from zoneinfo import ZoneInfo
+        user_tz = ZoneInfo(user_tz_name)
+    else:
+        import pytz
+        user_tz = pytz.timezone(user_tz_name)
     user_now = utc_now.astimezone(user_tz)
     user_now_str = user_now.isoformat()
     return '\n'.join([
