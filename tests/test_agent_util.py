@@ -549,6 +549,10 @@ def test_recursive_extract_messages():
             ],
         },
         {
+            'role': 'ai',
+            'text': '{"value": 7}',
+        },
+        {
             'role': 'system',
             'text': 'You aggregate other AI systems.',
             'cost': {

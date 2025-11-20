@@ -2,6 +2,8 @@ from .agent_runner import run
 
 from .util import get_name
 
+from .pydantic_util import result_to_string
+
 from .types import (
     AgentRunChained,
     AgentRunExtraction,
@@ -142,6 +144,11 @@ def recursive_extract_messages(
                         run['messages']
                     ),
                 )
+            else:
+                messages.append({
+                    'role': 'ai',
+                    'text': result_to_string(run['result']),
+                })
         else:
             raise RuntimeError('unreachable')
     return messages
