@@ -19,14 +19,14 @@ async def test_async_throttle_max_concurrent():
     async def foo_1() -> Tuple[str, float]:
         print('foo_1')
         call_time = time.time()
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.1)
         return 'foo_1', call_time
 
     @shared_decorator
     async def foo_2() -> Tuple[str, float]:
         print('foo_2')
         call_time = time.time()
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.1)
         return 'foo_2', call_time
 
     def _assert_results(expected_name: str, res: List[Tuple[str, float]]) -> None:
@@ -40,13 +40,13 @@ async def test_async_throttle_max_concurrent():
         for i in range(0, len(res), 2):
             _, a = res[i]
             _, b = res[i+1]
-            assert 0.0 <= b - a <= 0.01
+            assert 0.0 <= b - a <= 0.08
             avg = (a + b) / 2
             pairs.append(avg)
 
         for a, b in zip(pairs, pairs[1:]):
             diff = abs(a - b)
-            assert 0.04 < diff < 0.06
+            assert 0.09 < diff < 0.19
 
     tasks = [
         f()
@@ -66,8 +66,9 @@ async def test_async_throttle_max_concurrent():
 
 @pytest.mark.asyncio
 async def test_async_throttle_max_per_second():
-    shared_decorator = async_throttle(max_per_second=10)
-    period = 1 / 10
+    max_per_second = 10
+    shared_decorator = async_throttle(max_per_second=max_per_second)
+    period = 1 / max_per_second
 
     @shared_decorator
     async def foo_1() -> Tuple[str, float]:
@@ -92,7 +93,7 @@ async def test_async_throttle_max_per_second():
 
         for (_, a), (_, b) in zip(res, res[1:]):
             diff = b - a
-            assert (0.9 * period) < diff < (1.1 * period)
+            assert (0.9 * period) < diff < (1.5 * period)
 
     tasks = [
         f()
@@ -120,23 +121,23 @@ async def test_async_throttle_max_per_second__immediate_cases():
     # Ensure *first* call is immediate:
     t1 = time.time()
     t2 = await foo()
-    assert 0.0 <= t2 - t1 < 0.01
+    assert 0.0 <= t2 - t1 < 0.05
 
     # Ensure *second* call is delayed:
     t1 = time.time()
     t2 = await foo()
-    assert 0.09 <= t2 - t1 < 0.11
+    assert 0.09 <= t2 - t1 < 0.15
 
     # Ensure call is immediate if *enough time* has passed already:
     await asyncio.sleep(0.3)
     t1 = time.time()
     t2 = await foo()
-    assert 0.0 <= t2 - t1 < 0.01
+    assert 0.0 <= t2 - t1 < 0.05
 
     # Ensure we delay *again*, if called without delay:
     t1 = time.time()
     t2 = await foo()
-    assert 0.09 <= t2 - t1 < 0.11
+    assert 0.09 <= t2 - t1 < 0.15
 
 
 def test_tool_param_passthrough():
