@@ -170,7 +170,9 @@ def build_planning_agent(
             subtask_chain_of_chains = chained_runs('subtask_chain_of_chains', [])
             output_runs.append(subtask_chain_of_chains)
             async for subtask_input in subtask_input_generator(extraction_run):
-                subtask_chain = chained_runs('subtask_chain', subtask_input)
+                subtask_chain = chained_runs('subtask_chain', [
+                    *subtask_input,
+                ])
                 subtask_chain_of_chains['runs'].append(subtask_chain)
                 subtask_run = await planning_agent(
                     event_callback,
@@ -178,7 +180,9 @@ def build_planning_agent(
                 )
                 subtask_chain['runs'].append(subtask_run)
 
-        answer_chain = chained_runs('answer_chain', await answer_input_prompt(extraction_run))
+        answer_chain = chained_runs('answer_chain', [
+            *(await answer_input_prompt(extraction_run)),
+        ])
         output_runs.append(answer_chain)
         answer_run = await answer_agent(
             event_callback,
