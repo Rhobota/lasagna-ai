@@ -24,6 +24,12 @@ testall :
 checkall :
 	hatch run types:check
 
+shell :
+	hatch shell
+
+clean :
+	hatch env prune
+
 QUARTO_PATH := /usr/local/bin/quarto
 
 $(QUARTO_PATH) :
@@ -38,4 +44,4 @@ quarto-serve : $(QUARTO_PATH)
 docs-check :
 	hatch run docs:check
 
-.PHONY: help test check testall checkall quarto-serve docs-check
+.PHONY: help test check testall checkall shell clean quarto-serve docs-check

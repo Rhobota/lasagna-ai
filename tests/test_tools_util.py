@@ -1387,7 +1387,7 @@ def test_extract_tool_result_as_sting():
             ],
         },
     }
-    assert extract_tool_result_as_sting(m3) == '[{"name": "foo", "values": {"a": 7, "other": true}}]'
+    assert extract_tool_result_as_sting(m3) == 'foo({"a": 7, "other": true})'
 
     m4: ToolResult = {
         'call_id': '1001',
@@ -1408,6 +1408,58 @@ def test_extract_tool_result_as_sting():
         },
     }
     assert extract_tool_result_as_sting(m4) == 'Hi again'
+
+    m5: ToolResult = {
+        'call_id': '1001',
+        'type': 'layered_agent',
+        'run': {
+            'agent': 'some_downstream_agent',
+            'type': 'messages',
+            'messages': [
+                {
+                    'role': 'tool_call',
+                    'tools': [
+                        {
+                            'call_id': '1002',
+                            'call_type': 'function',
+                            'function': {
+                                'name': 'foo',
+                                'arguments': '{"a": 7, "other": true}',
+                            },
+                        },
+                    ],
+                },
+                {
+                    'role': 'tool_res',
+                    'tools': [
+                        {
+                            'type': 'any',
+                            'result': 'res1',
+                            'call_id': '123',
+                        },
+                        {
+                            'type': 'any',
+                            'result': 'res2',
+                            'call_id': '456',
+                        },
+                    ],
+                },
+            ],
+        },
+    }
+    assert extract_tool_result_as_sting(m5) == 'res1\nres2'
+
+    m6: ToolResult = {
+        'call_id': '1001',
+        'type': 'layered_agent',
+        'run': {
+            'agent': 'some_downstream_agent',
+            'type': 'extraction',
+            'messages': [],
+            'result': 'extraction result',
+        },
+    }
+    assert extract_tool_result_as_sting(m6) == 'extraction result'
 
 
 def test_type_a_isa_b():

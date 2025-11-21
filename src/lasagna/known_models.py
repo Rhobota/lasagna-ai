@@ -199,6 +199,9 @@ bedrock_claude_sonnet_4_binder = make_model_binder('bedrock', 'us.anthropic.clau
 bedrock_claude_haiku_3_5_binder = make_model_binder('bedrock', 'us.anthropic.claude-3-5-haiku-20241022-v1:0')
 
 
+abstract_binder = make_model_binder('__abstract__', '')
+
+
 NVIDIA_KNOWN_MODELS: List[ModelRecord] = [
     {
         'formal_name': 'meta/llama3-70b-instruct',

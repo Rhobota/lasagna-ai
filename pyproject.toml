@@ -65,6 +65,8 @@ dev = [
 ]
 example-deps = [
   "sympy",
+  "tzdata",
+  "pytz",
 ]
 
 [tool.hatch.build.targets.wheel]

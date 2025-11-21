@@ -549,6 +549,10 @@ def test_recursive_extract_messages():
             ],
         },
         {
+            'role': 'ai',
+            'text': '{"value": 7}',
+        },
+        {
             'role': 'system',
             'text': 'You aggregate other AI systems.',
             'cost': {
@@ -737,6 +741,114 @@ def test_strip_raw_cost_from_message():
         'text': 'Hi',
     }
 
+    message: Message = {
+        'role': 'tool_res',
+        'tools': [
+            {
+                'type': 'layered_agent',
+                'run': {
+                    'agent': 'testrun1',
+                    'type': 'messages',
+                    'messages': [
+                        {
+                            'role': 'ai',
+                            'text': 'Hi',
+                            'raw': {'test': 1},
+                            'cost': {
+                                'input_tokens': 3,
+                            },
+                        },
+                    ],
+                },
+                'call_id': 'abcd',
+                'is_error': False,
+            },
+            {
+                'type': 'layered_agent',
+                'run': {
+                    'agent': 'testrun2',
+                    'type': 'messages',
+                    'messages': [
+                        {
+                            'role': 'system',
+                            'text': 'do good',
+                            'raw': {'test': 1},
+                            'cost': {
+                                'input_tokens': 3,
+                            },
+                        },
+                        {
+                            'role': 'ai',
+                            'text': 'okay',
+                            'raw': {'test': 1},
+                            'cost': {
+                                'input_tokens': 3,
+                            },
+                        },
+                    ],
+                },
+                'call_id': 'efgh',
+                'is_error': False,
+            },
+            {
+                'type': 'any',
+                'result': 'result!',
+                'call_id': 'xyz',
+            },
+        ],
+        'raw': {'test': 1},
+        'cost': {
+            'input_tokens': 3,
+        },
+    }
+    message_orig = copy.deepcopy(message)
+    message_stripped = strip_raw_cost_from_message(message)
+    assert message_orig == message   # ensure pure function!
+    assert message_stripped == {
+        'role': 'tool_res',
+        'tools': [
+            {
+                'type': 'layered_agent',
+                'run': {
+                    'agent': 'testrun1',
+                    'type': 'messages',
+                    'messages': [
+                        {
+                            'role': 'ai',
+                            'text': 'Hi',
+                        },
+                    ],
+                },
+                'call_id': 'abcd',
+                'is_error': False,
+            },
+            {
+                'type': 'layered_agent',
+                'run': {
+                    'agent': 'testrun2',
+                    'type': 'messages',
+                    'messages': [
+                        {
+                            'role': 'system',
+                            'text': 'do good',
+                        },
+                        {
+                            'role': 'ai',
+                            'text': 'okay',
+                        },
+                    ],
+                },
+                'call_id': 'efgh',
+                'is_error': False,
+            },
+            {
+                'type': 'any',
+                'result': 'result!',
+                'call_id': 'xyz',
+            },
+        ],
+    }
+
 
 def test_strip_raw_cost_from_run():
     run: AgentRun = {
@@ -761,6 +873,21 @@ def test_strip_raw_cost_from_run():
                     },
                 ],
             },
+            {
+                'agent': 'test',
+                'type': 'extraction',
+                'messages': [
+                    {
+                        'role': 'ai',
+                        'text': 'Hi again',
+                        'raw': {'test': 1},
+                        'cost': {
+                            'input_tokens': 3,
+                        },
+                    },
+                ],
+                'result': None,
+            },
         ],
     }
     run_orig = copy.deepcopy(run)
@@ -784,6 +911,17 @@ def test_strip_raw_cost_from_run():
                     },
                 ],
             },
+            {
+                'agent': 'test',
+                'type': 'extraction',
+                'messages': [
+                    {
+                        'role': 'ai',
+                        'text': 'Hi again',
+                    },
+                ],
+                'result': None,
+            },
         ],
     }
 
@@ -805,6 +943,32 @@ def test_model_dump_all_pydantic_results():
                         'role': 'ai',
                         'text': 'Hi',
                     },
+                    {
+                        'role': 'tool_res',
+                        'tools': [
+                            {
+                                'type': 'layered_agent',
+                                'run': {
+                                    'agent': 'subagent',
+                                    'type': 'extraction',
+                                    'messages': [],
+                                    'result': MyTestType(
+                                        a = 'innerstuff',
+                                        b = 50,
+                                    ),
+                                },
+                                'call_id': 'abc',
+                            },
+                            {
+                                'type': 'any',
+                                'result': MyTestType(
+                                    a = 'toolresult',
+                                    b = 75,
+                                ),
+                                'call_id': 'hijk',
+                            },
+                        ],
+                    },
                 ],
             },
             {
@@ -814,6 +978,24 @@ def test_model_dump_all_pydantic_results():
                     {
                         'role': 'ai',
                         'text': 'Here is the structured output...',
+                    },
+                    {
+                        'role': 'tool_res',
+                        'tools': [
+                            {
+                                'type': 'layered_agent',
+                                'run': {
+                                    'agent': 'innertoolagent',
+                                    'type': 'extraction',
+                                    'messages': [],
+                                    'result': MyTestType(
+                                        a = 'moreinnerstuff',
+                                        b = 10,
+                                    ),
+                                },
+                                'call_id': '123',
+                            },
+                        ],
                     },
                 ],
                 'result': MyTestType(
@@ -842,6 +1024,32 @@ def test_model_dump_all_pydantic_results():
                         'role': 'ai',
                         'text': 'Hi',
                     },
+                    {
+                        'role': 'tool_res',
+                        'tools': [
+                            {
+                                'type': 'layered_agent',
+                                'run': {
+                                    'agent': 'subagent',
+                                    'type': 'extraction',
+                                    'messages': [],
+                                    'result': {
+                                        'a': 'innerstuff',
+                                        'b': 50,
+                                    },
+                                },
+                                'call_id': 'abc',
+                            },
+                            {
+                                'type': 'any',
+                                'result': {
+                                    'a': 'toolresult',
+                                    'b': 75,
+                                },
+                                'call_id': 'hijk',
+                            },
+                        ],
+                    },
                 ],
             },
             {
@@ -851,6 +1059,24 @@ def test_model_dump_all_pydantic_results():
                     {
                         'role': 'ai',
                         'text': 'Here is the structured output...',
+                    },
+                    {
+                        'role': 'tool_res',
+                        'tools': [
+                            {
+                                'type': 'layered_agent',
+                                'run': {
+                                    'agent': 'innertoolagent',
+                                    'type': 'extraction',
+                                    'messages': [],
+                                    'result': {
+                                        'a': 'moreinnerstuff',
+                                        'b': 10,
+                                    },
+                                },
+                                'call_id': '123',
+                            },
+                        ],
                     },
                 ],
                 'result': {

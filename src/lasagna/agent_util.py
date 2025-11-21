@@ -2,6 +2,8 @@ from .agent_runner import run
 
 from .util import get_name
 
+from .pydantic_util import result_to_string
+
 from .types import (
     AgentRunChained,
     AgentRunExtraction,
@@ -142,6 +144,11 @@ def recursive_extract_messages(
                         run['messages']
                     ),
                 )
+            else:
+                messages.append({
+                    'role': 'ai',
+                    'text': result_to_string(run['result']),
+                })
         else:
             raise RuntimeError('unreachable')
     return messages
@@ -482,12 +489,28 @@ def build_static_output_agent(
     return a
 
 
+def _strip_raw_cost_from_toolres(toolres: ToolResult) -> ToolResult:
+    if toolres['type'] == 'layered_agent':
+        toolres = copy.copy(toolres)
+        toolres['run'] = strip_raw_cost_from_run(toolres['run'])
+        return toolres
+    elif toolres['type'] == 'any':
+        return toolres
+    else:
+        raise RuntimeError('unreachable')
+
+
 def strip_raw_cost_from_message(message: Message) -> Message:
     message = copy.copy(message)
     if 'raw' in message:
         del message['raw']
     if 'cost' in message:
         del message['cost']
+    if message['role'] == 'tool_res':
+        message['tools'] = [
+            _strip_raw_cost_from_toolres(t)
+            for t in message['tools']
+        ]
     return message
 
 
@@ -502,11 +525,41 @@ def strip_raw_cost_from_run(run: AgentRun) -> AgentRun:
     return run
 
 
+def _model_dump_pydantic_results_for_toolres(toolres: ToolResult) -> ToolResult:
+    toolres = copy.copy(toolres)
+    if toolres['type'] == 'layered_agent':
+        toolres['run'] = model_dump_all_pydantic_results(toolres['run'])
+    elif toolres['type'] == 'any':
+        result = toolres['result']
+        if isinstance(result, pydantic.BaseModel):
+            toolres['result'] = result.model_dump()
+    else:
+        raise RuntimeError('unreachable')
+    return toolres
+
+
+def _model_dump_pydantic_results_for_message(message: Message) -> Message:
+    if message['role'] == 'tool_res':
+        message = copy.copy(message)
+        message['tools'] = [
+            _model_dump_pydantic_results_for_toolres(t)
+            for t in message['tools']
+        ]
+    return message
+
+
 def model_dump_all_pydantic_results(run: AgentRun) -> AgentRun:
     run = copy.copy(run)
     if run['type'] == 'messages':
-        pass  # noop
+        run['messages'] = [
+            _model_dump_pydantic_results_for_message(m)
+            for m in run['messages']
+        ]
     elif run['type'] == 'extraction':
+        run['messages'] = [
+            _model_dump_pydantic_results_for_message(m)
+            for m in run['messages']
+        ]
         result = run['result']
         if isinstance(result, pydantic.BaseModel):
             run['result'] = result.model_dump()

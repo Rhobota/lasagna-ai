@@ -10,6 +10,8 @@ from typing import (
 )
 from typing_extensions import is_typeddict
 
+from .pydantic_util import result_to_string
+
 from .agent_util import make_model_binder, extract_last_message, flat_messages
 
 from .util import (
@@ -354,7 +356,7 @@ async def _run_single_tool(
                 })
             prev_runs: List[AgentRun] = [
                 flat_messages(
-                    agent_name = 'upstream_agent',
+                    agent_name = '__upstream__',
                     messages = messages,
                 ),
             ]
@@ -439,18 +441,15 @@ def extract_tool_result_as_sting(tool_result: ToolResult) -> str:
     content: str
 
     if tool_result['type'] == 'any':
-        content = str(tool_result['result'])
+        content = result_to_string(tool_result['result'])
 
     elif tool_result['type'] == 'layered_agent':
-        last_message = extract_last_message([tool_result['run']], from_tools=True, from_extraction=True)
+        last_message = extract_last_message([tool_result['run']], from_tools=True, from_extraction=False)
         if last_message['role'] == 'ai':
             content = last_message['text'] or ''
         elif last_message['role'] == 'tool_call':
-            content = json.dumps([
-                {
-                    'name': c['function']['name'],
-                    'values': json.loads(c['function']['arguments']),
-                }
+            content = '\n'.join([
+                f"{c['function']['name']}({c['function']['arguments']})"
                 for c in last_message['tools']
             ])
         elif last_message['role'] == 'tool_res':
@@ -459,7 +458,7 @@ def extract_tool_result_as_sting(tool_result: ToolResult) -> str:
                 for r in last_message['tools']
             ])
         else:
-            raise RuntimeError('unreachable')
+            raise RuntimeError(f"invalid last message role: {last_message['role']}")
 
     else:
         raise RuntimeError('unreachable')
