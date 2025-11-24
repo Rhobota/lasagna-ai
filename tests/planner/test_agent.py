@@ -5,6 +5,7 @@ from lasagna.agent_util import (
     noop_callback,
     human_input,
     extract_last_message,
+    override_system_prompt,
 )
 
 from lasagna.types import AgentRun
@@ -14,7 +15,7 @@ from lasagna.planner.debug_model import DebugModel
 from lasagna.planner.agent import (
     build_default_planning_agent,
     _minimal_copy_lrpa_aware,
-    _extract_messages_lrpa_aware,
+    build_message_extractor_lrpa_aware,
 )
 
 import copy
@@ -35,11 +36,11 @@ def _assert_recursive_structure(run: AgentRun) -> None:
     runs = run['runs']
 
     if len(runs) == 2:
-        assert runs[0]['agent'] == 'extraction_run'
+        assert runs[0]['agent'] == 'extraction_agent'
         assert runs[1]['agent'] == 'answer_chain'
 
     elif len(runs) == 3:
-        assert runs[0]['agent'] == 'extraction_run'
+        assert runs[0]['agent'] == 'extraction_agent'
         assert runs[1]['agent'] == 'subtask_chain_of_chains'
         assert runs[2]['agent'] == 'answer_chain'
 
@@ -65,17 +66,17 @@ async def test_agent():
 
     planning_agent = build_default_planning_agent(binder = binder_seed_0)
     run = await planning_agent(noop_callback, human_input('hi'))
-    assert _count_runs(run) == 41         # <-- if fails, did self.rand in the DebugModel change?
+    assert _count_runs(run) == 47         # <-- if fails, did self.rand in the DebugModel change?
     _assert_recursive_structure(run)
     assert extract_last_message(
         run,
         from_tools = False,
         from_extraction = False,
-    ).get('text') == 'The answer is: 13'  # <-- also depends on self.rand being reproducible
+    ).get('text') == 'The answer is: 23'  # <-- also depends on self.rand being reproducible
 
     planning_agent = build_default_planning_agent(binder = binder_seed_1)
     run = await planning_agent(noop_callback, human_input('hi'))
-    assert _count_runs(run) == 5          # <-- if fails, did self.rand in the DebugModel change?
+    assert _count_runs(run) == 6          # <-- if fails, did self.rand in the DebugModel change?
     _assert_recursive_structure(run)
     assert extract_last_message(
         run,
@@ -125,7 +126,7 @@ def test_minimal_copy_lrpa_aware():
             'type': 'chain',
             'runs': [
                 {
-                    'agent': 'extraction_run',
+                    'agent': 'extraction_agent',
                     'type': 'extraction',
                     'messages': [],
                     'result': {},
@@ -175,7 +176,7 @@ def test_minimal_copy_lrpa_aware():
             'type': 'chain',
             'runs': [
                 {
-                    'agent': 'extraction_run',
+                    'agent': 'extraction_agent',
                     'type': 'extraction',
                     'messages': [],
                     'result': {},
@@ -213,7 +214,7 @@ def test_minimal_copy_lrpa_aware():
     assert inner_run is modified_copy[1]['runs'][1]['runs'][0]['runs'][1]  # type: ignore
 
 
-def test_extract_messages_lrpa_aware():
+def test_build_message_extractor_lrpa_aware():
     runs: List[AgentRun] = [
         {
             'agent': 'human_input',
@@ -230,7 +231,7 @@ def test_extract_messages_lrpa_aware():
             'type': 'chain',
             'runs': [
                 {
-                    'agent': 'extraction_run',
+                    'agent': 'extraction_agent',
                     'type': 'extraction',
                     'messages': [],
                     'result': {'extraction_level': 0},
@@ -258,7 +259,7 @@ def test_extract_messages_lrpa_aware():
                                     'type': 'chain',
                                     'runs': [
                                         {
-                                            'agent': 'extraction_run',
+                                            'agent': 'extraction_agent',
                                             'type': 'extraction',
                                             'messages': [],
                                             'result': {'extraction_level': 1},
@@ -268,12 +269,18 @@ def test_extract_messages_lrpa_aware():
                                             'type': 'chain',
                                             'runs': [
                                                 {
-                                                    'agent': 'answer_input_prompt',
-                                                    'type': 'messages',
-                                                    'messages': [
+                                                    'agent': 'answer_input_chain',
+                                                    'type': 'chain',
+                                                    'runs': [
                                                         {
-                                                            'role': 'human',
-                                                            'text': '... make your final answer',
+                                                            'agent': 'answer_input_prompt',
+                                                            'type': 'messages',
+                                                            'messages': [
+                                                                {
+                                                                    'role': 'human',
+                                                                    'text': '... make your final answer',
+                                                                },
+                                                            ],
                                                         },
                                                     ],
                                                 },
@@ -320,7 +327,7 @@ def test_extract_messages_lrpa_aware():
                                     'type': 'chain',
                                     'runs': [
                                         {
-                                            'agent': 'extraction_run',
+                                            'agent': 'extraction_agent',
                                             'type': 'extraction',
                                             'messages': [],
                                             'result': {'extraction_level': 2},
@@ -330,12 +337,18 @@ def test_extract_messages_lrpa_aware():
                                             'type': 'chain',
                                             'runs': [
                                                 {
-                                                    'agent': 'answer_input_prompt',
-                                                    'type': 'messages',
-                                                    'messages': [
+                                                    'agent': 'answer_input_chain',
+                                                    'type': 'chain',
+                                                    'runs': [
                                                         {
-                                                            'role': 'human',
-                                                            'text': '... make your final answer now',
+                                                            'agent': 'answer_input_prompt',
+                                                            'type': 'messages',
+                                                            'messages': [
+                                                                {
+                                                                    'role': 'human',
+                                                                    'text': '... make your final answer now',
+                                                                },
+                                                            ],
                                                         },
                                                     ],
                                                 },
@@ -382,7 +395,7 @@ def test_extract_messages_lrpa_aware():
                                     'type': 'chain',
                                     'runs': [
                                         {
-                                            'agent': 'extraction_run',
+                                            'agent': 'extraction_agent',
                                             'type': 'extraction',
                                             'messages': [],
                                             'result': {'extraction_level': 3},
@@ -392,12 +405,18 @@ def test_extract_messages_lrpa_aware():
                                             'type': 'chain',
                                             'runs': [
                                                 {
-                                                    'agent': 'answer_input_prompt',
-                                                    'type': 'messages',
-                                                    'messages': [
+                                                    'agent': 'answer_input_chain',
+                                                    'type': 'chain',
+                                                    'runs': [
                                                         {
-                                                            'role': 'human',
-                                                            'text': '... make your final answer now again',
+                                                            'agent': 'answer_input_prompt',
+                                                            'type': 'messages',
+                                                            'messages': [
+                                                                {
+                                                                    'role': 'human',
+                                                                    'text': '... make your final answer now again',
+                                                                },
+                                                            ],
                                                         },
                                                     ],
                                                 },
@@ -413,9 +432,15 @@ def test_extract_messages_lrpa_aware():
         },
     ]
     runs_copy = copy.deepcopy(runs)
-    messages = _extract_messages_lrpa_aware(runs)
+    messages_no_system_prompt = build_message_extractor_lrpa_aware(
+        system_prompt_override=None,
+    )(runs)
+    messages_with_system_prompt = build_message_extractor_lrpa_aware(
+        system_prompt_override='sys',
+    )(runs)
     assert runs == runs_copy, "ensure pure function"
-    assert messages == [
+    assert override_system_prompt(messages_no_system_prompt, 'sys') == messages_with_system_prompt
+    assert messages_no_system_prompt == [
         {
             'role': 'human',
             'text': 'hi',
@@ -430,7 +455,19 @@ def test_extract_messages_lrpa_aware():
         },
         {
             'role': 'ai',
+            'text': '{"extraction_level": 1}',
+        },
+        {
+            'role': 'human',
+            'text': '... make your final answer',
+        },
+        {
+            'role': 'ai',
             'text': 'it is 47',
+        },
+        {
+            'role': 'human',
+            'text': 'really?',
         },
         {
             'role': 'ai',
@@ -442,7 +479,19 @@ def test_extract_messages_lrpa_aware():
         },
         {
             'role': 'ai',
+            'text': '{"extraction_level": 2}',
+        },
+        {
+            'role': 'human',
+            'text': '... make your final answer now',
+        },
+        {
+            'role': 'ai',
             'text': 'it is 48',
+        },
+        {
+            'role': 'human',
+            'text': 'really?',
         },
         {
             'role': 'ai',
@@ -472,12 +521,18 @@ def test_extract_messages_lrpa_aware():
         'type': 'chain',
         'runs': [
             {
-                'agent': 'answer_input_prompt',
-                'type': 'messages',
-                'messages': [
+                'agent': 'answer_input_chain',
+                'type': 'chain',
+                'runs': [
                     {
-                        'role': 'human',
-                        'text': 'FINAL ANSWER?',
+                        'agent': 'answer_input_prompt',
+                        'type': 'messages',
+                        'messages': [
+                            {
+                                'role': 'human',
+                                'text': 'FINAL ANSWER?',
+                            },
+                        ],
                     },
                 ],
             },
@@ -502,16 +557,34 @@ def test_extract_messages_lrpa_aware():
         ],
     })
     runs_copy = copy.deepcopy(runs)
-    messages = _extract_messages_lrpa_aware(runs)
+    messages_no_system_prompt = build_message_extractor_lrpa_aware(
+        system_prompt_override=None,
+    )(runs)
+    messages_with_system_prompt = build_message_extractor_lrpa_aware(
+        system_prompt_override='sys',
+    )(runs)
     assert runs == runs_copy, "ensure pure function"
-    assert messages == [
+    assert override_system_prompt(messages_no_system_prompt, 'sys') == messages_with_system_prompt
+    assert messages_no_system_prompt == [
         {
             'role': 'human',
             'text': 'hi',
         },
         {
             'role': 'ai',
+            'text': '{"extraction_level": 0}',
+        },
+        {
+            'role': 'human',
+            'text': 'FINAL ANSWER?',
+        },
+        {
+            'role': 'ai',
             'text': 'answer is 7',
+        },
+        {
+            'role': 'human',
+            'text': 'no?',
         },
         {
             'role': 'ai',

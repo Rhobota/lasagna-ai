@@ -75,23 +75,25 @@ from ..types import (
     Message,
     AgentCallable,
     BoundAgentCallable,
-    ExtractionType,
 )
 from ..agent_util import (
     override_system_prompt,
+    build_extraction_agent,
     build_simple_agent,
-    recursive_extract_messages,
-    extraction,
     MessageExtractor,
 )
 from ..agent_util import chained_runs
 from ..pydantic_util import result_to_string
+from ..known_models import abstract_binder
 
 from .util import extract_is_trivial
 from . import default_prompts
 
 import copy
-from typing import List, Tuple, Callable, Type, AsyncIterable, Awaitable
+from typing import (
+    List, Tuple, Optional,
+    Callable, AsyncIterable, Awaitable,
+)
 
 
 def build_default_planning_agent(
@@ -102,39 +104,41 @@ def build_default_planning_agent(
     max_depth: int = 4,
 ) -> BoundAgentCallable:
     return build_planning_agent(
-        binder = binder,
+        extraction_agent = binder(build_extraction_agent(
+            'extraction_agent',
+            extraction_type = default_prompts.PlanOutput,
+            message_extractor = build_message_extractor_lrpa_aware(
+                system_prompt_override = default_prompts.append_tool_spec_to_prompt(
+                    default_prompts.PLANNING_EXTRACTION_AGENT_SYSTEM_PROMPT,
+                    tools,
+                ),
+            ),
+        )),
         answer_agent = binder(build_simple_agent(
             'answer_agent',
             tools = tools,
             max_tool_iters = max_tool_iters,
-            message_extractor = _extract_messages_lrpa_aware,
+            message_extractor = build_message_extractor_lrpa_aware(
+                system_prompt_override = None,
+            ),
         )),
-        system_prompt = default_prompts.append_tool_spec_to_prompt(
-            default_prompts.PLANNING_AGENT_SYSTEM_PROMPT,
-            tools,
-        ),
-        message_extractor = _extract_messages_lrpa_aware,
         subtask_input_generator = default_prompts.subtask_input_generator,
         answer_input_prompt = default_prompts.answer_input_prompt,
-        extraction_type = default_prompts.PlanOutput,
         max_depth = max_depth,
     )
 
 
 def build_planning_agent(
     *,
-    binder: Callable[[AgentCallable], BoundAgentCallable],
+    extraction_agent: BoundAgentCallable,
     answer_agent: BoundAgentCallable,
-    system_prompt: str,
-    message_extractor: MessageExtractor,
     subtask_input_generator: Callable[[AgentRun], AsyncIterable[List[AgentRun]]],
     answer_input_prompt: Callable[[AgentRun], Awaitable[List[AgentRun]]],
-    extraction_type: Type[ExtractionType],
     max_depth: int,
 ) -> BoundAgentCallable:
-    @binder
+    @abstract_binder
     async def planning_agent(
-        model: Model,
+        _: Model,
         event_callback: EventCallback,
         prev_runs: List[AgentRun],
     ) -> AgentRun:
@@ -153,28 +157,21 @@ def build_planning_agent(
         assert planning_agent_chain['type'] == 'chain'
         output_runs = planning_agent_chain['runs']
 
-        messages_orig = message_extractor(prev_runs)
-
-        messages_new_system_prompt = override_system_prompt(
-            messages_orig,
-            system_prompt = system_prompt,
-        )
-
-        extraction_message, extraction_result = await model.extract(
+        extraction_run = await extraction_agent(
             event_callback,
-            messages = messages_new_system_prompt,
-            extraction_type = extraction_type,
+            prev_runs,
         )
-        extraction_run = extraction('extraction_run', [extraction_message], extraction_result)
         output_runs.append(extraction_run)
 
-        is_trivial = extract_is_trivial(extraction_result)
+        is_trivial = extract_is_trivial(extraction_run)
 
         if not is_trivial and depth < max_depth:
             subtask_chain_of_chains = chained_runs('subtask_chain_of_chains', [])
             output_runs.append(subtask_chain_of_chains)
             async for subtask_input in subtask_input_generator(extraction_run):
-                subtask_chain = chained_runs('subtask_chain', subtask_input)
+                subtask_chain = chained_runs('subtask_chain', [
+                    *subtask_input,
+                ])
                 subtask_chain_of_chains['runs'].append(subtask_chain)
                 subtask_run = await planning_agent(
                     event_callback,
@@ -182,7 +179,11 @@ def build_planning_agent(
                 )
                 subtask_chain['runs'].append(subtask_run)
 
-        answer_chain = chained_runs('answer_chain', await answer_input_prompt(extraction_run))
+        answer_chain = chained_runs('answer_chain', [
+            chained_runs('answer_input_chain', [
+                *(await answer_input_prompt(extraction_run)),
+            ]),
+        ])
         output_runs.append(answer_chain)
         answer_run = await answer_agent(
             event_callback,
@@ -237,68 +238,71 @@ def _minimal_copy_lrpa_aware(
     return prev_runs_copy, planning_agent_chain, depth
 
 
-def _extract_messages_lrpa_aware(
-    prev_runs: List[AgentRun],
-    depth: int = 0,
-) -> List[Message]:
-    """
-    This function extracts only _relevant_ messages. If a subtask has an
-    answer, the subtasks below it are removed (since the answer is what
-    matters in this case). If a subtask does not yet have an answer, its
-    full surrounding context is preserved so that an answer can be reached.
-    Stated another way: The subtask tree is pruned to keep only the messages
-    relevant to obtain the next answer.
-    NOTE: The implementation of this function is tied to and assumes this
-    is called from the `planning_agent`. That is, it assumes the hierarchical/
-    recursive `prev_runs` in the input match that built by `planning_agent`.
-    """
-    messages: List[Message] = []
+def build_message_extractor_lrpa_aware(
+    system_prompt_override: Optional[str],
+) -> MessageExtractor:
+    def extract_messages_lrpa_aware(
+        prev_runs: List[AgentRun],
+        depth: int = 0,
+    ) -> List[Message]:
+        """
+        This function extracts only _relevant_ messages. If a subtask has an
+        answer, the subtasks below it are removed (since the answer is what
+        matters in this case). If a subtask does not yet have an answer, its
+        full surrounding context is preserved so that an answer can be reached.
+        Stated another way: The subtask tree is pruned to keep only the messages
+        relevant to obtain the next answer.
+        NOTE: The implementation of this function is tied to and assumes this
+        is called from the `planning_agent`. That is, it assumes the hierarchical/
+        recursive `prev_runs` in the input match that built by `planning_agent`.
+        """
+        messages: List[Message] = []
 
-    for run in prev_runs:
-        if run['agent'] == 'planning_agent_chain':
-            # Special case! We want to only recurse when the answer hasn't been found.
-            assert run['type'] == 'chain'
-            pa_runs = run['runs']
-            if len(pa_runs) > 0 and pa_runs[-1]['agent'] == 'answer_chain':
-                answer_chain = pa_runs[-1]
-                assert answer_chain['type'] == 'chain'
-                answer_ai_messages = [
-                    m
-                    for m in recursive_extract_messages(
-                        answer_chain,
-                        from_tools=False,
-                        from_extraction=False,
-                    )
-                    if m['role'] == 'ai'
-                ]
-                if answer_ai_messages:
-                    messages.extend(answer_ai_messages)
-                    continue
+        for run in prev_runs:
+            if run['agent'] == 'planning_agent_chain':
+                assert run['type'] == 'chain'
+                pa_runs = run['runs']
+                if len(pa_runs) > 0 and pa_runs[-1]['agent'] == 'answer_chain':
+                    extraction_run = pa_runs[0]
+                    answer_chain = pa_runs[-1]
+                    assert answer_chain['type'] == 'chain'
+                    if len(answer_chain['runs']) > 1:
+                        # We *must* have an answer... since it goes in the second spot of this answer_chain.
+                        # Thus, we hit a special case. We'll *exclude* the intermediate steps, and just include this answer.
+                        messages.extend(
+                            extract_messages_lrpa_aware([extraction_run, answer_chain], depth = depth + 1),
+                        )
+                        continue
 
-        if run['type'] == 'messages':
-            messages.extend(
-                run['messages'],
-            )
+            if run['type'] == 'messages':
+                messages.extend(
+                    run['messages'],
+                )
 
-        elif run['type'] == 'chain' or run['type'] == 'parallel':
-            messages.extend(
-                _extract_messages_lrpa_aware(run['runs'], depth = depth + 1),
-            )
+            elif run['type'] == 'chain' or run['type'] == 'parallel':
+                messages.extend(
+                    extract_messages_lrpa_aware(run['runs'], depth = depth + 1),
+                )
 
-        elif run['type'] == 'extraction':
-            messages.append({
-                'role': 'ai',
-                'text': result_to_string(run['result']),
-            })
+            elif run['type'] == 'extraction':
+                messages.append({
+                    'role': 'ai',
+                    'text': result_to_string(run['result']),
+                })
 
-        else:
-            raise RuntimeError(f"unknown type: {run['type']}")
+            else:
+                raise RuntimeError(f"unknown type: {run['type']}")
 
-    #if depth == 0:
-    #    from ..agent_util import to_str
-    #    print(to_str(prev_runs))
-    #    import json
-    #    print(json.dumps(messages, indent=2))
-    #    print('-' * 60)
+        if depth == 0 and system_prompt_override is not None:
+            messages = override_system_prompt(messages, system_prompt_override)
 
-    return messages
+        #if depth == 0:
+        #    from ..agent_util import to_str
+        #    print(to_str(prev_runs))
+        #    import json
+        #    print(json.dumps(messages, indent=2))
+        #    print('-' * 60)
+
+        return messages
+
+    return extract_messages_lrpa_aware

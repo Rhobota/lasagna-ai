@@ -14,7 +14,7 @@ import json
 from typing import List, Dict, AsyncIterable, Callable
 
 
-PLANNING_AGENT_SYSTEM_PROMPT = """
+PLANNING_EXTRACTION_AGENT_SYSTEM_PROMPT = """
 You plan the execution of a task by:
 - analyzing it,
 - determining its complexities, and
@@ -32,9 +32,7 @@ class PlanOutput(BaseModel):
 async def subtask_input_generator(
     extraction_run: AgentRun,
 ) -> AsyncIterable[List[AgentRun]]:
-    assert extraction_run['type'] == 'extraction'
-    extraction_result = extraction_run['result']
-    subtask_strings = extract_subtask_strings(extraction_result)
+    subtask_strings = extract_subtask_strings(extraction_run)
     for i, subtask_string in enumerate(subtask_strings):
         yield [
             flat_messages('subtask_input_generator', [{
@@ -47,9 +45,7 @@ async def subtask_input_generator(
 async def answer_input_prompt(
     extraction_run: AgentRun,
 ) -> List[AgentRun]:
-    assert extraction_run['type'] == 'extraction'
-    extraction_result = extraction_run['result']
-    task_statement = extract_task_statement(extraction_result)
+    task_statement = extract_task_statement(extraction_run)
     return [
         flat_messages('answer_input_prompt', [{
             'role': 'human',
