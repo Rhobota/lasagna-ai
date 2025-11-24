@@ -80,7 +80,6 @@ from ..agent_util import (
     override_system_prompt,
     build_extraction_agent,
     build_simple_agent,
-    recursive_extract_messages,
     MessageExtractor,
 )
 from ..agent_util import chained_runs
@@ -181,7 +180,9 @@ def build_planning_agent(
                 subtask_chain['runs'].append(subtask_run)
 
         answer_chain = chained_runs('answer_chain', [
-            *(await answer_input_prompt(extraction_run)),
+            chained_runs('answer_input_chain', [
+                *(await answer_input_prompt(extraction_run)),
+            ]),
         ])
         output_runs.append(answer_chain)
         answer_run = await answer_agent(
@@ -259,23 +260,18 @@ def build_message_extractor_lrpa_aware(
 
         for run in prev_runs:
             if run['agent'] == 'planning_agent_chain':
-                # Special case! We want to only recurse when the answer hasn't been found.
                 assert run['type'] == 'chain'
                 pa_runs = run['runs']
                 if len(pa_runs) > 0 and pa_runs[-1]['agent'] == 'answer_chain':
+                    extraction_run = pa_runs[0]
                     answer_chain = pa_runs[-1]
                     assert answer_chain['type'] == 'chain'
-                    answer_ai_messages = [
-                        m
-                        for m in recursive_extract_messages(
-                            answer_chain,
-                            from_tools=False,
-                            from_extraction=False,
+                    if len(answer_chain['runs']) > 1:
+                        # We *must* have an answer... since it goes in the second spot of this answer_chain.
+                        # Thus, we hit a special case. We'll *exclude* the intermediate steps, and just include this answer.
+                        messages.extend(
+                            extract_messages_lrpa_aware([extraction_run, answer_chain], depth = depth + 1),
                         )
-                        if m['role'] == 'ai'
-                    ]
-                    if answer_ai_messages:
-                        messages.extend(answer_ai_messages)
                         continue
 
             if run['type'] == 'messages':
