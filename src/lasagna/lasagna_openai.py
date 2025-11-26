@@ -294,11 +294,16 @@ def _get_cost(
     if not usages:
         return None
     usage = usages[-1]
-    return {
+    cost: Cost = {
         'input_tokens': usage.prompt_tokens,
         'output_tokens': usage.completion_tokens,
-        'total_tokens': usage.total_tokens,
     }
+    if usage.prompt_tokens_details:
+        if usage.prompt_tokens_details.cached_tokens:
+            ct = usage.prompt_tokens_details.cached_tokens
+            cost['cache_read_tokens'] = ct
+            cost['input_tokens'] -= ct
+    return cost
 
 
 def _build_messages_from_openai_payload(
