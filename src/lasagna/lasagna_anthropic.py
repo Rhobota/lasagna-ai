@@ -184,44 +184,69 @@ def _collapse_tool_call_messages(
 
 async def _convert_to_anthropic_messages(
     messages: List[Message],
-) -> Tuple[Union[str, None], List[MessageParam]]:
-    system_prompt: Union[str, None] = None
+) -> Tuple[Union[List[TextBlockParam], None], List[MessageParam]]:
+    system_prompts: List[TextBlockParam] = []
+
+    for m in messages:
+        if m['role'] != 'system':
+            break
+        if m.get('media'):
+            raise ValueError(f"For this model, you may not pass media in the system prompt.")
+        system_prompts.append({
+            'type': 'text',
+            'text': m['text'] or '',
+        })
+
+    if len(system_prompts) > 0:
+        system_prompts[-1]['cache_control'] = {
+            'type': 'ephemeral',
+            'ttl': '5m',
+        }
+        messages = messages[len(system_prompts):]
+
     ret: List[MessageParam] = []
-    if len(messages) > 0:
-        first_message = messages[0]
-        if first_message['role'] == 'system':
-            if first_message.get('media'):
-                raise ValueError(f"For this model, you may not pass media in the system prompt.")
-            system_prompt = first_message['text']
-            messages = messages[1:]
-        for m in messages:
-            if m['role'] == 'system':
-                raise ValueError(f"For this model, you can only have a system prompt as the first message!")
-            elif m['role'] == 'ai':
-                ret.append({
-                    'role': 'assistant',
-                    'content': await _build_anthropic_content(m),
-                })
-            elif m['role'] == 'human':
-                ret.append({
-                    'role': 'user',
-                    'content': await _build_anthropic_content(m),
-                })
-            elif m['role'] == 'tool_call':
-                ret.append({
-                    'role': 'assistant',
-                    'content': await _build_anthropic_tool_use(m),
-                })
-            elif m['role'] == 'tool_res':
-                ret.append({
-                    'role': 'user',
-                    'content': await _build_anthropic_tool_result(m),
-                })
-            else:
-                raise ValueError(f"Unknown role: {m['role']}")
+
+    for m in messages:
+        if m['role'] == 'system':
+            raise ValueError(f"For this model, you can only have system prompts as the first messages!")
+        elif m['role'] == 'ai':
+            ret.append({
+                'role': 'assistant',
+                'content': await _build_anthropic_content(m),
+            })
+        elif m['role'] == 'human':
+            ret.append({
+                'role': 'user',
+                'content': await _build_anthropic_content(m),
+            })
+        elif m['role'] == 'tool_call':
+            ret.append({
+                'role': 'assistant',
+                'content': await _build_anthropic_tool_use(m),
+            })
+        elif m['role'] == 'tool_res':
+            ret.append({
+                'role': 'user',
+                'content': await _build_anthropic_tool_result(m),
+            })
+        else:
+            raise ValueError(f"Unknown role: {m['role']}")
+
     ret = [r for r in ret if len(list(r['content'])) > 0]
+
     ret = _collapse_anthropic_messages(ret)
-    return system_prompt, ret
+
+    for msg in reversed(ret):
+        if msg['role'] == 'user':
+            assert isinstance(msg['content'], list)
+            last_content = msg['content'][-1]
+            last_content['cache_control'] = {
+                'type': 'ephemeral',
+                'ttl': '5m',
+            }
+            break
+
+    return system_prompts or None, ret
 
 
 def _build_messages_from_anthropic_payload(
@@ -259,7 +284,8 @@ def _build_messages_from_anthropic_payload(
     cost: Cost = {
         'input_tokens': message.usage.input_tokens,
         'output_tokens': message.usage.output_tokens,
-        'total_tokens': message.usage.input_tokens + message.usage.output_tokens,
+        'cache_write_tokens': message.usage.cache_creation_input_tokens or 0,
+        'cache_read_tokens': message.usage.cache_read_input_tokens or 0,
     }
     last_message['cost'] = cost
     last_message['raw'] = {
@@ -284,6 +310,10 @@ def _convert_to_anthropic_tools(tools: List[Callable]) -> Union[Omit, List[Anthr
     if len(tools) == 0:
         return omit
     specs = [_convert_to_anthropic_tool(tool) for tool in tools]
+    specs[-1]['cache_control'] = {
+        'type': 'ephemeral',
+        'ttl': '5m',
+    }
     return specs
 
 
@@ -410,7 +440,7 @@ class LasagnaAnthropic(Model):
             else:
                 tool_choice = omit
 
-        system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
+        system_prompts, anthropic_messages = await _convert_to_anthropic_messages(messages)
 
         max_tokens: int = self.model_kwargs.get('max_tokens', 4096)
         stop: Union[List[str], Omit] = self.model_kwargs.get('stop', omit)
@@ -433,12 +463,12 @@ class LasagnaAnthropic(Model):
         if user is not None:
             assert isinstance(user, str)
 
-        _LOG.info(f"Invoking {self.model} with:\n  system_prompt: {system_prompt}\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
+        _LOG.info(f"Invoking {self.model} with:\n  system_prompts: {system_prompts}\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
 
         client = self._make_client()
         async with client.messages.stream(
             model       = self.model,
-            system      = system_prompt or omit,
+            system      = system_prompts or omit,
             messages    = anthropic_messages,
             max_tokens  = max_tokens,
             tools       = tools_spec,
