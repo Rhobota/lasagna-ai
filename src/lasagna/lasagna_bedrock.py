@@ -182,12 +182,12 @@ async def _convert_to_bedrock_messages(
         })
 
     if len(system_prompts) > 0:
+        messages = messages[len(system_prompts):]
         system_prompts.append({
             'cachePoint': {
                 'type': 'default',
             }
         })
-        messages = messages[len(system_prompts):]
 
     ret: List[Dict] = []
 

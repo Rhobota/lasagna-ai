@@ -971,7 +971,6 @@ def test_build_messages_from_openai_payload():
             'cost': {
                 'input_tokens': 21,
                 'output_tokens': 22,
-                'total_tokens': 43,
             },
             'raw': [
                 v.to_dict()

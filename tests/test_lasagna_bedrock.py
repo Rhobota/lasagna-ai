@@ -110,7 +110,7 @@ def test_convert_to_bedrock_tools():
         return first, second, third
     spec = _convert_to_bedrock_tools([query_weather, my_other_tool, thing_with_optional_params])
     assert spec
-    assert len(spec) == 3
+    assert len(spec) == 4   # one extra for the cache checkpoint
     assert spec[0] == {
         'toolSpec': {
             'name': 'query_weather',
@@ -176,6 +176,11 @@ def test_convert_to_bedrock_tools():
             },
         },
     }
+    assert spec[3] == {
+        'cachePoint': {
+            'type': 'default',
+        }
+    }
 
 
 @pytest.mark.asyncio
@@ -191,14 +196,28 @@ async def test_convert_to_bedrock_messages():
             'text': 'Hi, what are you?',
         },
     ]
-    system_prompt, bedrock_messages = await _convert_to_bedrock_messages(messages)
-    assert system_prompt == 'You are a robot.'
+    system_prompts, bedrock_messages = await _convert_to_bedrock_messages(messages)
+    assert system_prompts == [
+        {
+            'text': 'You are a robot.',
+        },
+        {
+            'cachePoint': {
+                'type': 'default',
+            }
+        },
+    ]
     assert bedrock_messages == [
         {
             'role': 'user',
             'content': [
                 {
                     'text': 'Hi, what are you?',
+                },
+                {
+                    'cachePoint': {
+                        'type': 'default',
+                    }
                 },
             ],
         },
@@ -211,8 +230,8 @@ async def test_convert_to_bedrock_messages():
             'text': 'Hi, what can I help you with today?',
         },
     ]
-    system_prompt, bedrock_messages = await _convert_to_bedrock_messages(messages)
-    assert system_prompt is None
+    system_prompts, bedrock_messages = await _convert_to_bedrock_messages(messages)
+    assert system_prompts is None
     assert bedrock_messages == [
         {
             'role': 'assistant',
@@ -241,8 +260,8 @@ async def test_convert_to_bedrock_messages():
                 ],
             },
         ]
-        system_prompt, bedrock_messages = await _convert_to_bedrock_messages(messages)
-        assert system_prompt is None
+        system_prompts, bedrock_messages = await _convert_to_bedrock_messages(messages)
+        assert system_prompts is None
         assert bedrock_messages == [
             {
                 'role': 'user',
@@ -255,6 +274,11 @@ async def test_convert_to_bedrock_messages():
                             'format': 'png',
                             'source': {'bytes': 'MTIzNA=='},
                         },
+                    },
+                    {
+                        'cachePoint': {
+                            'type': 'default',
+                        }
                     },
                 ],
             },
@@ -300,8 +324,8 @@ async def test_convert_to_bedrock_messages():
             ],
         },
     ]
-    system_prompt, bedrock_messages = await _convert_to_bedrock_messages(messages)
-    assert system_prompt is None
+    system_prompts, bedrock_messages = await _convert_to_bedrock_messages(messages)
+    assert system_prompts is None
     assert bedrock_messages == [
         {
             'role': 'assistant',
@@ -347,6 +371,11 @@ async def test_convert_to_bedrock_messages():
                         'status': 'error',
                     },
                 },
+                {
+                    'cachePoint': {
+                        'type': 'default',
+                    }
+                },
             ],
         },
     ]
@@ -372,8 +401,8 @@ async def test_convert_to_bedrock_messages():
             'text': 'Here is more text.',
         },
     ]
-    system_prompt, bedrock_messages = await _convert_to_bedrock_messages(messages)
-    assert system_prompt is None
+    system_prompts, bedrock_messages = await _convert_to_bedrock_messages(messages)
+    assert system_prompts is None
     assert bedrock_messages == [
         {
             'role': 'assistant',
@@ -403,8 +432,8 @@ async def test_convert_to_bedrock_messages():
             'text': 'Please be more specific.',
         },
     ]
-    system_prompt, bedrock_messages = await _convert_to_bedrock_messages(messages)
-    assert system_prompt is None
+    system_prompts, bedrock_messages = await _convert_to_bedrock_messages(messages)
+    assert system_prompts is None
     assert bedrock_messages == [
         {
             'role': 'assistant',
@@ -419,6 +448,11 @@ async def test_convert_to_bedrock_messages():
             'content': [
                 {
                     'text': 'I need help with everything.',
+                },
+                {
+                    'cachePoint': {
+                        'type': 'default',
+                    }
                 },
             ],
         },
@@ -455,8 +489,8 @@ async def test_convert_to_bedrock_messages():
             'text': 'Like tell me what you are trying to do.',
         },
     ]
-    system_prompt, bedrock_messages = await _convert_to_bedrock_messages(messages)
-    assert system_prompt is None
+    system_prompts, bedrock_messages = await _convert_to_bedrock_messages(messages)
+    assert system_prompts is None
     assert bedrock_messages == [
         {
             'role': 'assistant',
@@ -474,6 +508,11 @@ async def test_convert_to_bedrock_messages():
                 },
                 {
                     'text': 'EVERYTHING!',
+                },
+                {
+                    'cachePoint': {
+                        'type': 'default',
+                    }
                 },
             ],
         },
@@ -517,8 +556,8 @@ async def test_convert_to_bedrock_messages():
             'text': 'Forget it...',
         },
     ]
-    system_prompt, bedrock_messages = await _convert_to_bedrock_messages(messages)
-    assert system_prompt is None
+    system_prompts, bedrock_messages = await _convert_to_bedrock_messages(messages)
+    assert system_prompts is None
     assert bedrock_messages == [
         {
             'role': 'assistant',
@@ -556,6 +595,11 @@ async def test_convert_to_bedrock_messages():
                 {
                     'text': 'Forget it...',
                 },
+                {
+                    'cachePoint': {
+                        'type': 'default',
+                    }
+                },
             ],
         },
     ]
@@ -577,7 +621,8 @@ async def test_process_bedrock_stream():
             'cost': {
                 'input_tokens': 31,
                 'output_tokens': 38,
-                'total_tokens': 31 + 38,
+                'cache_read_tokens': 0,
+                'cache_write_tokens': 0,
             },
             'raw': {
                 'events': _SAMPLE_TEXT_STREAM,
@@ -624,7 +669,8 @@ async def test_process_bedrock_stream():
             'cost': {
                 'input_tokens': 373,
                 'output_tokens': 59,
-                'total_tokens': 373 + 59,
+                'cache_read_tokens': 0,
+                'cache_write_tokens': 0,
             },
             'raw': {
                 'events': _SAMPLE_TOOL_STREAM,
@@ -684,7 +730,8 @@ async def test_process_bedrock_stream():
             'cost': {
                 'input_tokens': 2 + 373,
                 'output_tokens': 3 + 59,
-                'total_tokens': 2 + 373 + 3 + 59,
+                'cache_read_tokens': 0,
+                'cache_write_tokens': 0,
             },
             'raw': {
                 'events': _SAMPLE_MULTI_TOOL_STREAM,

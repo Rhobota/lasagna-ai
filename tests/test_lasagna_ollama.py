@@ -288,7 +288,6 @@ def test_set_cost_raw():
         'cost': {
             'input_tokens': 20,
             'output_tokens': 10,
-            'total_tokens': 30,
         },
         'raw': _sample_events_streaming_text,
     }
@@ -325,7 +324,6 @@ async def test_process_stream_streaming_text():
             'cost': {
                 'input_tokens': 20,
                 'output_tokens': 10,
-                'total_tokens': 30,
             },
             'raw': _sample_events_streaming_text,
         },
@@ -360,7 +358,6 @@ async def test_process_stream_tool_call():
             'cost': {
                 'input_tokens': 100,
                 'output_tokens': 29,
-                'total_tokens': 129,
             },
             'raw': _sample_events_tool_call,
         },
@@ -412,7 +409,6 @@ async def test_process_stream_text_and_tool_call():
             'cost': {
                 'input_tokens': 20 + 100,
                 'output_tokens': 10 + 29,
-                'total_tokens': 30 + 129,
             },
             'raw': _sample_events,
         },
@@ -438,7 +434,6 @@ async def test_process_stream_structured_output():
             'cost': {
                 'input_tokens': 28,
                 'output_tokens': 15,
-                'total_tokens': 43,
             },
             'raw': _sample_events_structued_output,
         },
