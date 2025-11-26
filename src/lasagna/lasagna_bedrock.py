@@ -71,6 +71,8 @@ def _convert_to_bedrock_tool(tool: Callable) -> Dict:
                 'json': schema,
             },
         },
+        # TODO: use strict mode, once Bedrock supports it
+        #   https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/bedrock-runtime/client/converse.html
     }
 
 
@@ -622,8 +624,12 @@ class LasagnaBedrock(Model):
                         'json': to_strict_json_schema(ensure_pydantic_model(extraction_type)),
                     },
                 },
+                # TODO: use strict mode, once Bedrock supports it
+                #   https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/bedrock-runtime/client/converse.html
             },
         ]
+
+        # TODO: Use structured output feature (rather than toolcalling) once boto3/Bedrock supports it.
 
         docstr = getattr(extraction_type, '__doc__', None)
         if docstr:

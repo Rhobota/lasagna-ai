@@ -8,6 +8,9 @@ help :
 	@echo '  make testall      # <-- run tests in *all* python versions (uses hatch)'
 	@echo '  make checkall     # <-- check types in *all* python versions (uses hatch)'
 	@echo
+	@echo '  make shell        # <-- get a shell into the default hatch python environment'
+	@echo '  make clean        # <-- remove all hatch python environments'
+	@echo
 	@echo '  make quarto-serve # <-- run quarto over the docs'
 	@echo '  make docs-check   # <-- check types within the docs'
 	@echo

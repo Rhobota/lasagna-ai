@@ -52,7 +52,7 @@ openai = [
   # This optional dependency name is left here for backward compatibility.
 ]
 anthropic = [
-  "anthropic >= 0.37.1, <= 0.64.0",
+  "anthropic >= 0.75.0",
 ]
 bedrock = [
   "boto3>=1.37.0",

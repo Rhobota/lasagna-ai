@@ -44,8 +44,8 @@ from .known_models import ANTHROPIC_KNOWN_MODELS
 
 from anthropic import (
     AsyncAnthropic,
-    NOT_GIVEN,
-    NotGiven,
+    omit,
+    Omit,
     AnthropicError,
     APIConnectionError,
     APIStatusError,
@@ -271,16 +271,18 @@ def _build_messages_from_anthropic_payload(
 
 def _convert_to_anthropic_tool(tool: Callable) -> AnthropicToolParam:
     description, params = get_tool_params(tool)
-    return {
+    tool_spec: AnthropicToolParam = {
         'name': get_name(tool),
         'description': description,
         'input_schema': convert_to_json_schema(params),
     }
+    tool_spec['strict'] = True  # type: ignore # TODO (anthropic lib doesn't have this yet, but the API does)
+    return tool_spec
 
 
-def _convert_to_anthropic_tools(tools: List[Callable]) -> Union[NotGiven, List[AnthropicToolParam]]:
+def _convert_to_anthropic_tools(tools: List[Callable]) -> Union[Omit, List[AnthropicToolParam]]:
     if len(tools) == 0:
-        return NOT_GIVEN
+        return omit
     specs = [_convert_to_anthropic_tool(tool) for tool in tools]
     return specs
 
@@ -380,11 +382,11 @@ class LasagnaAnthropic(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools_spec: Union[NotGiven, List[AnthropicToolParam]],
+        tools_spec: Union[Omit, List[AnthropicToolParam]],
         force_tool: bool,
         disable_parallel_tool_use: bool,
     ) -> List[Message]:
-        tool_choice: Union[NotGiven, ToolChoice]
+        tool_choice: Union[Omit, ToolChoice]
         if force_tool:
             if not tools_spec or len(tools_spec) == 0:
                 raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
@@ -406,27 +408,27 @@ class LasagnaAnthropic(Model):
                     "disable_parallel_tool_use": disable_parallel_tool_use,
                 }
             else:
-                tool_choice = NOT_GIVEN
+                tool_choice = omit
 
         system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
 
         max_tokens: int = self.model_kwargs.get('max_tokens', 4096)
-        stop: Union[List[str], NotGiven] = self.model_kwargs.get('stop', NOT_GIVEN)
-        temperature: Union[float, NotGiven] = float(self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
-        top_p: Union[float, NotGiven] = float(self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
-        top_k: Union[int, NotGiven] = self.model_kwargs.get('top_k', NOT_GIVEN)
+        stop: Union[List[str], Omit] = self.model_kwargs.get('stop', omit)
+        temperature: Union[float, Omit] = float(self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else omit
+        top_p: Union[float, Omit] = float(self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else omit
+        top_k: Union[int, Omit] = self.model_kwargs.get('top_k', omit)
         user: Union[str, None] = self.model_kwargs.get('user', None)
 
         assert isinstance(max_tokens, int)
-        if stop is not NOT_GIVEN:
+        if stop is not omit:
             assert isinstance(stop, list)
             for s in stop:
                 assert isinstance(s, str)
-        if temperature is not NOT_GIVEN:
+        if temperature is not omit:
             assert isinstance(temperature, float)
-        if top_p is not NOT_GIVEN:
+        if top_p is not omit:
             assert isinstance(top_p, float)
-        if top_k is not NOT_GIVEN:
+        if top_k is not omit:
             assert isinstance(top_k, int)
         if user is not None:
             assert isinstance(user, str)
@@ -436,7 +438,7 @@ class LasagnaAnthropic(Model):
         client = self._make_client()
         async with client.messages.stream(
             model       = self.model,
-            system      = system_prompt or NOT_GIVEN,
+            system      = system_prompt or omit,
             messages    = anthropic_messages,
             max_tokens  = max_tokens,
             tools       = tools_spec,
@@ -448,6 +450,7 @@ class LasagnaAnthropic(Model):
                 'user_id': user,
             },
             stop_sequences = stop,
+            extra_headers = {'anthropic-beta': 'structured-outputs-2025-11-13'},  # TODO: remove this once the feature is out of beta
             # Anthropic doesn't support sending logprobs 👎
         ) as stream:
             raw_stream, rt_stream = adup(stream)
@@ -465,7 +468,7 @@ class LasagnaAnthropic(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools_spec: Union[NotGiven, List[AnthropicToolParam]],
+        tools_spec: Union[Omit, List[AnthropicToolParam]],
         force_tool: bool,
         disable_parallel_tool_use: bool,
         validator: Union[Callable[[List[Message]], Any], None] = None,  # <-- raises if validations fails
@@ -576,6 +579,11 @@ class LasagnaAnthropic(Model):
                 'input_schema': to_strict_json_schema(ensure_pydantic_model(extraction_type)),
             },
         ]
+
+        tools_spec[0]['strict'] = True  # type: ignore # TODO (anthropic lib doesn't have this yet, but the API does)
+
+        # TODO: use `output_format` param (insted of toolcalling), once the anthropic lib supports it.
+        #  https://platform.claude.com/docs/en/build-with-claude/structured-outputs#json-outputs
 
         docstr = getattr(extraction_type, '__doc__', None)
         if docstr:
