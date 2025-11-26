@@ -19,6 +19,8 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
   "Intended Audience :: Developers",
@@ -65,7 +67,6 @@ dev = [
 example-deps = [
   "sympy",
   "tzdata",
-  "pytz",
   "beautifulsoup4",
 ]
 
@@ -76,20 +77,20 @@ packages = ["src/lasagna"]
 path = "src/lasagna/__init__.py"
 
 [tool.hatch.envs.default]
-python = "3.12"
+python = "3.14"
 features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 
 [tool.hatch.envs.types]
 features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 
 [[tool.hatch.envs.types.matrix]]
-python = ["3.9", "3.10", "3.11", "3.12"]
+python = ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive src/lasagna/ tests/ examples/"
 
 [tool.hatch.envs.docs]
-python = "3.12"
+python = "3.14"
 features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 
 [tool.hatch.envs.docs.scripts]
@@ -99,7 +100,7 @@ check = "nbqa mypy --install-types --non-interactive docs/ --nbqa-dont-skip-bad-
 features = ["dev", "openai", "anthropic", "bedrock"]
 
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.9", "3.10", "3.11", "3.12"]
+python = ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

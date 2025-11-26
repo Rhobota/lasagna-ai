@@ -16,6 +16,7 @@ import sys
 import json
 import asyncio
 import aiohttp
+from zoneinfo import ZoneInfo
 from datetime import datetime, timezone
 
 from bs4 import BeautifulSoup
@@ -178,12 +179,7 @@ def current_time() -> str:
     """
     utc_now = datetime.now(timezone.utc)
     user_tz_name = os.environ.get('USER_TIMEZONE', 'US/Central')
-    if sys.version_info >= (3, 9):
-        from zoneinfo import ZoneInfo
-        user_tz = ZoneInfo(user_tz_name)
-    else:
-        import pytz
-        user_tz = pytz.timezone(user_tz_name)
+    user_tz = ZoneInfo(user_tz_name)
     user_now = utc_now.astimezone(user_tz)
     user_now_str = user_now.isoformat()
     return '\n'.join([

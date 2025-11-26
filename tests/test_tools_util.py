@@ -1551,35 +1551,32 @@ def test_type_a_isa_b():
     assert not type_a_isa_b(MessageContent, Set)
     assert not type_a_isa_b(Message, Set)
 
-    # The next set of tests only works for Python 3.9+, where the builtin types
-    # can be used as generic type hints.
-    if sys.version_info >= (3, 9):
-        # True
-        assert type_a_isa_b(List[int], list[int])
-        assert type_a_isa_b(List[int], list)
-        assert type_a_isa_b(list[int], List[int])
-        assert type_a_isa_b(list[int], List)
-        assert type_a_isa_b(List[str], list[str])
-        assert type_a_isa_b(List[str], list)
-        assert type_a_isa_b(list[str], List[str])
-        assert type_a_isa_b(list[str], List)
-        # False
-        assert not type_a_isa_b(List[int], list[str])
-        assert not type_a_isa_b(List[str], list[int])
-        assert not type_a_isa_b(list[int], List[str])
-        assert not type_a_isa_b(list[str], List[int])
+    # True
+    assert type_a_isa_b(List[int], list[int])
+    assert type_a_isa_b(List[int], list)
+    assert type_a_isa_b(list[int], List[int])
+    assert type_a_isa_b(list[int], List)
+    assert type_a_isa_b(List[str], list[str])
+    assert type_a_isa_b(List[str], list)
+    assert type_a_isa_b(list[str], List[str])
+    assert type_a_isa_b(list[str], List)
+    # False
+    assert not type_a_isa_b(List[int], list[str])
+    assert not type_a_isa_b(List[str], list[int])
+    assert not type_a_isa_b(list[int], List[str])
+    assert not type_a_isa_b(list[str], List[int])
 
-        # True
-        assert type_a_isa_b(
-            List[dict[str, Set[int]]],
-            list[Dict[str, set[int]]],
-        )
-        # False
-        assert not type_a_isa_b(
-            List[dict[str, Set[int]]],
-            list[Dict[str, set[str]]],
-        )
-        assert not type_a_isa_b(
-            List[dict[str, List[int]]],
-            list[Dict[str, set[int]]],
-        )
+    # True
+    assert type_a_isa_b(
+        List[dict[str, Set[int]]],
+        list[Dict[str, set[int]]],
+    )
+    # False
+    assert not type_a_isa_b(
+        List[dict[str, Set[int]]],
+        list[Dict[str, set[str]]],
+    )
+    assert not type_a_isa_b(
+        List[dict[str, List[int]]],
+        list[Dict[str, set[int]]],
+    )
