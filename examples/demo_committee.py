@@ -24,14 +24,6 @@ COMMITTEE_SPEC = [
     known_models.anthropic_claude_opus_4_1_binder,
     known_models.anthropic_claude_sonnet_4_5_binder,
     known_models.anthropic_claude_haiku_4_5_binder,
-
-    known_models.nvidia_meta_llama3_8b_instruct_binder,
-    known_models.nvidia_meta_llama3_1_8b_instruct_binder,
-    known_models.nvidia_meta_llama3_2_3b_instruct_binder,
-    known_models.nvidia_mistralai_mistral_large_binder,
-    known_models.nvidia_mistralai_mixtral_8x7b_instruct_binder,
-    known_models.nvidia_google_recurrentgemma_2b_binder,
-    known_models.nvidia_microsoft_phi_3_mini_128k_instruct_binder,
 ]
 
 
