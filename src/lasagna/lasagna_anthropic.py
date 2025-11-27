@@ -295,21 +295,22 @@ def _build_messages_from_anthropic_payload(
     return ms
 
 
-def _convert_to_anthropic_tool(tool: Callable) -> AnthropicToolParam:
+def _convert_to_anthropic_tool(tool: Callable, strict_tools: bool) -> AnthropicToolParam:
     description, params = get_tool_params(tool)
     tool_spec: AnthropicToolParam = {
         'name': get_name(tool),
         'description': description,
         'input_schema': convert_to_json_schema(params),
     }
-    tool_spec['strict'] = True  # type: ignore # TODO (anthropic lib doesn't have this yet, but the API does)
+    if strict_tools:
+        tool_spec['strict'] = True  # type: ignore # TODO (anthropic lib doesn't have this yet, but the API does)
     return tool_spec
 
 
-def _convert_to_anthropic_tools(tools: List[Callable]) -> Union[Omit, List[AnthropicToolParam]]:
+def _convert_to_anthropic_tools(tools: List[Callable], strict_tools: bool) -> Union[Omit, List[AnthropicToolParam]]:
     if len(tools) == 0:
         return omit
-    specs = [_convert_to_anthropic_tool(tool) for tool in tools]
+    specs = [_convert_to_anthropic_tool(tool, strict_tools) for tool in tools]
     specs[-1]['cache_control'] = {
         'type': 'ephemeral',
         'ttl': '5m',
@@ -397,6 +398,7 @@ class LasagnaAnthropic(Model):
             'model': self.model,
             'model_kwargs': self.model_kwargs,
         }
+        self.strict_tools = bool(self.model_kwargs.get('strict_tools', False))
 
     def config_hash(self) -> str:
         return recursive_hash(None, self.model_spec)
@@ -569,7 +571,7 @@ class LasagnaAnthropic(Model):
     ) -> List[Message]:
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
-        tools_spec = _convert_to_anthropic_tools(tools)
+        tools_spec = _convert_to_anthropic_tools(tools, self.strict_tools)
         tools_map = {get_name(tool): tool for tool in tools}
         for _ in range(max_tool_iters):
             new_messages_here = await self._retrying_run_once(
@@ -610,7 +612,8 @@ class LasagnaAnthropic(Model):
             },
         ]
 
-        tools_spec[0]['strict'] = True  # type: ignore # TODO (anthropic lib doesn't have this yet, but the API does)
+        if self.strict_tools:
+            tools_spec[0]['strict'] = True  # type: ignore # TODO (anthropic lib doesn't have this yet, but the API does)
 
         # TODO: use `output_format` param (insted of toolcalling), once the anthropic lib supports it.
         #  https://platform.claude.com/docs/en/build-with-claude/structured-outputs#json-outputs
