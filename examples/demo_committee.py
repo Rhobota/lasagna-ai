@@ -21,7 +21,7 @@ COMMITTEE_SPEC = [
     known_models.openai_gpt_5_binder,
     known_models.openai_gpt_4_1_binder,
 
-    known_models.anthropic_claude_opus_4_1_binder,
+    known_models.anthropic_claude_opus_4_5_binder,
     known_models.anthropic_claude_sonnet_4_5_binder,
     known_models.anthropic_claude_haiku_4_5_binder,
 ]

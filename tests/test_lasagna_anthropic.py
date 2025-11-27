@@ -550,7 +550,7 @@ def test_convert_to_anthropic_tools():
         :param: b: float: the second value
         """
         return a * b
-    assert _convert_to_anthropic_tools([multiply]) == [
+    assert _convert_to_anthropic_tools([multiply], strict_tools=True) == [
         {
             'name': 'multiply',
             'description': 'Use this tool to get the product of two values.',
