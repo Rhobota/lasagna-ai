@@ -81,6 +81,7 @@ from ..agent_util import (
     build_extraction_agent,
     build_simple_agent,
     MessageExtractor,
+    recursive_sum_costs,
 )
 from ..agent_util import chained_runs
 from ..pydantic_util import result_to_string
@@ -94,6 +95,10 @@ from typing import (
     List, Tuple, Optional,
     Callable, AsyncIterable, Awaitable,
 )
+
+import logging
+
+_LOG = logging.getLogger(__name__)
 
 
 def build_default_planning_agent(
@@ -191,6 +196,7 @@ def build_planning_agent(
         )
         answer_chain['runs'].append(answer_run)
 
+        _LOG.info(f"Costs: {recursive_sum_costs(planning_agent_chain)}")
         return planning_agent_chain
 
     return planning_agent

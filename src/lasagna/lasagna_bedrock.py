@@ -515,7 +515,7 @@ class LasagnaBedrock(Model):
         if top_p is not None:
             inference_config['topP'] = top_p
 
-        _LOG.info(f"Invoking {self.model} with:\n  system_prompts: {system_prompts}\n  messages: {_log_dumps(bedrock_messages)}\n  tools: {_log_dumps(tools_spec)}\n  force_tool: {force_tool}")
+        _LOG.debug(f"Invoking {self.model} with:\n  system_prompts: {system_prompts}\n  messages: {_log_dumps(bedrock_messages)}\n  tools: {_log_dumps(tools_spec)}\n  force_tool: {force_tool}")
 
         params = {
             'modelId': self.model,
@@ -559,7 +559,7 @@ class LasagnaBedrock(Model):
 
         await task
 
-        _LOG.info(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
+        _LOG.debug(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
 
         return new_messages
 

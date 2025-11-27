@@ -310,7 +310,7 @@ class LasagnaOllama(Model):
 
         ollama_messages = await _convert_to_ollama_messages(messages)
 
-        _LOG.info(f"Invoking {self.model} with:\n  messages: {_log_dumps(ollama_messages)}\n  tools: {_log_dumps(tools_spec)}")
+        _LOG.debug(f"Invoking {self.model} with:\n  messages: {_log_dumps(ollama_messages)}\n  tools: {_log_dumps(tools_spec)}")
 
         url = f'{self.base_url}/api/chat'
 
@@ -327,7 +327,7 @@ class LasagnaOllama(Model):
         event_stream = _event_stream(url, payload, self.timeout_seconds)
         new_messages = await _process_stream(event_stream, event_callback)
 
-        _LOG.info(f"Finished {self.model}")
+        _LOG.debug(f"Finished {self.model}")
 
         return new_messages
 

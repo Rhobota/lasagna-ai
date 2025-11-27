@@ -443,7 +443,7 @@ class LasagnaOpenAI(Model):
         if user is not omit:
             assert isinstance(user, str)
 
-        _LOG.info(f"Invoking {self.model} with:\n  messages: {_log_dumps(openai_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
+        _LOG.debug(f"Invoking {self.model} with:\n  messages: {_log_dumps(openai_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
 
         client = self._make_client()
         completion = await client.chat.completions.create(
@@ -477,7 +477,7 @@ class LasagnaOpenAI(Model):
 
         new_messages = _build_messages_from_openai_payload(raw_payload, events)
 
-        _LOG.info(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
+        _LOG.debug(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
 
         return new_messages
 

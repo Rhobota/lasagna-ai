@@ -463,7 +463,7 @@ class LasagnaAnthropic(Model):
         if user is not None:
             assert isinstance(user, str)
 
-        _LOG.info(f"Invoking {self.model} with:\n  system_prompts: {system_prompts}\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
+        _LOG.debug(f"Invoking {self.model} with:\n  system_prompts: {system_prompts}\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
 
         client = self._make_client()
         async with client.messages.stream(
@@ -490,7 +490,7 @@ class LasagnaAnthropic(Model):
             anthropic_message = await stream.get_final_message()
             new_messages = _build_messages_from_anthropic_payload(raw_events, anthropic_message)
 
-        _LOG.info(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
+        _LOG.debug(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
 
         return new_messages
 
