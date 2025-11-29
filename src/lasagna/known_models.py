@@ -7,8 +7,8 @@ from .agent_util import make_model_binder
 
 OPENAI_KNOWN_MODELS: List[ModelRecord] = [
     {
-        'formal_name': 'gpt-5-2025-08-07',
-        'display_name': 'GPT-5',
+        'formal_name': 'gpt-5.1-2025-11-13',
+        'display_name': 'GPT-5.1',
     },
     {
         'formal_name': 'gpt-5-mini-2025-08-07',
@@ -21,6 +21,11 @@ OPENAI_KNOWN_MODELS: List[ModelRecord] = [
     {
         'formal_name': 'gpt-4.1-2025-04-14',
         'display_name': 'GPT-4.1',
+    },
+    {
+        'formal_name': 'gpt-5-2025-08-07',
+        'display_name': 'GPT-5',
+        'outdated': True,
     },
     {
         'formal_name': 'gpt-4o-mini-2024-07-18',
@@ -54,7 +59,7 @@ OPENAI_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
-openai_gpt_5_binder        = make_model_binder('openai', 'gpt-5-2025-08-07')
+openai_gpt_5_1_binder      = make_model_binder('openai', 'gpt-5.1-2025-11-13')
 openai_gpt_5_mini_binder   = make_model_binder('openai', 'gpt-5-mini-2025-08-07')
 openai_gpt_5_nano_binder   = make_model_binder('openai', 'gpt-5-nano-2025-08-07')
 openai_gpt_4_1_binder      = make_model_binder('openai', 'gpt-4.1-2025-04-14')
@@ -129,7 +134,15 @@ OLLAMA_KNOWN_MODELS: List[ModelRecord] = [
     # We'll only list models here that (1) support tool-calling because
     # that's kind of the whole point of lasagna, and (2) we've tested
     # ourselves and pass our "vibe" test. Users are of course more than
-    # welcome to use *other* Ollama models as they see fit.
+    # welcome to bind *other* Ollama models to their agents, as they see fit.
+    {
+        'formal_name': 'gpt-oss:120b',
+        'display_name': 'OpenAI gpt-oss-120b',
+    },
+    {
+        'formal_name': 'gpt-oss:20b',
+        'display_name': 'OpenAI gpt-oss-20b',
+    },
     {
         'formal_name': 'llama3.2',
         'display_name': 'Meta Llama 3.2',
@@ -144,23 +157,40 @@ OLLAMA_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
-ollama_llama3_2_binder = make_model_binder('ollama', 'llama3.2')
-ollama_mistral_small_binder = make_model_binder('ollama', 'mistral-small')
-ollama_mistral_large_binder = make_model_binder('ollama', 'mistral-large')
+ollama_openai_gpt_oss_120b  = make_model_binder('ollama', 'gpt-oss:120b',  num_ctx = 131072)
+ollama_openai_gpt_oss_20b   = make_model_binder('ollama', 'gpt-oss:20b',   num_ctx = 131072)
+ollama_llama3_2_binder      = make_model_binder('ollama', 'llama3.2',      num_ctx = 131072)
+ollama_mistral_small_binder = make_model_binder('ollama', 'mistral-small', num_ctx = 32768)
+ollama_mistral_large_binder = make_model_binder('ollama', 'mistral-large', num_ctx = 131072)
 
 
 BEDROCK_KNOWN_MODELS: List[ModelRecord] = [
+    #{
+    #    'formal_name': '',  # No US cross-region ID, yet?
+    #    'display_name': 'Claude Opus 4.5',
+    #},
+    {
+        'formal_name': 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
+        'display_name': 'Claude Sonnet 4.5',
+    },
+    {
+        'formal_name': 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
+        'display_name': 'Claude Haiku 4.5',
+    },
     {
         'formal_name': 'us.anthropic.claude-opus-4-1-20250805-v1:0',
         'display_name': 'Claude Opus 4.1',
+        'outdated': True,
     },
     {
         'formal_name': 'us.anthropic.claude-sonnet-4-20250514-v1:0',
         'display_name': 'Claude Sonnet 4',
+        'outdated': True,
     },
     {
         'formal_name': 'us.anthropic.claude-3-5-haiku-20241022-v1:0',
         'display_name': 'Claude Haiku 3.5',
+        'outdated': True,
     },
     {
         'formal_name': 'us.anthropic.claude-opus-4-20250514-v1:0',
@@ -199,9 +229,8 @@ BEDROCK_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
-bedrock_claude_opus_4_1_binder = make_model_binder('bedrock', 'us.anthropic.claude-opus-4-1-20250805-v1:0')
-bedrock_claude_sonnet_4_binder = make_model_binder('bedrock', 'us.anthropic.claude-sonnet-4-20250514-v1:0')
-bedrock_claude_haiku_3_5_binder = make_model_binder('bedrock', 'us.anthropic.claude-3-5-haiku-20241022-v1:0')
+bedrock_claude_sonnet_4_5_binder = make_model_binder('bedrock', 'us.anthropic.claude-sonnet-4-5-20250929-v1:0')
+bedrock_claude_haiku_4_5_binder = make_model_binder('bedrock', 'us.anthropic.claude-haiku-4-5-20251001-v1:0')
 
 
 abstract_binder = make_model_binder('__abstract__', '')
