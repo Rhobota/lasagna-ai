@@ -178,6 +178,14 @@ BEDROCK_KNOWN_MODELS: List[ModelRecord] = [
         'display_name': 'Claude Haiku 4.5',
     },
     {
+        'formal_name': 'openai.gpt-oss-120b-1:0',
+        'display_name': 'OpenAI gpt-oss-120b',
+    },
+    {
+        'formal_name': 'openai.gpt-oss-20b-1:0',
+        'display_name': 'OpenAI gpt-oss-20b',
+    },
+    {
         'formal_name': 'us.anthropic.claude-opus-4-1-20250805-v1:0',
         'display_name': 'Claude Opus 4.1',
         'outdated': True,
@@ -231,6 +239,9 @@ BEDROCK_KNOWN_MODELS: List[ModelRecord] = [
 
 bedrock_claude_sonnet_4_5_binder = make_model_binder('bedrock', 'us.anthropic.claude-sonnet-4-5-20250929-v1:0', use_cache = True)
 bedrock_claude_haiku_4_5_binder = make_model_binder('bedrock', 'us.anthropic.claude-haiku-4-5-20251001-v1:0', use_cache = True)
+
+bedrock_openai_gpt_oss_120b  = make_model_binder('bedrock', 'openai.gpt-oss-120b-1:0')
+bedrock_openai_gpt_oss_20b   = make_model_binder('bedrock', 'openai.gpt-oss-20b-1:0')
 
 
 abstract_binder = make_model_binder('__abstract__', '')

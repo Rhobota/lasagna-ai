@@ -333,6 +333,8 @@ async def _process_bedrock_stream(
                 text = delta['toolUse']['input']
                 await event_callback(('tool_call', 'text_event', text))
                 this_block['content'].append(text)
+            elif 'reasoningContent' in delta:
+                pass  # TODO: someday we'll capture these
             else:
                 _LOG.warning(f'unknown bedrock `delta` type: {event}')
 
