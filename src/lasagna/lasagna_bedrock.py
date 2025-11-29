@@ -76,15 +76,16 @@ def _convert_to_bedrock_tool(tool: Callable) -> Dict:
     }
 
 
-def _convert_to_bedrock_tools(tools: List[Callable]) -> Union[None, List[Dict]]:
+def _convert_to_bedrock_tools(tools: List[Callable], use_cache: bool) -> Union[None, List[Dict]]:
     if len(tools) == 0:
         return None
     specs = [_convert_to_bedrock_tool(tool) for tool in tools]
-    specs.append({
-        'cachePoint': {
-            'type': 'default',
-        },
-    })
+    if use_cache:
+        specs.append({
+            'cachePoint': {
+                'type': 'default',
+            },
+        })
     return specs
 
 
@@ -169,6 +170,7 @@ def _collapse_bedrock_messages(messages: List[Dict]) -> List[Dict]:
 
 async def _convert_to_bedrock_messages(
     messages: List[Message],
+    use_cache: bool,
 ) -> Tuple[Union[None, List[Dict]], List[Dict]]:
     system_prompts: List[Dict] = []
 
@@ -183,11 +185,12 @@ async def _convert_to_bedrock_messages(
 
     if len(system_prompts) > 0:
         messages = messages[len(system_prompts):]
-        system_prompts.append({
-            'cachePoint': {
-                'type': 'default',
-            }
-        })
+        if use_cache:
+            system_prompts.append({
+                'cachePoint': {
+                    'type': 'default',
+                }
+            })
 
     ret: List[Dict] = []
 
@@ -221,14 +224,15 @@ async def _convert_to_bedrock_messages(
 
     ret = _collapse_bedrock_messages(ret)
 
-    for msg in reversed(ret):
-        if msg['role'] == 'user':
-            msg['content'].append({
-                'cachePoint': {
-                    'type': 'default',
-                }
-            })
-            break
+    if use_cache:
+        for msg in reversed(ret):
+            if msg['role'] == 'user':
+                msg['content'].append({
+                    'cachePoint': {
+                        'type': 'default',
+                    }
+                })
+                break
 
     return system_prompts or None, ret
 
@@ -446,6 +450,7 @@ class LasagnaBedrock(Model):
             _LOG.warning(f'untested model: {model} (may or may not work)')
         self.model = model
         self.model_kwargs = copy.deepcopy(model_kwargs)
+        self.use_cache = bool(self.model_kwargs.get('use_cache', False))
         self.n_retries: int = self.model_kwargs.get('retries', 3)
         if not isinstance(self.n_retries, int) or self.n_retries < 0:
             raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.n_retries})")
@@ -479,7 +484,7 @@ class LasagnaBedrock(Model):
         tools_spec: Union[None, List[Dict]],
         force_tool: bool,
     ) -> List[Message]:
-        system_prompts, bedrock_messages = await _convert_to_bedrock_messages(messages)
+        system_prompts, bedrock_messages = await _convert_to_bedrock_messages(messages, self.use_cache)
 
         tool_config: Union[None, Dict] = None
         if tools_spec:
@@ -613,7 +618,7 @@ class LasagnaBedrock(Model):
     ) -> List[Message]:
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
-        tools_spec = _convert_to_bedrock_tools(tools)
+        tools_spec = _convert_to_bedrock_tools(tools, self.use_cache)
         tools_map = {get_name(tool): tool for tool in tools}
         for _ in range(max_tool_iters):
             new_messages_here = await self._retrying_run_once(

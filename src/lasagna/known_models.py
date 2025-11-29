@@ -229,8 +229,8 @@ BEDROCK_KNOWN_MODELS: List[ModelRecord] = [
     },
 ]
 
-bedrock_claude_sonnet_4_5_binder = make_model_binder('bedrock', 'us.anthropic.claude-sonnet-4-5-20250929-v1:0')
-bedrock_claude_haiku_4_5_binder = make_model_binder('bedrock', 'us.anthropic.claude-haiku-4-5-20251001-v1:0')
+bedrock_claude_sonnet_4_5_binder = make_model_binder('bedrock', 'us.anthropic.claude-sonnet-4-5-20250929-v1:0', use_cache = True)
+bedrock_claude_haiku_4_5_binder = make_model_binder('bedrock', 'us.anthropic.claude-haiku-4-5-20251001-v1:0', use_cache = True)
 
 
 abstract_binder = make_model_binder('__abstract__', '')
