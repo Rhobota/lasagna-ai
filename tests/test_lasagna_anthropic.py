@@ -42,8 +42,17 @@ async def test_convert_to_anthropic_messages():
             'text': 'Hi, what are you?',
         },
     ]
-    system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
-    assert system_prompt == 'You are a robot.'
+    system_prompts, anthropic_messages = await _convert_to_anthropic_messages(messages)
+    assert system_prompts == [
+        {
+            'type': 'text',
+            'text': 'You are a robot.',
+            'cache_control': {
+                'type': 'ephemeral',
+                'ttl': '5m',
+            },
+        }
+    ]
     assert anthropic_messages == [
         {
             'role': 'user',
@@ -51,6 +60,10 @@ async def test_convert_to_anthropic_messages():
                 {
                     'type': 'text',
                     'text': 'Hi, what are you?',
+                    'cache_control': {
+                        'type': 'ephemeral',
+                        'ttl': '5m',
+                    },
                 },
             ],
         },
@@ -63,8 +76,8 @@ async def test_convert_to_anthropic_messages():
             'text': 'Hi, what can I help you with today?',
         },
     ]
-    system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
-    assert system_prompt is None
+    system_prompts, anthropic_messages = await _convert_to_anthropic_messages(messages)
+    assert system_prompts is None
     assert anthropic_messages == [
         {
             'role': 'assistant',
@@ -94,8 +107,8 @@ async def test_convert_to_anthropic_messages():
                 ],
             },
         ]
-        system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
-        assert system_prompt is None
+        system_prompts, anthropic_messages = await _convert_to_anthropic_messages(messages)
+        assert system_prompts is None
         assert anthropic_messages == [
             {
                 'role': 'user',
@@ -110,6 +123,10 @@ async def test_convert_to_anthropic_messages():
                             'type': 'base64',
                             'media_type': 'image/png',
                             'data': 'MTIzNA==',
+                        },
+                        'cache_control': {
+                            'type': 'ephemeral',
+                            'ttl': '5m',
                         },
                     },
                 ],
@@ -156,8 +173,8 @@ async def test_convert_to_anthropic_messages():
             ],
         },
     ]
-    system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
-    assert system_prompt is None
+    system_prompts, anthropic_messages = await _convert_to_anthropic_messages(messages)
+    assert system_prompts is None
     assert anthropic_messages == [
         {
             'role': 'assistant',
@@ -199,6 +216,10 @@ async def test_convert_to_anthropic_messages():
                         },
                     ],
                     'is_error': True,
+                    'cache_control': {
+                        'type': 'ephemeral',
+                        'ttl': '5m',
+                    },
                 },
             ],
         },
@@ -225,8 +246,8 @@ async def test_convert_to_anthropic_messages():
             'text': 'Here is more text.',
         },
     ]
-    system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
-    assert system_prompt is None
+    system_prompts, anthropic_messages = await _convert_to_anthropic_messages(messages)
+    assert system_prompts is None
     assert anthropic_messages == [
         {
             'role': 'assistant',
@@ -258,8 +279,8 @@ async def test_convert_to_anthropic_messages():
             'text': 'Please be more specific.',
         },
     ]
-    system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
-    assert system_prompt is None
+    system_prompts, anthropic_messages = await _convert_to_anthropic_messages(messages)
+    assert system_prompts is None
     assert anthropic_messages == [
         {
             'role': 'assistant',
@@ -276,6 +297,10 @@ async def test_convert_to_anthropic_messages():
                 {
                     'type': 'text',
                     'text': 'I need help with everything.',
+                    'cache_control': {
+                        'type': 'ephemeral',
+                        'ttl': '5m',
+                    },
                 },
             ],
         },
@@ -313,8 +338,8 @@ async def test_convert_to_anthropic_messages():
             'text': 'Like tell me what you are trying to do.',
         },
     ]
-    system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
-    assert system_prompt is None
+    system_prompts, anthropic_messages = await _convert_to_anthropic_messages(messages)
+    assert system_prompts is None
     assert anthropic_messages == [
         {
             'role': 'assistant',
@@ -335,6 +360,10 @@ async def test_convert_to_anthropic_messages():
                 {
                     'type': 'text',
                     'text': 'EVERYTHING!',
+                    'cache_control': {
+                        'type': 'ephemeral',
+                        'ttl': '5m',
+                    },
                 },
             ],
         },
@@ -380,8 +409,8 @@ async def test_convert_to_anthropic_messages():
             'text': 'Forget it...',
         },
     ]
-    system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
-    assert system_prompt is None
+    system_prompts, anthropic_messages = await _convert_to_anthropic_messages(messages)
+    assert system_prompts is None
     assert anthropic_messages == [
         {
             'role': 'assistant',
@@ -424,6 +453,10 @@ async def test_convert_to_anthropic_messages():
                 {
                     'type': 'text',
                     'text': 'Forget it...',
+                    'cache_control': {
+                        'type': 'ephemeral',
+                        'ttl': '5m',
+                    },
                 },
             ],
         },
@@ -498,7 +531,8 @@ async def test_build_messages_from_anthropic_payload():
             'cost': {
                 'input_tokens': 508,
                 'output_tokens': 82,
-                'total_tokens': 590,
+                'cache_read_tokens': 0,
+                'cache_write_tokens': 0,
             },
             'raw': {
                 'events': [],
@@ -516,10 +550,11 @@ def test_convert_to_anthropic_tools():
         :param: b: float: the second value
         """
         return a * b
-    assert _convert_to_anthropic_tools([multiply]) == [
+    assert _convert_to_anthropic_tools([multiply], strict_tools=True) == [
         {
             'name': 'multiply',
             'description': 'Use this tool to get the product of two values.',
+            'strict': True,
             'input_schema': {
                 'type': 'object',
                 'properties': {
@@ -528,6 +563,10 @@ def test_convert_to_anthropic_tools():
                 },
                 'required': ['a', 'b'],
                 'additionalProperties': False,
+            },
+            'cache_control': {
+                'type': 'ephemeral',
+                'ttl': '5m',
             },
         },
     ]

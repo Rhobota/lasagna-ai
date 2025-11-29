@@ -45,7 +45,8 @@ ToolResult = Union[
 class Cost(TypedDict):
     input_tokens: NotRequired[int]
     output_tokens: NotRequired[int]
-    total_tokens: NotRequired[int]
+    cache_write_tokens: NotRequired[int]
+    cache_read_tokens: NotRequired[int]
 
 
 class MediaImage(TypedDict):

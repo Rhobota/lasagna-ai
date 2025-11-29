@@ -7,7 +7,7 @@ name = "lasagna-ai"
 dynamic = ["version"]
 description = 'Layered agents!'
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license-expression = "MIT"
 keywords = ["ai", "agent", "agents", "llm", "hierarchical", "layers", "layered"]
 authors = [
@@ -15,11 +15,11 @@ authors = [
 ]
 classifiers = [
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
   "Intended Audience :: Developers",
@@ -39,7 +39,7 @@ dependencies = [
   "python-dotenv",
   "colorama",
   "pydantic >= 2.7, < 3",
-  "openai >= 1.52.0, <= 1.99.9",
+  "openai >= 2.8.1",
 ]
 
 [project.urls]
@@ -52,21 +52,20 @@ openai = [
   # This optional dependency name is left here for backward compatibility.
 ]
 anthropic = [
-  "anthropic >= 0.37.1, <= 0.64.0",
+  "anthropic >= 0.75.0",
 ]
 bedrock = [
-  "boto3>=1.37.0",
+  "boto3 >= 1.37.0",
 ]
 dev = [
-  "mypy>=1.10.0",
-  "pytest>=8.1.1",
-  "pytest-asyncio>=0.23.6",
+  "mypy >= 1.10.0",
+  "pytest >= 8.1.1",
+  "pytest-asyncio >= 0.23.6",
   "nbqa",
 ]
 example-deps = [
   "sympy",
   "tzdata",
-  "pytz",
   "beautifulsoup4",
 ]
 
@@ -77,20 +76,20 @@ packages = ["src/lasagna"]
 path = "src/lasagna/__init__.py"
 
 [tool.hatch.envs.default]
-python = "3.12"
+python = "3.14"
 features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 
 [tool.hatch.envs.types]
 features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 
 [[tool.hatch.envs.types.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive src/lasagna/ tests/ examples/"
 
 [tool.hatch.envs.docs]
-python = "3.12"
+python = "3.14"
 features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 
 [tool.hatch.envs.docs.scripts]
@@ -100,7 +99,7 @@ check = "nbqa mypy --install-types --non-interactive docs/ --nbqa-dont-skip-bad-
 features = ["dev", "openai", "anthropic", "bedrock"]
 
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

@@ -172,12 +172,13 @@ def _set_cost_raw(message: Message, raw: List[Dict]) -> Message:
             cost['input_tokens'] = cost.get('input_tokens', 0) + event['prompt_eval_count']
         if 'eval_count' in event:
             cost['output_tokens'] = cost.get('output_tokens', 0) + event['eval_count']
-    cost['total_tokens'] = cost.get('input_tokens', 0) + cost.get('output_tokens', 0)
-    new_message: Message = copy.copy(message)
-    if cost['total_tokens'] > 0:
-        new_message['cost'] = cost
-    new_message['raw'] = raw
-    return new_message
+    total_tokens = cost.get('input_tokens', 0) + cost.get('output_tokens', 0)
+
+    message = copy.copy(message)
+    if total_tokens > 0:
+        message['cost'] = cost
+    message['raw'] = raw
+    return message
 
 
 async def _process_stream(
@@ -309,7 +310,7 @@ class LasagnaOllama(Model):
 
         ollama_messages = await _convert_to_ollama_messages(messages)
 
-        _LOG.info(f"Invoking {self.model} with:\n  messages: {_log_dumps(ollama_messages)}\n  tools: {_log_dumps(tools_spec)}")
+        _LOG.debug(f"Invoking {self.model} with:\n  messages: {_log_dumps(ollama_messages)}\n  tools: {_log_dumps(tools_spec)}")
 
         url = f'{self.base_url}/api/chat'
 
@@ -326,7 +327,7 @@ class LasagnaOllama(Model):
         event_stream = _event_stream(url, payload, self.timeout_seconds)
         new_messages = await _process_stream(event_stream, event_callback)
 
-        _LOG.info(f"Finished {self.model}")
+        _LOG.debug(f"Finished {self.model}")
 
         return new_messages
 

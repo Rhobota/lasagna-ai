@@ -29,7 +29,7 @@
 
 - ↔️ **Provider/model agnostic and interoperable!**
   - Core support for [OpenAI](https://platform.openai.com/docs/models), [Anthropic](https://docs.anthropic.com/en/docs/welcome), and [AWS Bedrock](https://docs.aws.amazon.com/bedrock/).
-  - Experimental support for [Ollama](https://ollama.com/search) and [NVIDIA NIM/NGC](https://build.nvidia.com/explore/reasoning).
+  - Experimental support for [Ollama](https://ollama.com/search).
   - Message representations are canonized. 😇
   - Supports vision!
   - Easily build committees!

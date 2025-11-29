@@ -44,7 +44,7 @@ from .pydantic_util import build_and_validate, ensure_pydantic_model
 
 from .known_models import OPENAI_KNOWN_MODELS
 
-from openai import AsyncOpenAI, NOT_GIVEN, NotGiven, pydantic_function_tool
+from openai import AsyncOpenAI, omit, Omit, pydantic_function_tool
 from openai.types.chat import (
     ChatCompletionChunk,
     ChatCompletionToolParam,
@@ -179,9 +179,9 @@ def _convert_to_openai_tool(tool: Callable) -> ChatCompletionToolParam:
     }
 
 
-def _convert_to_openai_tools(tools: List[Callable]) -> Union[NotGiven, List[ChatCompletionToolParam]]:
+def _convert_to_openai_tools(tools: List[Callable]) -> Union[Omit, List[ChatCompletionToolParam]]:
     if len(tools) == 0:
-        return NOT_GIVEN
+        return omit
     specs = [_convert_to_openai_tool(tool) for tool in tools]
     return specs
 
@@ -294,11 +294,16 @@ def _get_cost(
     if not usages:
         return None
     usage = usages[-1]
-    return {
+    cost: Cost = {
         'input_tokens': usage.prompt_tokens,
         'output_tokens': usage.completion_tokens,
-        'total_tokens': usage.total_tokens,
     }
+    if usage.prompt_tokens_details:
+        if usage.prompt_tokens_details.cached_tokens:
+            ct = usage.prompt_tokens_details.cached_tokens
+            cost['cache_read_tokens'] = ct
+            cost['input_tokens'] -= ct
+    return cost
 
 
 def _build_messages_from_openai_payload(
@@ -387,11 +392,11 @@ class LasagnaOpenAI(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools_spec: Union[NotGiven, List[ChatCompletionToolParam]],
+        tools_spec: Union[Omit, List[ChatCompletionToolParam]],
         force_tool: bool,
-        parallel_tool_calls: Union[NotGiven, bool],
+        parallel_tool_calls: Union[Omit, bool],
     ) -> List[Message]:
-        tool_choice: Union[ChatCompletionToolChoiceOptionParam, NotGiven]
+        tool_choice: Union[ChatCompletionToolChoiceOptionParam, Omit]
         if force_tool:
             if not tools_spec or len(tools_spec) == 0:
                 raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
@@ -403,45 +408,45 @@ class LasagnaOpenAI(Model):
             else:
                 tool_choice = 'required'  # <-- model must use a tool, but is allowed to choose which one on its own
         else:
-            tool_choice = NOT_GIVEN  # <-- if tools given, the model can choose to use them or not
+            tool_choice = omit  # <-- if tools given, the model can choose to use them or not
 
         openai_messages = await _convert_to_openai_messages(messages)
 
-        logprobs: Union[bool, NotGiven] = self.model_kwargs.get('logprobs', NOT_GIVEN)
-        top_logprobs: Union[int, NotGiven] = self.model_kwargs.get('top_logprobs', (20 if logprobs is True else NOT_GIVEN))
-        frequency_penalty: Union[float, NotGiven] = float(self.model_kwargs['frequency_penalty']) if 'frequency_penalty' in self.model_kwargs else NOT_GIVEN
-        presence_penalty: Union[float, NotGiven] = float(self.model_kwargs['presence_penalty']) if 'presence_penalty' in self.model_kwargs else NOT_GIVEN
-        max_tokens: Union[int, NotGiven] = self.model_kwargs.get('max_tokens', NOT_GIVEN)
-        stop: Union[List[str], NotGiven] = self.model_kwargs.get('stop', NOT_GIVEN)
-        temperature: Union[float, NotGiven] = float(self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
-        top_p: Union[float, NotGiven] = float(self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
-        user: Union[str, NotGiven] = self.model_kwargs.get('user', NOT_GIVEN)
+        logprobs: Union[bool, Omit] = self.model_kwargs.get('logprobs', omit)
+        top_logprobs: Union[int, Omit] = self.model_kwargs.get('top_logprobs', (20 if logprobs is True else omit))
+        frequency_penalty: Union[float, Omit] = float(self.model_kwargs['frequency_penalty']) if 'frequency_penalty' in self.model_kwargs else omit
+        presence_penalty: Union[float, Omit] = float(self.model_kwargs['presence_penalty']) if 'presence_penalty' in self.model_kwargs else omit
+        max_tokens: Union[int, Omit] = self.model_kwargs.get('max_tokens', omit)
+        stop: Union[List[str], Omit] = self.model_kwargs.get('stop', omit)
+        temperature: Union[float, Omit] = float(self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else omit
+        top_p: Union[float, Omit] = float(self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else omit
+        user: Union[str, Omit] = self.model_kwargs.get('user', omit)
 
-        if logprobs is not NOT_GIVEN:
+        if logprobs is not omit:
             assert isinstance(logprobs, bool)
-        if top_logprobs is not NOT_GIVEN:
+        if top_logprobs is not omit:
             assert isinstance(top_logprobs, int)
-        if frequency_penalty is not NOT_GIVEN:
+        if frequency_penalty is not omit:
             assert isinstance(frequency_penalty, float)
-        if presence_penalty is not NOT_GIVEN:
+        if presence_penalty is not omit:
             assert isinstance(presence_penalty, float)
-        if max_tokens is not NOT_GIVEN:
+        if max_tokens is not omit:
             assert isinstance(max_tokens, int)
-        if stop is not NOT_GIVEN:
+        if stop is not omit:
             assert isinstance(stop, list)
             for s in stop:
                 assert isinstance(s, str)
-        if temperature is not NOT_GIVEN:
+        if temperature is not omit:
             assert isinstance(temperature, float)
-        if top_p is not NOT_GIVEN:
+        if top_p is not omit:
             assert isinstance(top_p, float)
-        if user is not NOT_GIVEN:
+        if user is not omit:
             assert isinstance(user, str)
 
-        _LOG.info(f"Invoking {self.model} with:\n  messages: {_log_dumps(openai_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
+        _LOG.debug(f"Invoking {self.model} with:\n  messages: {_log_dumps(openai_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
 
         client = self._make_client()
-        completion: AsyncIterator[ChatCompletionChunk] = await client.chat.completions.create(
+        completion = await client.chat.completions.create(
             model        = self.model,
             messages     = openai_messages,
             tools        = tools_spec,
@@ -472,7 +477,7 @@ class LasagnaOpenAI(Model):
 
         new_messages = _build_messages_from_openai_payload(raw_payload, events)
 
-        _LOG.info(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
+        _LOG.debug(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
 
         return new_messages
 
@@ -480,9 +485,9 @@ class LasagnaOpenAI(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools_spec: Union[NotGiven, List[ChatCompletionToolParam]],
+        tools_spec: Union[Omit, List[ChatCompletionToolParam]],
         force_tool: bool,
-        parallel_tool_calls: Union[NotGiven, bool],
+        parallel_tool_calls: Union[Omit, bool],
     ) -> List[Message]:
         last_error: Union[APIError, None] = None
         assert self.n_retries + 1 > 0   # <-- we know this is true from the check in __init__
@@ -547,7 +552,7 @@ class LasagnaOpenAI(Model):
                 messages       = messages,
                 tools_spec     = tools_spec,
                 force_tool     = force_tool,
-                parallel_tool_calls = NOT_GIVEN,
+                parallel_tool_calls = omit,
             )
             tools_results = await handle_tools(
                 prev_messages = messages,

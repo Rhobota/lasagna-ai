@@ -71,13 +71,21 @@ def _convert_to_bedrock_tool(tool: Callable) -> Dict:
                 'json': schema,
             },
         },
+        # TODO: use strict mode, once Bedrock supports it
+        #   https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/bedrock-runtime/client/converse.html
     }
 
 
-def _convert_to_bedrock_tools(tools: List[Callable]) -> Union[None, List[Dict]]:
+def _convert_to_bedrock_tools(tools: List[Callable], use_cache: bool) -> Union[None, List[Dict]]:
     if len(tools) == 0:
         return None
     specs = [_convert_to_bedrock_tool(tool) for tool in tools]
+    if use_cache:
+        specs.append({
+            'cachePoint': {
+                'type': 'default',
+            },
+        })
     return specs
 
 
@@ -162,44 +170,71 @@ def _collapse_bedrock_messages(messages: List[Dict]) -> List[Dict]:
 
 async def _convert_to_bedrock_messages(
     messages: List[Message],
-) -> Tuple[Union[None, str], List[Dict]]:
-    system_prompt: Union[str, None] = None
+    use_cache: bool,
+) -> Tuple[Union[None, List[Dict]], List[Dict]]:
+    system_prompts: List[Dict] = []
+
+    for m in messages:
+        if m['role'] != 'system':
+            break
+        if m.get('media'):
+            raise ValueError(f"For this model, you may not pass media in the system prompt.")
+        system_prompts.append({
+            'text': m['text'] or '',
+        })
+
+    if len(system_prompts) > 0:
+        messages = messages[len(system_prompts):]
+        if use_cache:
+            system_prompts.append({
+                'cachePoint': {
+                    'type': 'default',
+                }
+            })
+
     ret: List[Dict] = []
-    if len(messages) > 0:
-        first_message = messages[0]
-        if first_message['role'] == 'system':
-            if first_message.get('media'):
-                raise ValueError(f"For this model, you may not pass media in the system prompt.")
-            system_prompt = first_message['text']
-            messages = messages[1:]
-        for m in messages:
-            if m['role'] == 'system':
-                raise ValueError(f"For this model, you can only have a system prompt as the first message!")
-            elif m['role'] == 'ai':
-                ret.append({
-                    'role': 'assistant',
-                    'content': await _build_bedrock_content(m),
-                })
-            elif m['role'] == 'human':
-                ret.append({
-                    'role': 'user',
-                    'content': await _build_bedrock_content(m),
-                })
-            elif m['role'] == 'tool_call':
-                ret.append({
-                    'role': 'assistant',
-                    'content': await _build_bedrock_tool_use(m),
-                })
-            elif m['role'] == 'tool_res':
-                ret.append({
-                    'role': 'user',
-                    'content': await _build_bedrock_tool_result(m),
-                })
-            else:
-                raise ValueError(f"Unknown role: {m['role']}")
+
+    for m in messages:
+        if m['role'] == 'system':
+            raise ValueError(f"For this model, you can only have a system prompt as the first message!")
+        elif m['role'] == 'ai':
+            ret.append({
+                'role': 'assistant',
+                'content': await _build_bedrock_content(m),
+            })
+        elif m['role'] == 'human':
+            ret.append({
+                'role': 'user',
+                'content': await _build_bedrock_content(m),
+            })
+        elif m['role'] == 'tool_call':
+            ret.append({
+                'role': 'assistant',
+                'content': await _build_bedrock_tool_use(m),
+            })
+        elif m['role'] == 'tool_res':
+            ret.append({
+                'role': 'user',
+                'content': await _build_bedrock_tool_result(m),
+            })
+        else:
+            raise ValueError(f"Unknown role: {m['role']}")
+
     ret = [r for r in ret if len(list(r['content'])) > 0]
+
     ret = _collapse_bedrock_messages(ret)
-    return system_prompt, ret
+
+    if use_cache:
+        for msg in reversed(ret):
+            if msg['role'] == 'user':
+                msg['content'].append({
+                    'cachePoint': {
+                        'type': 'default',
+                    }
+                })
+                break
+
+    return system_prompts or None, ret
 
 
 def _collapse_tool_call_messages(
@@ -229,7 +264,8 @@ async def _process_bedrock_stream(
         cost: Cost = {
             'input_tokens': 0,
             'output_tokens': 0,
-            'total_tokens': 0,
+            'cache_read_tokens': 0,
+            'cache_write_tokens': 0,
         }
         partial_messages.append({
             'role': role,
@@ -297,6 +333,8 @@ async def _process_bedrock_stream(
                 text = delta['toolUse']['input']
                 await event_callback(('tool_call', 'text_event', text))
                 this_block['content'].append(text)
+            elif 'reasoningContent' in delta:
+                pass  # TODO: someday we'll capture these
             else:
                 _LOG.warning(f'unknown bedrock `delta` type: {event}')
 
@@ -332,7 +370,8 @@ async def _process_bedrock_stream(
             usage = payload['usage']
             curr_message['cost']['input_tokens'] += usage['inputTokens']
             curr_message['cost']['output_tokens'] += usage['outputTokens']
-            curr_message['cost']['total_tokens'] += usage['totalTokens']
+            curr_message['cost']['cache_read_tokens'] += usage.get('cacheReadInputTokens', 0)
+            curr_message['cost']['cache_write_tokens'] += usage.get('cacheWriteInputTokens', 0)
 
         else:
             _LOG.warning(f'unknown bedrock streaming event: {event}')
@@ -381,12 +420,14 @@ async def _process_bedrock_stream(
     total_cost: Cost = {
         'input_tokens': 0,
         'output_tokens': 0,
-        'total_tokens': 0,
+        'cache_read_tokens': 0,
+        'cache_write_tokens': 0,
     }
     for pm in partial_messages:
         total_cost['input_tokens'] += pm['cost']['input_tokens']
         total_cost['output_tokens'] += pm['cost']['output_tokens']
-        total_cost['total_tokens'] += pm['cost']['total_tokens']
+        total_cost['cache_read_tokens'] += pm['cost']['cache_read_tokens']
+        total_cost['cache_write_tokens'] += pm['cost']['cache_write_tokens']
 
     last_message = ms[-1]
     last_message['cost'] = total_cost
@@ -411,6 +452,7 @@ class LasagnaBedrock(Model):
             _LOG.warning(f'untested model: {model} (may or may not work)')
         self.model = model
         self.model_kwargs = copy.deepcopy(model_kwargs)
+        self.use_cache = bool(self.model_kwargs.get('use_cache', False))
         self.n_retries: int = self.model_kwargs.get('retries', 3)
         if not isinstance(self.n_retries, int) or self.n_retries < 0:
             raise ValueError(f"model_kwargs['retries'] must be a non-negative integer (got {self.n_retries})")
@@ -444,9 +486,7 @@ class LasagnaBedrock(Model):
         tools_spec: Union[None, List[Dict]],
         force_tool: bool,
     ) -> List[Message]:
-        system_prompt, bedrock_messages = await _convert_to_bedrock_messages(messages)
-
-        system = [{'text' : system_prompt}] if system_prompt is not None else None
+        system_prompts, bedrock_messages = await _convert_to_bedrock_messages(messages, self.use_cache)
 
         tool_config: Union[None, Dict] = None
         if tools_spec:
@@ -482,7 +522,7 @@ class LasagnaBedrock(Model):
         if top_p is not None:
             inference_config['topP'] = top_p
 
-        _LOG.info(f"Invoking {self.model} with:\n  system_prompt: {system_prompt}\n  messages: {_log_dumps(bedrock_messages)}\n  tools: {_log_dumps(tools_spec)}\n  force_tool: {force_tool}")
+        _LOG.debug(f"Invoking {self.model} with:\n  system_prompts: {system_prompts}\n  messages: {_log_dumps(bedrock_messages)}\n  tools: {_log_dumps(tools_spec)}\n  force_tool: {force_tool}")
 
         params = {
             'modelId': self.model,
@@ -490,8 +530,8 @@ class LasagnaBedrock(Model):
             'inferenceConfig': inference_config,
         }
 
-        if system is not None:
-            params['system'] = system
+        if system_prompts is not None:
+            params['system'] = system_prompts
 
         if tool_config is not None:
             params['toolConfig'] = tool_config
@@ -526,7 +566,7 @@ class LasagnaBedrock(Model):
 
         await task
 
-        _LOG.info(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
+        _LOG.debug(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
 
         return new_messages
 
@@ -580,7 +620,7 @@ class LasagnaBedrock(Model):
     ) -> List[Message]:
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
-        tools_spec = _convert_to_bedrock_tools(tools)
+        tools_spec = _convert_to_bedrock_tools(tools, self.use_cache)
         tools_map = {get_name(tool): tool for tool in tools}
         for _ in range(max_tool_iters):
             new_messages_here = await self._retrying_run_once(
@@ -622,8 +662,12 @@ class LasagnaBedrock(Model):
                         'json': to_strict_json_schema(ensure_pydantic_model(extraction_type)),
                     },
                 },
+                # TODO: use strict mode, once Bedrock supports it
+                #   https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/bedrock-runtime/client/converse.html
             },
         ]
+
+        # TODO: Use structured output feature (rather than toolcalling) once boto3/Bedrock supports it.
 
         docstr = getattr(extraction_type, '__doc__', None)
         if docstr:

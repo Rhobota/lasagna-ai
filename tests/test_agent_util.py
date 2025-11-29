@@ -94,7 +94,8 @@ _AGENT_RUN: AgentRun = {
                                                 'cost': {
                                                     'input_tokens': 10,
                                                     'output_tokens': 2,
-                                                    'total_tokens': 12,
+                                                    'cache_read_tokens': 15,
+                                                    'cache_write_tokens': 30,
                                                 },
                                             },
                                         ],
@@ -381,7 +382,8 @@ def test_recursive_extract_messages():
                                 'cost': {
                                     'input_tokens': 10,
                                     'output_tokens': 2,
-                                    'total_tokens': 12,
+                                    'cache_read_tokens': 15,
+                                    'cache_write_tokens': 30,
                                 },
                             },
                         ],
@@ -395,7 +397,8 @@ def test_recursive_extract_messages():
             'cost': {
                 'input_tokens': 10,
                 'output_tokens': 2,
-                'total_tokens': 12,
+                'cache_read_tokens': 15,
+                'cache_write_tokens': 30,
             },
         },
         {
@@ -465,7 +468,8 @@ def test_recursive_extract_messages():
                                 'cost': {
                                     'input_tokens': 10,
                                     'output_tokens': 2,
-                                    'total_tokens': 12,
+                                    'cache_read_tokens': 15,
+                                    'cache_write_tokens': 30,
                                 },
                             },
                         ],
@@ -540,7 +544,8 @@ def test_recursive_extract_messages():
                                 'cost': {
                                     'input_tokens': 10,
                                     'output_tokens': 2,
-                                    'total_tokens': 12,
+                                    'cache_read_tokens': 15,
+                                    'cache_write_tokens': 30,
                                 },
                             },
                         ],
@@ -720,7 +725,8 @@ def test_recursive_sum_costs():
     assert recursive_sum_costs(_AGENT_RUN) == {
         'input_tokens': 10,
         'output_tokens': 5,
-        'total_tokens': 12,
+        'cache_read_tokens': 15,
+        'cache_write_tokens': 30,
     }
 
 

@@ -70,7 +70,6 @@ website:
           - providers/anthropic.ipynb
           - providers/aws_bedrock.ipynb
           - providers/ollama.ipynb
-          - providers/nvidia.ipynb
       - section: "☁️ How to Deploy"
         contents:
           - deployment/streaming_and_events.ipynb

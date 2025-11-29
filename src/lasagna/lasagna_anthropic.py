@@ -44,8 +44,8 @@ from .known_models import ANTHROPIC_KNOWN_MODELS
 
 from anthropic import (
     AsyncAnthropic,
-    NOT_GIVEN,
-    NotGiven,
+    omit,
+    Omit,
     AnthropicError,
     APIConnectionError,
     APIStatusError,
@@ -184,44 +184,69 @@ def _collapse_tool_call_messages(
 
 async def _convert_to_anthropic_messages(
     messages: List[Message],
-) -> Tuple[Union[str, None], List[MessageParam]]:
-    system_prompt: Union[str, None] = None
+) -> Tuple[Union[List[TextBlockParam], None], List[MessageParam]]:
+    system_prompts: List[TextBlockParam] = []
+
+    for m in messages:
+        if m['role'] != 'system':
+            break
+        if m.get('media'):
+            raise ValueError(f"For this model, you may not pass media in the system prompt.")
+        system_prompts.append({
+            'type': 'text',
+            'text': m['text'] or '',
+        })
+
+    if len(system_prompts) > 0:
+        system_prompts[-1]['cache_control'] = {
+            'type': 'ephemeral',
+            'ttl': '5m',
+        }
+        messages = messages[len(system_prompts):]
+
     ret: List[MessageParam] = []
-    if len(messages) > 0:
-        first_message = messages[0]
-        if first_message['role'] == 'system':
-            if first_message.get('media'):
-                raise ValueError(f"For this model, you may not pass media in the system prompt.")
-            system_prompt = first_message['text']
-            messages = messages[1:]
-        for m in messages:
-            if m['role'] == 'system':
-                raise ValueError(f"For this model, you can only have a system prompt as the first message!")
-            elif m['role'] == 'ai':
-                ret.append({
-                    'role': 'assistant',
-                    'content': await _build_anthropic_content(m),
-                })
-            elif m['role'] == 'human':
-                ret.append({
-                    'role': 'user',
-                    'content': await _build_anthropic_content(m),
-                })
-            elif m['role'] == 'tool_call':
-                ret.append({
-                    'role': 'assistant',
-                    'content': await _build_anthropic_tool_use(m),
-                })
-            elif m['role'] == 'tool_res':
-                ret.append({
-                    'role': 'user',
-                    'content': await _build_anthropic_tool_result(m),
-                })
-            else:
-                raise ValueError(f"Unknown role: {m['role']}")
+
+    for m in messages:
+        if m['role'] == 'system':
+            raise ValueError(f"For this model, you can only have system prompts as the first messages!")
+        elif m['role'] == 'ai':
+            ret.append({
+                'role': 'assistant',
+                'content': await _build_anthropic_content(m),
+            })
+        elif m['role'] == 'human':
+            ret.append({
+                'role': 'user',
+                'content': await _build_anthropic_content(m),
+            })
+        elif m['role'] == 'tool_call':
+            ret.append({
+                'role': 'assistant',
+                'content': await _build_anthropic_tool_use(m),
+            })
+        elif m['role'] == 'tool_res':
+            ret.append({
+                'role': 'user',
+                'content': await _build_anthropic_tool_result(m),
+            })
+        else:
+            raise ValueError(f"Unknown role: {m['role']}")
+
     ret = [r for r in ret if len(list(r['content'])) > 0]
+
     ret = _collapse_anthropic_messages(ret)
-    return system_prompt, ret
+
+    for msg in reversed(ret):
+        if msg['role'] == 'user':
+            assert isinstance(msg['content'], list)
+            last_content = msg['content'][-1]
+            last_content['cache_control'] = {
+                'type': 'ephemeral',
+                'ttl': '5m',
+            }
+            break
+
+    return system_prompts or None, ret
 
 
 def _build_messages_from_anthropic_payload(
@@ -259,7 +284,8 @@ def _build_messages_from_anthropic_payload(
     cost: Cost = {
         'input_tokens': message.usage.input_tokens,
         'output_tokens': message.usage.output_tokens,
-        'total_tokens': message.usage.input_tokens + message.usage.output_tokens,
+        'cache_write_tokens': message.usage.cache_creation_input_tokens or 0,
+        'cache_read_tokens': message.usage.cache_read_input_tokens or 0,
     }
     last_message['cost'] = cost
     last_message['raw'] = {
@@ -269,19 +295,26 @@ def _build_messages_from_anthropic_payload(
     return ms
 
 
-def _convert_to_anthropic_tool(tool: Callable) -> AnthropicToolParam:
+def _convert_to_anthropic_tool(tool: Callable, strict_tools: bool) -> AnthropicToolParam:
     description, params = get_tool_params(tool)
-    return {
+    tool_spec: AnthropicToolParam = {
         'name': get_name(tool),
         'description': description,
         'input_schema': convert_to_json_schema(params),
     }
+    if strict_tools:
+        tool_spec['strict'] = True  # type: ignore # TODO (anthropic lib doesn't have this yet, but the API does)
+    return tool_spec
 
 
-def _convert_to_anthropic_tools(tools: List[Callable]) -> Union[NotGiven, List[AnthropicToolParam]]:
+def _convert_to_anthropic_tools(tools: List[Callable], strict_tools: bool) -> Union[Omit, List[AnthropicToolParam]]:
     if len(tools) == 0:
-        return NOT_GIVEN
-    specs = [_convert_to_anthropic_tool(tool) for tool in tools]
+        return omit
+    specs = [_convert_to_anthropic_tool(tool, strict_tools) for tool in tools]
+    specs[-1]['cache_control'] = {
+        'type': 'ephemeral',
+        'ttl': '5m',
+    }
     return specs
 
 
@@ -365,6 +398,7 @@ class LasagnaAnthropic(Model):
             'model': self.model,
             'model_kwargs': self.model_kwargs,
         }
+        self.strict_tools = bool(self.model_kwargs.get('strict_tools', False))
 
     def config_hash(self) -> str:
         return recursive_hash(None, self.model_spec)
@@ -380,11 +414,11 @@ class LasagnaAnthropic(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools_spec: Union[NotGiven, List[AnthropicToolParam]],
+        tools_spec: Union[Omit, List[AnthropicToolParam]],
         force_tool: bool,
         disable_parallel_tool_use: bool,
     ) -> List[Message]:
-        tool_choice: Union[NotGiven, ToolChoice]
+        tool_choice: Union[Omit, ToolChoice]
         if force_tool:
             if not tools_spec or len(tools_spec) == 0:
                 raise ValueError(f"When `force_tool` is set, you must pass at least one tool!")
@@ -406,37 +440,37 @@ class LasagnaAnthropic(Model):
                     "disable_parallel_tool_use": disable_parallel_tool_use,
                 }
             else:
-                tool_choice = NOT_GIVEN
+                tool_choice = omit
 
-        system_prompt, anthropic_messages = await _convert_to_anthropic_messages(messages)
+        system_prompts, anthropic_messages = await _convert_to_anthropic_messages(messages)
 
         max_tokens: int = self.model_kwargs.get('max_tokens', 4096)
-        stop: Union[List[str], NotGiven] = self.model_kwargs.get('stop', NOT_GIVEN)
-        temperature: Union[float, NotGiven] = float(self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else NOT_GIVEN
-        top_p: Union[float, NotGiven] = float(self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else NOT_GIVEN
-        top_k: Union[int, NotGiven] = self.model_kwargs.get('top_k', NOT_GIVEN)
+        stop: Union[List[str], Omit] = self.model_kwargs.get('stop', omit)
+        temperature: Union[float, Omit] = float(self.model_kwargs['temperature']) if 'temperature' in self.model_kwargs else omit
+        top_p: Union[float, Omit] = float(self.model_kwargs['top_p']) if 'top_p' in self.model_kwargs else omit
+        top_k: Union[int, Omit] = self.model_kwargs.get('top_k', omit)
         user: Union[str, None] = self.model_kwargs.get('user', None)
 
         assert isinstance(max_tokens, int)
-        if stop is not NOT_GIVEN:
+        if stop is not omit:
             assert isinstance(stop, list)
             for s in stop:
                 assert isinstance(s, str)
-        if temperature is not NOT_GIVEN:
+        if temperature is not omit:
             assert isinstance(temperature, float)
-        if top_p is not NOT_GIVEN:
+        if top_p is not omit:
             assert isinstance(top_p, float)
-        if top_k is not NOT_GIVEN:
+        if top_k is not omit:
             assert isinstance(top_k, int)
         if user is not None:
             assert isinstance(user, str)
 
-        _LOG.info(f"Invoking {self.model} with:\n  system_prompt: {system_prompt}\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
+        _LOG.debug(f"Invoking {self.model} with:\n  system_prompts: {system_prompts}\n  messages: {_log_dumps(anthropic_messages)}\n  tools: {_log_dumps(tools_spec)}\n  tool_choice: {tool_choice}")
 
         client = self._make_client()
         async with client.messages.stream(
             model       = self.model,
-            system      = system_prompt or NOT_GIVEN,
+            system      = system_prompts or omit,
             messages    = anthropic_messages,
             max_tokens  = max_tokens,
             tools       = tools_spec,
@@ -448,6 +482,7 @@ class LasagnaAnthropic(Model):
                 'user_id': user,
             },
             stop_sequences = stop,
+            extra_headers = {'anthropic-beta': 'structured-outputs-2025-11-13'},  # TODO: remove this once the feature is out of beta
             # Anthropic doesn't support sending logprobs 👎
         ) as stream:
             raw_stream, rt_stream = adup(stream)
@@ -457,7 +492,7 @@ class LasagnaAnthropic(Model):
             anthropic_message = await stream.get_final_message()
             new_messages = _build_messages_from_anthropic_payload(raw_events, anthropic_message)
 
-        _LOG.info(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
+        _LOG.debug(f"Finished {self.model} with usage: {_log_dumps(new_messages[-1].get('cost'))}")
 
         return new_messages
 
@@ -465,7 +500,7 @@ class LasagnaAnthropic(Model):
         self,
         event_callback: EventCallback,
         messages: List[Message],
-        tools_spec: Union[NotGiven, List[AnthropicToolParam]],
+        tools_spec: Union[Omit, List[AnthropicToolParam]],
         force_tool: bool,
         disable_parallel_tool_use: bool,
         validator: Union[Callable[[List[Message]], Any], None] = None,  # <-- raises if validations fails
@@ -536,7 +571,7 @@ class LasagnaAnthropic(Model):
     ) -> List[Message]:
         messages = [*messages]  # shallow copy
         new_messages: List[Message] = []
-        tools_spec = _convert_to_anthropic_tools(tools)
+        tools_spec = _convert_to_anthropic_tools(tools, self.strict_tools)
         tools_map = {get_name(tool): tool for tool in tools}
         for _ in range(max_tool_iters):
             new_messages_here = await self._retrying_run_once(
@@ -576,6 +611,12 @@ class LasagnaAnthropic(Model):
                 'input_schema': to_strict_json_schema(ensure_pydantic_model(extraction_type)),
             },
         ]
+
+        if self.strict_tools:
+            tools_spec[0]['strict'] = True  # type: ignore # TODO (anthropic lib doesn't have this yet, but the API does)
+
+        # TODO: use `output_format` param (insted of toolcalling), once the anthropic lib supports it.
+        #  https://platform.claude.com/docs/en/build-with-claude/structured-outputs#json-outputs
 
         docstr = getattr(extraction_type, '__doc__', None)
         if docstr:

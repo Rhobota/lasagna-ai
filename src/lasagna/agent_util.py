@@ -262,7 +262,8 @@ def recursive_sum_costs(
 
     input_tokens  = [m['cost']['input_tokens']  for m in messages if 'cost' in m and 'input_tokens'  in m['cost']]
     output_tokens = [m['cost']['output_tokens'] for m in messages if 'cost' in m and 'output_tokens' in m['cost']]
-    total_tokens  = [m['cost']['total_tokens']  for m in messages if 'cost' in m and 'total_tokens'  in m['cost']]
+    cache_write_tokens = [m['cost']['cache_write_tokens'] for m in messages if 'cost' in m and 'cache_write_tokens' in m['cost']]
+    cache_read_tokens = [m['cost']['cache_read_tokens'] for m in messages if 'cost' in m and 'cache_read_tokens' in m['cost']]
 
     cost: Cost = {}
 
@@ -270,8 +271,10 @@ def recursive_sum_costs(
         cost['input_tokens'] = sum(input_tokens)
     if output_tokens:
         cost['output_tokens'] = sum(output_tokens)
-    if total_tokens:
-        cost['total_tokens'] = sum(total_tokens)
+    if cache_write_tokens:
+        cost['cache_write_tokens'] = sum(cache_write_tokens)
+    if cache_read_tokens:
+        cost['cache_read_tokens'] = sum(cache_read_tokens)
 
     return cost
 

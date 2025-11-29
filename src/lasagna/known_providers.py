@@ -15,7 +15,6 @@ def attempt_load_all_known_providers() -> None:
         'openai',
         'anthropic',
         'ollama',
-        'nvidia',
         'bedrock',
         '__abstract__',
     ]
@@ -74,16 +73,6 @@ def attempt_load_known_providers(provider: str) -> None:
             name = 'Ollama',
             factory = LasagnaOllama,
             models = OLLAMA_KNOWN_MODELS,
-        )
-
-    elif provider == 'nvidia':
-        from .known_models import NVIDIA_KNOWN_MODELS
-        from .lasagna_nvidia import LasagnaNVIDIA
-        register_provider(
-            key  = 'nvidia',
-            name = 'NVIDIA',
-            factory = LasagnaNVIDIA,
-            models = NVIDIA_KNOWN_MODELS,
         )
 
     elif provider == 'bedrock':
