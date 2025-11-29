@@ -16,10 +16,10 @@ help :
 	@echo
 
 test :
-	hatch test -i python=3.9 -vv
+	hatch test -i python=3.10 -vv
 
 check :
-	hatch run +python=3.9 types:check
+	hatch run +python=3.10 types:check
 
 testall :
 	hatch test --all --cover --randomize

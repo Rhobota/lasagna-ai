@@ -7,7 +7,7 @@ name = "lasagna-ai"
 dynamic = ["version"]
 description = 'Layered agents!'
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license-expression = "MIT"
 keywords = ["ai", "agent", "agents", "llm", "hierarchical", "layers", "layered"]
 authors = [
@@ -15,7 +15,6 @@ authors = [
 ]
 classifiers = [
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -84,7 +83,7 @@ features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 features = ["dev", "example-deps", "openai", "anthropic", "bedrock"]
 
 [[tool.hatch.envs.types.matrix]]
-python = ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive src/lasagna/ tests/ examples/"
@@ -100,7 +99,7 @@ check = "nbqa mypy --install-types --non-interactive docs/ --nbqa-dont-skip-bad-
 features = ["dev", "openai", "anthropic", "bedrock"]
 
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
