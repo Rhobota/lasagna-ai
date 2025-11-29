@@ -21,9 +21,16 @@ from datetime import datetime, timezone
 
 from bs4 import BeautifulSoup
 
-from typing import Dict, List
+from typing import Dict, List, Literal
 
 from dotenv import load_dotenv; load_dotenv()
+
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+)
 
 
 if os.environ.get('DEBUG', 'false').lower() in ['1', 'true', 'yes', 'y']:
@@ -116,34 +123,71 @@ class fetch_url:
     max_concurrent = int(os.environ.get('BRAVE_API_CNCR', 1)),
     max_per_second = 0.5 * float(os.environ.get('BRAVE_API_RPS', 1.0)),
 )
-async def web_search(search_term: str, num_results: int) -> str:
-    """
-    Use this tool to perform a web search to retrieve documents relevant to
-    the supplied `search_term` string.
-    This tool returns a JSON-encoded payload of the web search results.
-    NOTE: The returned results will _not_ contain the full content of each
-    retrieved document; rather, the returned results will contain small snippets
-    from each document along with a URL to use to fetch the whole document.
-    You can use the `fetch_url` to fetch those URLs, if you so choose.
-    :param: search_term: str: the search term to send to the search engine
-    :param: num_results: int: the number of results that should be returned by this search (must be a positive value, at most 100)
-    """
-    assert (0 < num_results <= 100), f"num_results cannot be {num_results}; it must be in the range (0, 100]"
+async def _brave_search(
+    search_type: Literal['news', 'web', 'images', 'vidoes'],
+    q: str,
+    n: int,
+) -> str:
     headers: Dict[str, str] = {
         'x-subscription-token': os.environ['BRAVE_API_KEY'],
     }
-    url = 'https://api.search.brave.com/res/v1/news/search'  # TODO: just news?
+    url = f'https://api.search.brave.com/res/v1/{search_type}/search'
     params: Dict[str, str] = {
-        'q': search_term,
+        'q': q,
+        'count': str(n),
         'safesearch': 'moderate',
-        'count': str(num_results),
         'spellcheck': 'false',
-        'extra_snippets': 'true',
     }
+    if search_type in ['web', 'news']:
+        params['extra_snippets'] = 'true'
+    if search_type == 'images':
+        params['safesearch'] = 'strict'
     async with aiohttp.ClientSession(raise_for_status=True, headers=headers) as session:
         async with session.get(url, params=params) as response:
             response = await response.json()
     return json.dumps(response)
+
+
+async def web_search(
+    q: str,
+    n: int,
+) -> str:
+    """
+    Use this tool to perform a web search to retrieve documents relevant to
+    the supplied `q` string.
+    This tool returns a JSON-encoded payload of the web search results.
+    This tool uses Brave's API for doing the web search, so you can use the
+    search syntax for Brave's API.
+    NOTE: The returned results will _not_ contain the full content of each
+    retrieved document; rather, the returned results will contain small snippets
+    from each document along with a URL to use to fetch the whole document.
+    You can use the `fetch_url` to fetch those URLs, if you so choose.
+    :param: q: str: the search string to send to the search engine
+    :param: n: int: the number of results that should be returned by this search (must be a positive value, at most 20)
+    """
+    assert (0 < n <= 20), f"n cannot be {n}; it must be in the range (0, 20]"
+    return await _brave_search('web', q, n)
+
+
+async def news_search(
+    q: str,
+    n: int,
+) -> str:
+    """
+    Use this tool to perform a news search to retrieve news events relevant to
+    the supplied `q` string.
+    This tool returns a JSON-encoded payload of the news search results.
+    This tool uses Brave's API for doing the news search, so you can use the
+    search syntax for Brave's API.
+    NOTE: The returned results will _not_ contain the full content of each
+    retrieved news story; rather, the returned results will contain small snippets
+    from each news story along with a URL to use to fetch the source article.
+    You can use the `fetch_url` to fetch those URLs, if you so choose.
+    :param: q: str: the search string to send to the search engine
+    :param: n: int: the number of results that should be returned by this search (must be a positive value, at most 100)
+    """
+    assert (0 < n <= 100), f"n cannot be {n}; it must be in the range (0, 100]"
+    return await _brave_search('news', q, n)
 
 
 def ask_user(question: str) -> str:
@@ -197,10 +241,12 @@ async def run_planner(prompt: str) -> None:
         tools = [
             fetch_url(),
             web_search,
+            news_search,
             ask_user,
             user_location,
             current_time,
         ],
+        max_tool_iters = 20,
     )
     run = await planning_agent(tui_event_callback, human_input(prompt))
     run_as_str = to_str(run)
