@@ -88,7 +88,7 @@ class fetch_url:
 
         # Use bs4 to strip away js and css (to reduce token count):
         if 'text/html' in content_type.lower():
-            soup = BeautifulSoup(content, 'html.parser')
+            soup = BeautifulSoup(content, 'lxml')
             for el in soup(["script", "style"]):
                 el.extract()
             content = soup.get_text()

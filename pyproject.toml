@@ -67,6 +67,7 @@ example-deps = [
   "sympy",
   "tzdata",
   "beautifulsoup4",
+  "lxml",
 ]
 
 [tool.hatch.build.targets.wheel]
