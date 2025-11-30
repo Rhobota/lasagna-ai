@@ -88,7 +88,7 @@ class fetch_url:
 
         # Use bs4 to strip away js and css (to reduce token count):
         if 'text/html' in content_type.lower():
-            soup = BeautifulSoup(content)
+            soup = BeautifulSoup(content, 'html.parser')
             for el in soup(["script", "style"]):
                 el.extract()
             content = soup.get_text()
@@ -101,7 +101,7 @@ class fetch_url:
         prompt_messages: List[Message] = [
             {
                 'role': 'system',
-                'text': 'Transcribe the important parts of this webpage into Markdown.',
+                'text': 'Transcribe the important parts of this webpage into Markdown. Do not output a preamble or summary; output your Markdown translation *only*.',
             },
             {
                 'role': 'human',
