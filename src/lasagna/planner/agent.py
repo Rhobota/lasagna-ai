@@ -124,7 +124,7 @@ def build_default_planning_agent(
             tools = tools,
             max_tool_iters = max_tool_iters,
             message_extractor = build_message_extractor_lrpa_aware(
-                system_prompt_override = None,
+                system_prompt_override = default_prompts.ANSWER_AGENT_SYSTEM_PROMPT,
             ),
         )),
         subtask_input_generator = default_prompts.subtask_input_generator,

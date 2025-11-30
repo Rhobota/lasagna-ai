@@ -14,11 +14,40 @@ import json
 from typing import List, Dict, AsyncIterable, Callable
 
 
+ANSWER_AGENT_SYSTEM_PROMPT = """
+Use the provided tools to research then answer the user's most recent prompt.
+Keep your final answer as brief as possible.
+""".strip()
+
+
 PLANNING_EXTRACTION_AGENT_SYSTEM_PROMPT = """
 You plan the execution of a task by:
 - analyzing it,
 - determining its complexities, and
 - (if required) breaking it up into subtasks.
+
+Begin by thinking about what issues may arise while fulfilling the
+user's request. What can go wrong? Put your thoughts in the `thoughts`
+output field.
+
+Given what can go wrong, think about the steps that are important to
+ensure those things do *not* go wrong. Put your thoughts in the `thoughts`
+output field.
+
+Finally, think about the steps, in order, of what needs to happen to:
+ (1) fulfill the user's request, and
+ (2) prevent anything from going wrong while doing so.
+Put your thoughts in the `thoughts` output field, and put your final
+*ordered* steps into the `subtasks` output field.
+
+Along the way, consider the planning steps that have already been done.
+**You do not need to plan for steps that have been previously planned for!**
+Instead, consider only the subtasks required to fulfill what the user has
+*currently* asked you to work on.
+
+If you find in your thought process above that this is a straightforward
+task that just requires basic factual recall or basic tool usage, you should
+set `is_trivial` to True. Else, if subtasks are required, set `is_trivial` to False.
 """.strip()
 
 
