@@ -64,6 +64,7 @@ website:
           - recipes/swapping_providers.ipynb
           - recipes/delegating_subtasks.ipynb
           - recipes/parallelize.ipynb
+          - recipes/lasagna_recursive_planning_agent.ipynb
       - section: "🔌 Model Providers"
         contents:
           - providers/openai.ipynb
