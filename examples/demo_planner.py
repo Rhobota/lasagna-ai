@@ -7,8 +7,8 @@ from lasagna import (
 )
 from lasagna import Model, EventCallback, AgentRun, Message
 from lasagna.tui import tui_event_callback
-from lasagna.planner.agent import build_default_planning_agent
-from lasagna.planner.debug_model import DebugModel
+from lasagna.planner01.agent import build_default_planning_agent
+from lasagna.planner01.debug_model import DebugModel
 from lasagna.async_util import async_throttle
 
 import os

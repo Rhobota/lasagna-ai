@@ -1,6 +1,6 @@
 import pytest
 
-from lasagna.planner.util import (
+from lasagna.planner01.util import (
     NoResult,
     _extract_last_result_from_run,
     extract_is_trivial,
@@ -9,7 +9,7 @@ from lasagna.planner.util import (
 )
 
 from lasagna.types import AgentRun
-from lasagna.planner.default_prompts import PlanOutput
+from lasagna.planner01.default_prompts import PlanOutput
 
 import copy
 

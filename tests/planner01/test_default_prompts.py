@@ -1,6 +1,6 @@
 import pytest
 
-from lasagna.planner.default_prompts import (
+from lasagna.planner01.default_prompts import (
     PlanOutput,
     subtask_input_generator,
     answer_input_prompt,

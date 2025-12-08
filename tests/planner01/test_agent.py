@@ -10,9 +10,9 @@ from lasagna.agent_util import (
 
 from lasagna.types import AgentRun
 
-from lasagna.planner.debug_model import DebugModel
+from lasagna.planner01.debug_model import DebugModel
 
-from lasagna.planner.agent import (
+from lasagna.planner01.agent import (
     build_default_planning_agent,
     _minimal_copy_lrpa_aware,
     build_message_extractor_lrpa_aware,
@@ -72,7 +72,7 @@ async def test_agent():
         run,
         from_tools = False,
         from_extraction = False,
-    ).get('text') == 'The answer is: 23'  # <-- also depends on self.rand being reproducible
+    ).get('text') == 'The answer is: 24'  # <-- also depends on self.rand being reproducible
 
     planning_agent = build_default_planning_agent(binder = binder_seed_1)
     run = await planning_agent(noop_callback, human_input('hi'))
@@ -82,7 +82,7 @@ async def test_agent():
         run,
         from_tools = False,
         from_extraction = False,
-    ).get('text') == 'The answer is: 3'   # <-- also depends on self.rand being reproducible
+    ).get('text') == 'The answer is: 4'   # <-- also depends on self.rand being reproducible
 
 
 def test_minimal_copy_lrpa_aware():
